@@ -1,0 +1,657 @@
+import type {
+  ScatterPoint,
+  HeatCell,
+  LeaderRow,
+  AppRow,
+  HealthLevel,
+  DataTablePayload,
+  BarListItem,
+  DonutSlice,
+  CategoriesPayload,
+  MembersPayload,
+  AxisChartPayload,
+  TableRow,
+} from "@/types";
+
+/* -------------------------------------------------------------------------- */
+/*  Deterministic pseudo-random helpers (stable across renders)               */
+/* -------------------------------------------------------------------------- */
+
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(20260807);
+const between = (min: number, max: number) => min + rand() * (max - min);
+const pick = <T>(arr: T[]) => arr[Math.floor(rand() * arr.length)];
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/* -------------------------------------------------------------------------- */
+/*  Realistic entities                                                         */
+/* -------------------------------------------------------------------------- */
+
+export const PEOPLE = [
+  { name: "Abhishek Sharma", team: "Engineering", role: "Sr. Backend Engineer" },
+  { name: "Abhaya Rawat", team: "Engineering", role: "Staff Engineer" },
+  { name: "Sanya Mittal", team: "Engineering", role: "Frontend Engineer" },
+  { name: "Hemant Kumar Bhatt", team: "Engineering", role: "DevOps Engineer" },
+  { name: "Purna Chandra", team: "Design", role: "Product Designer" },
+  { name: "Priya Negi", team: "Design", role: "Design Lead" },
+  { name: "Chandrawati Singh", team: "Design", role: "UX Researcher" },
+  { name: "Harsh Singh", team: "Product", role: "Sr. Product Manager" },
+  { name: "Kiran Kumari Sharma", team: "Product", role: "Product Manager" },
+  { name: "Ankit Kamal", team: "Sales", role: "Account Executive" },
+  { name: "Aarti Yadav", team: "Sales", role: "SDR" },
+  { name: "Akshay Tyagi", team: "Marketing", role: "Growth Marketer" },
+  { name: "Amar Sharma", team: "Marketing", role: "Content Strategist" },
+  { name: "Animesh Rai", team: "Support", role: "Support Lead" },
+  { name: "Ashish Yadav", team: "Support", role: "Support Specialist" },
+  { name: "Tripti Garg", team: "Finance", role: "Financial Analyst" },
+];
+
+export const TEAMS = ["Engineering", "Design", "Product", "Sales", "Marketing", "Support"];
+
+export const APPS = [
+  { app: "app.workstatus.io", category: "Productive" as const, color: "#0ea5e9" },
+  { app: "Figma", category: "Productive" as const, color: "#a259ff" },
+  { app: "Cursor", category: "Productive" as const, color: "#111111" },
+  { app: "docs.google.com", category: "Productive" as const, color: "#4285f4" },
+  { app: "Jira", category: "Productive" as const, color: "#0052cc" },
+  { app: "chatgpt.com", category: "Neutral" as const, color: "#10a37f" },
+  { app: "Slack", category: "Neutral" as const, color: "#611f69" },
+  { app: "Gmail", category: "Neutral" as const, color: "#ea4335" },
+  { app: "linkedin.com", category: "Neutral" as const, color: "#0a66c2" },
+  { app: "Notepad", category: "Distracting" as const, color: "#6b7280" },
+  { app: "YouTube", category: "Distracting" as const, color: "#ff0000" },
+  { app: "instagram.com", category: "Distracting" as const, color: "#e1306c" },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Simple series / chart generators                                           */
+/* -------------------------------------------------------------------------- */
+
+export function makeSparkline(len = 14, base = 50, volatility = 12): number[] {
+  const out: number[] = [];
+  let v = base;
+  for (let i = 0; i < len; i++) {
+    v += between(-volatility, volatility);
+    v = Math.max(5, Math.min(100, v));
+    out.push(Math.round(v));
+  }
+  return out;
+}
+
+function healthFrom(v: number, good = 75, warn = 55): HealthLevel {
+  if (v >= good) return "good";
+  if (v >= warn) return "warn";
+  return "bad";
+}
+
+export function makeScatter(): ScatterPoint[] {
+  return PEOPLE.map((p, i) => {
+    const x = Math.round(between(28, 46));
+    const y = Math.round(between(48, 94));
+    return {
+      id: `sp-${i}`,
+      name: p.name,
+      x,
+      y,
+      size: Math.round(between(6, 20)),
+      health: healthFrom(y),
+      team: p.team,
+    };
+  });
+}
+
+export function makeHeatmap(): HeatCell[] {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const cells: HeatCell[] = [];
+  for (const day of days) {
+    for (let hour = 8; hour <= 19; hour++) {
+      const morning = Math.exp(-Math.pow(hour - 10.5, 2) / 6);
+      const afternoon = Math.exp(-Math.pow(hour - 15.5, 2) / 7);
+      const lunchDip = hour === 13 ? 0.4 : 1;
+      let v = (morning + afternoon) * 55 * lunchDip + between(-8, 8);
+      if (day === "Fri") v *= 0.82;
+      cells.push({ day, hour, value: Math.max(0, Math.min(100, Math.round(v))) });
+    }
+  }
+  return cells;
+}
+
+export function makeLeaderboard(unit = "hrs"): LeaderRow[] {
+  return PEOPLE.slice(0, 8)
+    .map((p, i) => {
+      const metric = round1(between(30, 48));
+      return {
+        id: `lb-${i}`,
+        name: p.name,
+        team: p.team,
+        metric,
+        unit,
+        health: healthFrom(metric, 42, 36),
+      };
+    })
+    .sort((a, b) => b.metric - a.metric);
+}
+
+export function makeAppBreakdown(filter?: AppRow["category"]): AppRow[] {
+  return APPS.filter((a) => !filter || a.category === filter)
+    .map((a) => ({ app: a.app, category: a.category, color: a.color, hours: round1(between(0.1, 4)) }))
+    .sort((a, b) => b.hours - a.hours);
+}
+
+/* -------------------------------- Donuts ---------------------------------- */
+
+export const projectsWorked: DonutSlice[] = [
+  { key: "Yet to Start", value: 20, color: "#0ea5e9" },
+  { key: "In Progress", value: 28, color: "#f59e0b" },
+  { key: "On Hold", value: 4, color: "#8b5cf6" },
+  { key: "Complete", value: 4, color: "#10b981" },
+  { key: "Cancelled", value: 5, color: "#ef4444" },
+  { key: "Archived", value: 40, color: "#374151" },
+];
+
+export const taskStatus: DonutSlice[] = [
+  { key: "Due Tomorrow", value: 57, color: "#f59e0b" },
+  { key: "Overdue", value: 1402, color: "#ef4444" },
+  { key: "Yet to Start", value: 2985, color: "#0ea5e9" },
+  { key: "Archived", value: 15600, color: "#10b981" },
+  { key: "Triage", value: 85, color: "#8b5cf6" },
+  { key: "Cancelled", value: 524, color: "#374151" },
+];
+
+export const membersData: MembersPayload = {
+  total: 45,
+  online: 37,
+  offline: 8,
+  devices: [
+    { name: "Android", count: 2 },
+    { name: "iOS", count: 1 },
+    { name: "Windows", count: 21 },
+    { name: "MacOS", count: 8 },
+    { name: "Linux", count: 13 },
+    { name: "Web", count: 3 },
+  ],
+};
+
+/* ------------------------------- Bar lists -------------------------------- */
+
+export const topProfitable: BarListItem[] = [
+  { label: "VC_Table Booking Mana…", value: 2.28, color: "#0ea5e9" },
+  { label: "VC_LiveCart", value: 1.9, color: "#0ea5e9" },
+  { label: "KIOO Labs", value: 0.86, color: "#0ea5e9" },
+  { label: "Hadeeco Principal…", value: 0.44, color: "#0ea5e9" },
+  { label: "PS Automation MVP | FCP", value: 0.31, color: "#0ea5e9" },
+];
+
+export const leastProfitable: BarListItem[] = [
+  { label: "VC_Angello", value: -4.7, color: "#ef4444" },
+  { label: "MATCT", value: -3.1, color: "#ef4444" },
+  { label: "cKymning App | FCP", value: -2.4, color: "#ef4444" },
+  { label: "Workstatus Product Dev…", value: -1.6, color: "#ef4444" },
+  { label: "VC_StudyAtHome App |…", value: -0.7, color: "#ef4444" },
+];
+
+export function makeTrackedHours(order: "most" | "least"): BarListItem[] {
+  const base = PEOPLE.slice(order === "most" ? 0 : 8, order === "most" ? 5 : 10).map((p) => ({
+    label: p.name,
+    value: round1(order === "most" ? between(2, 8.5) : between(0.2, 1.2)),
+    color: order === "most" ? "#10b981" : "#ef4444",
+    sub: p.team,
+  }));
+  return base.sort((a, b) => (order === "most" ? b.value - a.value : a.value - b.value));
+}
+
+/* ---------------------------- Axis-based charts --------------------------- */
+
+export const profitLoss: AxisChartPayload = {
+  xLabels: ["Q1 (Jan–Mar)", "Q2 (Apr–Jun)", "Q3 (Jul–Sep)", "Q4 (Oct–Dec)"],
+  unit: "INR",
+  series: [
+    { key: "Profit", color: "#10b981", kind: "line", data: [420, 610, 540, 720] },
+    { key: "Loss", color: "#ef4444", kind: "line", data: [180, 240, 300, 210] },
+  ],
+};
+
+export const budgetTrend: AxisChartPayload = {
+  xLabels: ["Q1 (Jan–Mar)", "Q2 (Apr–Jun)", "Q3 (Jul–Sep)", "Q4 (Oct–Dec)"],
+  unit: "INR",
+  series: [
+    { key: "Budgeted", color: "#c4b5fd", kind: "bar", data: [90, 60, 120, 105] },
+    { key: "Invoiced", color: "#0ea5e9", kind: "bar", data: [70, 45, 95, 88] },
+    { key: "Budget Trend", color: "#ef4444", kind: "line", dashed: true, data: [80, 52, 108, 96] },
+  ],
+};
+
+export const memberLocation: AxisChartPayload = {
+  xLabels: ["Apra Office", "Remote"],
+  series: [{ key: "Member Present", color: "#0ea5e9", kind: "bar", data: [23, 4] }],
+};
+
+/* ------------------------------ Categories -------------------------------- */
+
+export const categories: CategoriesPayload = {
+  moreCount: 22,
+  segments: [
+    { key: "Undefined", value: 44, color: "#9ca3af" },
+    { key: "Business Apps", value: 12, color: "#10b981" },
+    { key: "Communication", value: 9, color: "#f59e0b" },
+    { key: "Digital Marketing", value: 7, color: "#a259ff" },
+    { key: "Social", value: 5, color: "#0ea5e9" },
+    { key: "Design", value: 6, color: "#ec4899" },
+    { key: "Other", value: 17, color: "#d1d5db" },
+  ],
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Mini tables (Layer 2 embedded)                                             */
+/* -------------------------------------------------------------------------- */
+
+export function makeMilestones(): DataTablePayload {
+  const rows: TableRow[] = [
+    { milestone: "Phase 2 Sprint 1", project: "VC_BattForia | Dedicated", progress: "0/4 · 93 Hrs" },
+    { milestone: "Milestone 1 Test", project: "eishvi test", progress: "0/1 · 2 Hrs" },
+    { milestone: "Career in Platform PL", project: "VC_Career At Platform | FCP", progress: "0/2 · 12 Hrs" },
+    { milestone: "Design & Discovery", project: "VC_AI Persona Avatar MVP", progress: "0/2 · 8 Hrs" },
+    { milestone: "Milestone 1", project: "VC_Fractur Communication", progress: "0/1 · 5 Hrs" },
+  ];
+  return {
+    columns: [
+      { key: "milestone", label: "Milestone", pinned: true, width: 170 },
+      { key: "project", label: "Project", width: 200 },
+      { key: "progress", label: "Progress", align: "right", width: 120 },
+    ],
+    rows,
+  };
+}
+
+export function makeRecentTimesheets(): DataTablePayload {
+  const rows: TableRow[] = PEOPLE.slice(0, 10).map((p) => {
+    const start = 10 + Math.floor(between(0, 3));
+    const min = Math.floor(between(0, 59));
+    const dur = round1(between(0, 6));
+    return {
+      member: p.name,
+      project: pick([
+        "Product Sales & CRM | Workstatus",
+        "Workstatus Product Development",
+        "VC_New Cloud Networks | Ottova",
+        "VC_Phionity Application | FCP",
+        "PixelCrayons | Internal",
+        "Internal_Business Development",
+      ]),
+      date: "07 Aug, 2026",
+      start: `${start}:${String(min).padStart(2, "0")} AM`,
+      stop: `${start}:${String(Math.min(59, min + 6)).padStart(2, "0")} AM`,
+      duration: `00:0${Math.floor(dur)}:${String(Math.floor(between(0, 59))).padStart(2, "0")}`,
+    };
+  });
+  return {
+    columns: [
+      { key: "member", label: "Member", pinned: true, render: "avatar", width: 190 },
+      { key: "project", label: "Projects", width: 240 },
+      { key: "date", label: "Date", width: 110 },
+      { key: "start", label: "Start Time", align: "right", width: 100 },
+      { key: "stop", label: "Stop Time", align: "right", width: 100 },
+      { key: "duration", label: "Duration", align: "right", width: 100 },
+    ],
+    rows,
+  };
+}
+
+export function makeAttendance(): DataTablePayload {
+  const statuses = ["09:20:22", "05:56:45", "Absent", "01:59:53", "NOT IN YET", "03:26:28", "NOT IN YET", "09:38:29", "09:59:59"];
+  const rows: TableRow[] = PEOPLE.slice(0, 10).map((p, i) => ({
+    member: p.name,
+    team: p.team,
+    status: statuses[i % statuses.length],
+    breaks: `${Math.floor(between(1, 4))}`,
+    late: i % 3 === 0 ? "Yes" : "No",
+  }));
+  return {
+    columns: [
+      { key: "member", label: "Member Name", pinned: true, render: "avatar", width: 190 },
+      { key: "team", label: "Team", width: 130 },
+      { key: "status", label: "7 Aug", align: "right", render: "status", width: 120 },
+      { key: "breaks", label: "Breaks", align: "right", width: 90 },
+      { key: "late", label: "Late", align: "center", width: 80 },
+    ],
+    rows,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Layer-3 detailed report tables                                             */
+/* -------------------------------------------------------------------------- */
+
+export function makeActivityTable(): DataTablePayload {
+  const rows: TableRow[] = PEOPLE.map((p) => {
+    const tracked = round1(between(30, 46));
+    const active = round1(tracked * between(0.72, 0.96));
+    const productivity = Math.round(between(48, 94));
+    const focus = Math.round(between(35, 82));
+    const idle = round1(tracked - active);
+    return {
+      name: p.name,
+      team: p.team,
+      role: p.role,
+      tracked,
+      active,
+      idle,
+      productivity,
+      focus,
+      topApp: pick(["Jira", "Figma", "Cursor", "Slack", "Notion", "docs.google.com"]),
+      meetings: round1(between(2, 14)),
+      delta: Math.round(between(-18, 22)),
+      health: healthFrom(productivity),
+      updated: `${Math.floor(between(1, 58))}m ago`,
+    };
+  });
+  return {
+    columns: [
+      { key: "name", label: "Team Member", pinned: true, render: "avatar", width: 200 },
+      { key: "team", label: "Team", width: 120 },
+      { key: "role", label: "Role", width: 180 },
+      { key: "tracked", label: "Tracked", align: "right", render: "hours", width: 100 },
+      { key: "active", label: "Active", align: "right", render: "hours", width: 100 },
+      { key: "idle", label: "Idle", align: "right", render: "hours", width: 90 },
+      { key: "productivity", label: "Productivity", align: "right", render: "bar", width: 140 },
+      { key: "focus", label: "Focus", align: "right", render: "bar", width: 120 },
+      { key: "meetings", label: "Meetings", align: "right", render: "hours", width: 100 },
+      { key: "topApp", label: "Top App", width: 120 },
+      { key: "delta", label: "WoW", align: "right", render: "delta", width: 90 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+      { key: "updated", label: "Updated", align: "right", width: 100 },
+    ],
+    rows,
+  };
+}
+
+export function makeProjectTable(): DataTablePayload {
+  const projects = [
+    "VC_Table Booking Manager",
+    "VC_LiveCart",
+    "KIOO Labs",
+    "VC_Angello",
+    "MATCT",
+    "PS Automation MVP | FCP",
+    "Workstatus Product Development",
+    "cKymning App | FCP",
+    "VC_StudyAtHome App | FCP",
+    "Hadeeco Principal Platform",
+  ];
+  const statuses = ["On Track", "At Risk", "Delayed", "On Track", "On Track"];
+  const rows: TableRow[] = projects.map((name, i) => {
+    const status = pick(statuses);
+    return {
+      project: name,
+      lead: PEOPLE[i % PEOPLE.length].name,
+      status,
+      progress: Math.round(between(20, 98)),
+      budgetUsed: Math.round(between(60, 100)),
+      profit: Math.round(between(-470, 230)) / 100,
+      hoursLogged: Math.round(between(120, 940)),
+      openTasks: Math.floor(between(3, 42)),
+      blockers: Math.floor(between(0, 6)),
+      health: status === "Delayed" ? "bad" : status === "At Risk" ? "warn" : "good",
+      due: `Aug ${10 + i}, 2026`,
+    };
+  });
+  return {
+    columns: [
+      { key: "project", label: "Project", pinned: true, width: 220 },
+      { key: "lead", label: "Lead", render: "avatar", width: 180 },
+      { key: "status", label: "Status", render: "status", width: 110 },
+      { key: "progress", label: "Progress", align: "right", render: "bar", width: 150 },
+      { key: "budgetUsed", label: "Budget Used", align: "right", render: "bar", width: 150 },
+      { key: "profit", label: "Profit (₹M)", align: "right", render: "delta", width: 110 },
+      { key: "hoursLogged", label: "Hours", align: "right", width: 100 },
+      { key: "openTasks", label: "Open Tasks", align: "right", width: 110 },
+      { key: "blockers", label: "Blockers", align: "right", width: 100 },
+      { key: "due", label: "Due", align: "right", width: 120 },
+    ],
+    rows,
+  };
+}
+
+export function makeInvoiceTable(): DataTablePayload {
+  const rows: TableRow[] = Array.from({ length: 12 }).map((_, i) => {
+    const status = pick(["Paid", "Pending", "Overdue", "Paid", "Draft"]);
+    return {
+      invoice: `INV-2026-${String(1040 + i)}`,
+      client: pick(["Ottova Inc", "Hadeeco", "KIOO Labs", "Battforia", "PixelCrayons", "Angello"]),
+      amount: Math.round(between(20, 480)) * 1000,
+      status,
+      issued: `Jul ${5 + i}, 2026`,
+      due: `Aug ${5 + i}, 2026`,
+      health: status === "Overdue" ? "bad" : status === "Pending" ? "warn" : "good",
+    };
+  });
+  return {
+    columns: [
+      { key: "invoice", label: "Invoice #", pinned: true, width: 150 },
+      { key: "client", label: "Client", width: 160 },
+      { key: "amount", label: "Amount", align: "right", render: "money", width: 130 },
+      { key: "status", label: "Status", render: "status", width: 110 },
+      { key: "issued", label: "Issued", align: "right", width: 120 },
+      { key: "due", label: "Due", align: "right", width: 120 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+    ],
+    rows,
+  };
+}
+
+export function makeTaskTable(): DataTablePayload {
+  const rows: TableRow[] = Array.from({ length: 14 }).map((_, i) => {
+    const status = pick(["Overdue", "Due Tomorrow", "Yet to Start", "Triage", "In Progress"]);
+    return {
+      task: pick([
+        "Fix billing webhook retry",
+        "Design onboarding empty state",
+        "API gateway rate limiting",
+        "Migrate analytics events",
+        "QA regression pass",
+        "Update pricing page copy",
+      ]),
+      project: pick(["VC_LiveCart", "KIOO Labs", "Workstatus Product Dev", "VC_Angello"]),
+      assignee: PEOPLE[i % PEOPLE.length].name,
+      status,
+      priority: pick(["High", "Medium", "Low"]),
+      logged: `${Math.floor(between(1, 40))}h`,
+      health: status === "Overdue" ? "bad" : status === "Due Tomorrow" ? "warn" : "good",
+    };
+  });
+  return {
+    columns: [
+      { key: "task", label: "Task", pinned: true, width: 240 },
+      { key: "project", label: "Project", width: 180 },
+      { key: "assignee", label: "Assignee", render: "avatar", width: 180 },
+      { key: "status", label: "Status", render: "status", width: 130 },
+      { key: "priority", label: "Priority", width: 100 },
+      { key: "logged", label: "Logged", align: "right", width: 90 },
+      { key: "health", label: "Health", align: "center", width: 90 },
+    ],
+    rows,
+  };
+}
+
+export function makeAppUsageTable(): DataTablePayload {
+  const rows: TableRow[] = APPS.map((a) => ({
+    app: a.app,
+    category: a.category,
+    hours: round1(between(2, 34)),
+    users: Math.floor(between(3, 42)),
+    productivity: Math.round(between(20, 95)),
+    health:
+      a.category === "Productive" ? "good" : a.category === "Neutral" ? "warn" : "bad",
+  }));
+  return {
+    columns: [
+      { key: "app", label: "Application / URL", pinned: true, width: 200 },
+      { key: "category", label: "Policy", render: "status", width: 130 },
+      { key: "hours", label: "Hours", align: "right", render: "hours", width: 100 },
+      { key: "users", label: "Users", align: "right", width: 90 },
+      { key: "productivity", label: "Productivity", align: "right", render: "bar", width: 150 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+    ],
+    rows,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Widgets borrowed from the Insights module (rebuilt in our design language) */
+/* -------------------------------------------------------------------------- */
+
+/** Technology Usage — category allocation donut. */
+export const categoryAllocation: DonutSlice[] = [
+  { key: "Development", value: 25, color: "#0ea5e9" },
+  { key: "Collaborative", value: 25, color: "#38bdf8" },
+  { key: "CRM & ERP", value: 12, color: "#374151" },
+  { key: "Company Specific", value: 20, color: "#f59e0b" },
+  { key: "Design Tools", value: 14, color: "#ec4899" },
+  { key: "Others", value: 4, color: "#9ca3af" },
+];
+
+/** Apps & URLs affecting focus — bar + attention-shift bubble. */
+export const appsAffectingFocus: BarListItem[] = [
+  { label: "youtube.com", value: 3.7, bubble: 164 },
+  { label: "Google Docs", value: 1.3, bubble: 125 },
+  { label: "freepik.com", value: 0.7, bubble: 59 },
+  { label: "Jira", value: 0.6, bubble: 71 },
+  { label: "slack", value: 0.5, bubble: 53 },
+  { label: "Trello", value: 1.3, bubble: 125 },
+  { label: "google.com", value: 0.5, bubble: 71 },
+  { label: "Asana", value: 0.5, bubble: 71 },
+];
+
+/** Technology Usage — changes in category usage table. */
+export function makeCategoryChanges(): DataTablePayload {
+  const rows: TableRow[] = [
+    { category: "Email", change: 5.5, allocation: 50.5, hrs: 42.7, users: 123 },
+    { category: "Sales", change: 3.3, allocation: 27.5, hrs: 88.3, users: 256 },
+    { category: "Office", change: 0.6, allocation: 5.6, hrs: 15.6, users: 78 },
+    { category: "Chat & Meeting", change: -3.5, allocation: 33.5, hrs: 73.2, users: 199 },
+    { category: "Education & Training", change: -2.5, allocation: 1.52, hrs: 29.4, users: 312 },
+    { category: "HR & Hiring", change: -0.1, allocation: 19.4, hrs: 56.8, users: 45 },
+  ];
+  return {
+    columns: [
+      { key: "category", label: "Category", pinned: true, width: 180 },
+      { key: "change", label: "Allocation % Change", align: "right", render: "delta", width: 160 },
+      { key: "allocation", label: "Allocation %", align: "right", render: "bar", width: 140 },
+      { key: "hrs", label: "Hrs", align: "right", render: "hours", width: 90 },
+      { key: "users", label: "User Change", align: "right", width: 110 },
+    ],
+    rows,
+  };
+}
+
+/** Project & Budget — top cost drivers (currency, structural gray). */
+export const topCostDrivers: BarListItem[] = [
+  { label: "Developers", value: 11, color: "#374151" },
+  { label: "Design", value: 8.1, color: "#374151" },
+  { label: "QA & Testing", value: 4.5, color: "#374151" },
+  { label: "Server Costs", value: 3.2, color: "#374151" },
+  { label: "PM's", value: 2, color: "#374151" },
+  { label: "Tools", value: 2, color: "#374151" },
+  { label: "Others", value: 0.8, color: "#374151" },
+];
+
+/** Efficiency & Utilization — utilization gauge. */
+export const utilizationGauge = {
+  value: 5.25,
+  max: 8,
+  centerValue: "5:15",
+  centerLabel: "Avg. worked",
+  caption: "Below average",
+  target: "Daily target 8:00",
+};
+
+/** Work Time Classification — core vs non-core split. */
+export const workTimeClassification = {
+  headline: { value: "77%", label: "Core work" },
+  showAxis: true,
+  segments: [
+    { key: "Core work", value: 77, color: "#0ea5e9" },
+    { key: "Non-core", value: 21, color: "#374151" },
+    { key: "Neutral", value: 2, color: "#f59e0b" },
+  ],
+};
+
+/** Daily Focus — progress ring. */
+export const dailyFocus = {
+  percent: 88,
+  stats: [
+    { label: "Focus Time", value: "5h 35m" },
+    { label: "Focus Sessions", value: "5" },
+    { label: "Avg. Session", value: "1h 43m" },
+  ],
+};
+
+/** Team Comparison — employee working stat cluster. */
+export const employeeWorking = {
+  columns: 3,
+  stats: [
+    { label: "Working", value: "335", sub: "Total 350", accent: "#0ea5e9" },
+    { label: "On Remote", value: "10", sub: "Out of 335", accent: "#0ea5e9" },
+    { label: "On Leave", value: "5", sub: "Out of 350", accent: "#0ea5e9" },
+  ],
+};
+
+export const avgActivityDay = {
+  columns: 3,
+  stats: [
+    { label: "Activity", value: "59%", delta: "▼ -1% vs Goal", health: "bad" as const },
+    { label: "Idle", value: "3%", delta: "▲ +2% vs Goal", health: "good" as const },
+    { label: "Away", value: "14%", delta: "▼ -1% vs Goal", health: "bad" as const },
+  ],
+};
+
+/** Location & Work Mode — avg activity by working mode. */
+export const activityByMode = {
+  rows: [
+    { label: "Office", percent: 50, value: "7.7 hrs/day" },
+    { label: "Remote", percent: 74, value: "8.5 hrs/day" },
+    { label: "Hybrid", percent: 30, value: "4.5 hrs/day" },
+  ],
+};
+
+/** Location & Work Mode — avg start & end of day by location. */
+export const startEndByLocation = {
+  axisStart: 0,
+  axisEnd: 24,
+  rows: [
+    { label: "Office", start: 9.5, end: 14 },
+    { label: "Remote", start: 6, end: 11 },
+    { label: "Hybrid", start: 9, end: 15 },
+  ],
+};
+
+/** Efficiency & Workload — workload balance table. */
+export function makeWorkloadBalance(): DataTablePayload {
+  const rows: TableRow[] = [
+    { team: "Sales", over: 67, under: 5, breaks: 3.4, mins: 2.8 },
+    { team: "Marketing", over: 82, under: 3, breaks: 4.2, mins: 4.1 },
+    { team: "Consultants", over: 54, under: 7, breaks: 5.0, mins: 5.6 },
+    { team: "Accounting", over: 73, under: 2, breaks: 2.9, mins: 3.0 },
+    { team: "Developer", over: 89, under: 6, breaks: 3.7, mins: 3.9 },
+    { team: "Designer", over: 76, under: 1, breaks: 4.5, mins: 4.7 },
+    { team: "HR & Hiring", over: 48, under: 4, breaks: 5.3, mins: 5.1 },
+  ];
+  return {
+    columns: [
+      { key: "team", label: "Team", pinned: true, width: 150 },
+      { key: "over", label: "% Days Overutilized", align: "right", render: "bar", width: 160 },
+      { key: "under", label: "% Days Underutilized", align: "right", width: 150 },
+      { key: "breaks", label: "Breaks/Day", align: "right", width: 110 },
+      { key: "mins", label: "Avg Mins/Break", align: "right", width: 130 },
+    ],
+    rows,
+  };
+}
