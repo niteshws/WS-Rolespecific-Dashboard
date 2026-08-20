@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { Dashboard } from "@/types";
+import { AVAILABLE_ROLES } from "./CreateDashboardDialog";
 
 /**
- * Share a dashboard: toggle Private/Public visibility and copy a share link.
+ * Share a dashboard: toggle Private/Public/Shared visibility and copy a share link.
  * All state is local to the prototype — no data leaves the browser.
  */
 export function ShareDialog({
@@ -19,7 +20,7 @@ export function ShareDialog({
   dashboard: Dashboard;
   open: boolean;
   onClose: () => void;
-  onVisibilityChange: (v: "private" | "public") => void;
+  onVisibilityChange: (v: "private" | "shared", sharedRoles?: string[]) => void;
 }) {
   const [copied, setCopied] = useState(false);
   const link = `https://app.workstatus.io/intelligence/d/${dashboard.id}`;
@@ -30,6 +31,14 @@ export function ShareDialog({
     setTimeout(() => setCopied(false), 1600);
   }
 
+  function toggleRole(r: string) {
+    const currentRoles = dashboard.sharedRoles || [];
+    const newRoles = currentRoles.includes(r)
+      ? currentRoles.filter((x) => x !== r)
+      : [...currentRoles, r];
+    onVisibilityChange("shared", newRoles);
+  }
+
   const options = [
     {
       key: "private" as const,
@@ -38,10 +47,10 @@ export function ShareDialog({
       desc: "Only you and people you invite can view this dashboard.",
     },
     {
-      key: "public" as const,
-      icon: Globe,
-      title: "Public",
-      desc: "Anyone in your workspace with the link can view this dashboard.",
+      key: "shared" as const,
+      icon: Users,
+      title: "Shared",
+      desc: "Share with specific roles in your organization.",
     },
   ];
 
@@ -66,7 +75,7 @@ export function ShareDialog({
           return (
             <button
               key={o.key}
-              onClick={() => onVisibilityChange(o.key)}
+              onClick={() => onVisibilityChange(o.key, o.key === "shared" ? (dashboard.sharedRoles || []) : undefined)}
               className={cn(
                 "flex w-full items-start gap-3 rounded border p-3 text-left transition-colors",
                 active ? "border-primary bg-primary/[0.05]" : "border-border hover:bg-muted/5",
@@ -74,7 +83,7 @@ export function ShareDialog({
             >
               <span
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded",
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded",
                   active ? "bg-primary text-white" : "bg-muted/10 text-muted",
                 )}
               >
@@ -92,8 +101,33 @@ export function ShareDialog({
         })}
       </div>
 
+      {dashboard.visibility === "shared" && (
+        <div className="mt-4 border-t border-border pt-4">
+          <label className="mb-2 block text-[11px] font-medium text-muted">Select roles to share with</label>
+          <div className="flex flex-wrap gap-2">
+            {AVAILABLE_ROLES.map((role) => (
+              <label
+                key={role}
+                className={cn(
+                  "flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
+                  (dashboard.sharedRoles || []).includes(role)
+                    ? "border-primary bg-primary text-white"
+                    : "border-border bg-background text-ink hover:bg-muted/5"
+                )}
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleRole(role);
+                }}
+              >
+                {role}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* copy link */}
-      <div className="mt-4">
+      <div className="mt-4 border-t border-border pt-4">
         <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-muted">
           <Link2 className="h-3.5 w-3.5" />
           Share link
@@ -123,7 +157,8 @@ export function ShareDialog({
             <Avatar key={n} name={n} size={26} />
           ))}
           <span className="text-xs text-muted-foreground">
-            {dashboard.visibility === "public" ? "· Workspace (view)" : "· 3 people"}
+            {dashboard.visibility === "public" ? "· Workspace (view)" : 
+             dashboard.visibility === "shared" ? `· ${(dashboard.sharedRoles || []).length} roles` : "· 3 people"}
           </span>
         </div>
       </div>

@@ -88,14 +88,33 @@ export default function App() {
   };
 
   function handleCreate(input: NewDashboardInput) {
-    const tpl = ARCHETYPE_MAP[input.templateId];
-    const fresh: Dashboard = {
-      ...structuredClone(tpl),
-      id: nextId(),
-      name: input.name,
-      visibility: input.visibility,
-      templateId: input.templateId,
-    };
+    let fresh: Dashboard;
+    if (input.templateId === "custom") {
+      fresh = {
+        id: nextId(),
+        name: input.name,
+        role: "Custom",
+        description: "Custom dashboard",
+        icon: "Settings2",
+        visibility: input.visibility,
+        sharedRoles: input.sharedRoles,
+        owner: "Vinove Design",
+        templateId: "custom",
+        insights: [],
+        kpis: [],
+        widgets: input.customWidgets || [],
+      };
+    } else {
+      const tpl = ARCHETYPE_MAP[input.templateId];
+      fresh = {
+        ...structuredClone(tpl),
+        id: nextId(),
+        name: input.name,
+        visibility: input.visibility,
+        sharedRoles: input.sharedRoles,
+        templateId: input.templateId,
+      };
+    }
     setDashboards((prev) => [...prev, fresh]);
     setCurrentId(fresh.id);
     setCreateOpen(false);
@@ -165,7 +184,7 @@ export default function App() {
         dashboard={current}
         open={shareOpen}
         onClose={() => setShareOpen(false)}
-        onVisibilityChange={(v) => updateCurrent((d) => ({ ...d, visibility: v }))}
+        onVisibilityChange={(v, roles) => updateCurrent((d) => ({ ...d, visibility: v, sharedRoles: roles }))}
       />
       <CreateDashboardDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreate={handleCreate} />
     </div>

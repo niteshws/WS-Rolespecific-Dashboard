@@ -262,12 +262,7 @@ export function DashboardView({
                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="hidden sm:inline ml-1 text-xs">Edit</span>
               </Button>
-              {dashboard.id !== "my-dashboard" && (
-                <Button size="sm" className="h-8 px-3 text-xs bg-primary hover:bg-primary/95 text-white" onClick={onShare}>
-                  <Share2 className="h-3.5 w-3.5 mr-1" />
-                  Share
-                </Button>
-              )}
+
               <Button variant="outline" size="sm" className="h-8 px-2.5 border-border hover:bg-muted/10" onClick={onCreate} aria-label="Create dashboard">
                 <Plus className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>

@@ -1,0 +1,9 @@
+feat: Custom Dashboard Widget Selection & UI Updates
+
+Changelog:
+- Redesigned Custom Dashboard dialog with split-pane layout and category navigation
+- Implemented live WidgetRenderer grid previews in selection UI
+- Removed Public visibility option from Dashboard types and UI
+- Removed User role from ShareDialog and Dashboard visibility options
+- Removed Share button from DashboardView header
+- Improved CreateDashboardDialog edge-to-edge layout via custom Dialog content class

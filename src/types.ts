@@ -102,7 +102,8 @@ export interface Dashboard {
   label?: string;
   description: string;
   icon: string;
-  visibility: "private" | "public";
+  visibility: "private" | "public" | "shared";
+  sharedRoles?: string[];
   owner: string;
   templateId: string;
   insights: Insight[];

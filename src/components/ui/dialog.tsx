@@ -11,6 +11,7 @@ export function Dialog({
   children,
   footer,
   className,
+  contentClassName,
 }: {
   open: boolean;
   onClose: () => void;
@@ -19,6 +20,7 @@ export function Dialog({
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  contentClassName?: string;
 }) {
   React.useEffect(() => {
     if (!open) return;
@@ -42,7 +44,7 @@ export function Dialog({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-5 py-4">{children}</div>
+        <div className={cn("px-5 py-4", contentClassName)}>{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-border px-5 py-3">{footer}</div>}
       </div>
     </div>
