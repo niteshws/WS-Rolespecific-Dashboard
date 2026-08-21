@@ -27,6 +27,8 @@ import {
   avgActivityDay,
   activityByMode,
   startEndByLocation,
+  clientMargin,
+  pipelineForecast,
 } from "./dummy";
 import type { Archetype as _A } from "@/types";
 export type { Archetype } from "@/types";
@@ -115,6 +117,49 @@ export const ARCHETYPES: _A[] = [
       { id: "w-milestones", type: "miniTable", size: "half", layer: 2, title: "Upcoming Milestones", reportKey: "projects", payload: milestones },
       { id: "w-members", type: "members", size: "half", layer: 2, title: "Members", reportKey: "members", payload: membersData },
       { id: "w-table", type: "dataTable", size: "full-tall", layer: 3, title: "Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
+    ],
+  },
+
+  /* ------------------------------- Executive-2 ---------------------------- */
+  {
+    id: "executive-2",
+    label: "Executive 2",
+    role: "CEO Overview",
+    description: "Company-wide headline metrics, utilization, and pipeline forecast.",
+    icon: "Crown",
+    visibility: "public",
+    owner: "Vinove Design",
+    templateId: "executive-2",
+    insights: [
+      {
+        id: "ceo2-i1",
+        severity: "warn",
+        title: "Utilization under target",
+        body: "Utilization dropped to 72% this week, lowering margins. We have spare capacity to accelerate the pipeline.",
+        metricRef: "Utilization Rate",
+        action: "View capacity report",
+        reportKey: "utilization",
+      }
+    ],
+    kpis: [
+      { id: "k-revenue", label: "Revenue YTD", value: "₹42M", delta: 12, deltaLabel: "+12% vs last year", deltaPolarity: "up-good", health: "good", sparkline: makeSparkline(14, 80, 5), reportKey: "revenue", icon: "IndianRupee" },
+      { id: "k-profit", label: "Profitability", value: "24.5%", delta: 2.1, deltaLabel: "+2.1% vs target", deltaPolarity: "up-good", health: "good", sparkline: makeSparkline(14, 24, 2), reportKey: "profit", icon: "TrendingUp" },
+      { id: "k-utilization", label: "Utilization Rate", value: "72%", delta: -4, deltaLabel: "-4% vs target", deltaPolarity: "up-bad", health: "warn", sparkline: makeSparkline(14, 72, 4), reportKey: "utilization", icon: "Gauge" },
+      { id: "k-bench", label: "Resource Bench", value: "14%", delta: -2, deltaLabel: "Available capacity", deltaPolarity: "up-bad", health: "good", sparkline: makeSparkline(14, 14, 3), reportKey: "bench", icon: "Users" },
+    ],
+    widgets: [
+      { id: "w-capacity-demand", type: "gauge", size: "half-short", layer: 1, title: "Capacity vs Demand", reportKey: "capacity", payload: { value: 7.2, max: 10, centerValue: "72%", centerLabel: "Demand Met", caption: "Available capacity", target: "Target 85%" } },
+      { id: "w-pipeline", type: "gauge", size: "half-short", layer: 1, title: "Pipeline Forecast", reportKey: "pipeline", payload: pipelineForecast },
+      
+      { id: "w-utilization-pie", type: "donut", size: "half", layer: 2, title: "Utilization Split", reportKey: "utilization", payload: { slices: [{ key: "Billable", value: 72, color: "#10b981" }, { key: "Non-Billable", value: 14, color: "#f59e0b" }, { key: "Bench", value: 14, color: "#374151" }], centerValue: "100%", centerLabel: "Total Capacity" } },
+      { id: "w-client-margin", type: "barList", size: "half", layer: 2, title: "Project Margin by Client", reportKey: "margin", payload: { items: clientMargin, unit: "%" } },
+      
+      { id: "w-prod-trend", type: "lineChart", size: "half", layer: 3, title: "Productivity Trend", subtitle: "Monthly", reportKey: "productivity", payload: profitLoss },
+      { id: "w-budget", type: "barChart", size: "half", layer: 3, title: "Budget Trend", subtitle: "Quarterly", reportKey: "budget", payload: budgetTrend },
+      
+      { id: "w-members", type: "members", size: "half", layer: 3, title: "Team Members (103)", reportKey: "members", payload: membersData },
+      { id: "w-projects-worked", type: "donut", size: "half", layer: 3, title: "Projects Worked (1,402)", reportKey: "projects", payload: { slices: projectsWorked, centerValue: "1,402", centerLabel: "Total Projects" } },
+      { id: "w-table", type: "dataTable", size: "full-tall", layer: 3, title: "Detailed Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
     ],
   },
 

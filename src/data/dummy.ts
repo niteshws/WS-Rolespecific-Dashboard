@@ -198,6 +198,23 @@ export const leastProfitable: BarListItem[] = [
   { label: "VC_StudyAtHome App |…", value: -0.7, color: "#ef4444" },
 ];
 
+export const clientMargin: BarListItem[] = [
+  { label: "Ottova Inc", value: 34.2, color: "#10b981" },
+  { label: "Hadeeco", value: 28.5, color: "#10b981" },
+  { label: "KIOO Labs", value: 22.1, color: "#10b981" },
+  { label: "Battforia", value: 15.4, color: "#10b981" },
+  { label: "PixelCrayons", value: 8.2, color: "#f59e0b" },
+];
+
+export const pipelineForecast = {
+  value: 78,
+  max: 100,
+  centerValue: "78%",
+  centerLabel: "Capacity Booked",
+  caption: "Healthy pipeline",
+  target: "Target 80%",
+};
+
 export function makeTrackedHours(order: "most" | "least"): BarListItem[] {
   const base = PEOPLE.slice(order === "most" ? 0 : 8, order === "most" ? 5 : 10).map((p) => ({
     label: p.name,
