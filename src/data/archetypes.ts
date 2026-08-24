@@ -79,66 +79,20 @@ export const ARCHETYPES: _A[] = [
       {
         id: "ceo-i1",
         severity: "warn",
-        title: "Meeting load is climbing",
-        body: "Engineering has spent 40% more time in meetings this sprint. Suggest reviewing recurring syncs to protect maker time.",
-        metricRef: "Meeting Hours",
-        action: "Open working-hours report",
-        reportKey: "working-hours",
-      },
-      {
-        id: "ceo-i2",
-        severity: "bad",
-        title: "1,402 tasks are overdue",
-        body: "Overdue tasks rose 12% week-over-week, concentrated in three projects. Clearing the top 20 items would cut the backlog by a third.",
-        metricRef: "Task Status",
-        action: "Open tasks report",
-        reportKey: "tasks",
-      },
-    ],
-    kpis: [
-      { id: "k-effective", label: "Effective Time", value: "43h 29m", delta: 8, deltaLabel: "+8% vs yesterday", deltaPolarity: "up-good", health: "good", sparkline: makeSparkline(14, 70, 6), reportKey: "working-hours", icon: "Clock" },
-      { id: "k-productivity", label: "Avg Productivity", value: "22%", delta: 4, deltaLabel: "+4% vs yesterday", deltaPolarity: "up-good", health: "warn", sparkline: makeSparkline(14, 40, 8), reportKey: "productivity", icon: "Gauge" },
-      { id: "k-projects", label: "Total Projects", value: "101", delta: 3, deltaLabel: "+3 this week", deltaPolarity: "up-good", health: "good", sparkline: makeSparkline(14, 60, 4), reportKey: "projects", icon: "FolderKanban" },
-      { id: "k-overdue", label: "Overdue Tasks", value: "1,402", delta: 12, deltaLabel: "+12% vs last week", deltaPolarity: "up-bad", health: "bad", sparkline: makeSparkline(14, 45, 9), reportKey: "tasks", icon: "AlertTriangle" },
-    ],
-    widgets: [
-      { id: "w-working", type: "statGroup", size: "half-short", layer: 1, title: "Avg Working Hrs", reportKey: "working-hours", payload: { columns: 2, stats: [ { label: "Effective Time", value: "43h 29m", sub: "355.58 Yesterday", delta: "+8%", health: "good", accent: "#0ea5e9" }, { label: "Production Time", value: "9h 49m", sub: "83.26 Yesterday", delta: "+4%", health: "good", accent: "#10b981" } ] } },
-      { id: "w-prod", type: "statGroup", size: "half-short", layer: 1, title: "Avg Productivity", reportKey: "productivity", payload: { columns: 4, stats: [ { label: "Productivity", value: "22%", delta: "+4%", health: "warn" }, { label: "Activity", value: "39%", delta: "+6%", health: "warn" }, { label: "Idle", value: "6%", delta: "+1%", health: "warn" }, { label: "Away", value: "0%", delta: "flat", health: "good" } ] } },
-      { id: "w-pl-stat", type: "statGroup", size: "half-short", layer: 1, title: "Projects Profit & Loss", reportKey: "projects", payload: { columns: 3, stats: [ { label: "Profit / Loss", value: "₹37K", sub: "Profit", health: "good" }, { label: "Hrs Usage", value: "350", sub: "Budgeted 650" }, { label: "Margin %", value: "47.5%", health: "good" } ] } },
-      { id: "w-invoice-stat", type: "statGroup", size: "half-short", layer: 1, title: "Invoice Status", reportKey: "invoices", payload: { columns: 3, stats: [ { label: "Paid", value: "₹35K", sub: "123 invoices", health: "good" }, { label: "Pending", value: "₹1.5K", sub: "Invoiced ₹57K", health: "warn" }, { label: "Overdue", value: "₹20K", sub: "of ₹57K", health: "bad" } ] } },
-      { id: "w-utilization", type: "gauge", size: "half", layer: 2, title: "Utilization", reportKey: "utilization", payload: utilizationGauge },
-      { id: "w-classification", type: "segmentBar", size: "half", layer: 2, title: "Work Time Classification", reportKey: "productivity", payload: workTimeClassification },
-      { id: "w-projects-worked", type: "donut", size: "half", layer: 2, title: "Projects Worked", reportKey: "projects", payload: { slices: projectsWorked, centerValue: "101", centerLabel: "Total Projects" } },
-      { id: "w-task-status", type: "donut", size: "half", layer: 2, title: "Task Status", reportKey: "tasks", payload: { slices: taskStatus, centerValue: "20,653", centerLabel: "Total Tasks" } },
-      { id: "w-top-profit", type: "barList", size: "half", layer: 2, title: "Top Profitable Projects", subtitle: "Project profit (₹M)", reportKey: "projects", payload: { items: topProfitable, unit: "₹M" } },
-      { id: "w-least-profit", type: "barList", size: "half", layer: 2, title: "Least Profitable Projects", subtitle: "Project loss (₹M)", reportKey: "projects", payload: { items: leastProfitable, unit: "₹M", diverging: true } },
-      { id: "w-pl", type: "lineChart", size: "half", layer: 2, title: "Profit & Loss", subtitle: "Quarterly", reportKey: "invoices", payload: profitLoss },
-      { id: "w-budget", type: "barChart", size: "half", layer: 2, title: "Budget Trend", subtitle: "Quarterly", reportKey: "budget", payload: budgetTrend },
-      { id: "w-milestones", type: "miniTable", size: "half", layer: 2, title: "Upcoming Milestones", reportKey: "projects", payload: milestones },
-      { id: "w-members", type: "members", size: "half", layer: 2, title: "Members", reportKey: "members", payload: membersData },
-      { id: "w-table", type: "dataTable", size: "full-tall", layer: 3, title: "Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
-    ],
-  },
-
-  /* ------------------------------- Executive-2 ---------------------------- */
-  {
-    id: "executive-2",
-    label: "Executive 2",
-    role: "CEO Overview",
-    description: "Company-wide headline metrics, utilization, and pipeline forecast.",
-    icon: "Crown",
-    visibility: "public",
-    owner: "Vinove Design",
-    templateId: "executive-2",
-    insights: [
-      {
-        id: "ceo2-i1",
-        severity: "warn",
-        title: "Utilization under target",
+        title: "Utilization under target — bench available",
         body: "Utilization dropped to 72% this week, lowering margins. We have spare capacity to accelerate the pipeline.",
         metricRef: "Utilization Rate",
         action: "View capacity report",
         reportKey: "utilization",
+      },
+      {
+        id: "ceo-i2",
+        severity: "bad",
+        title: "Margin pressure on 2 clients",
+        body: "PixelCrayons and Battforia margins are below the 20% threshold. Consider a rate or scope review.",
+        metricRef: "Project Margin",
+        action: "Open Project Margin by Client",
+        reportKey: "margin",
       }
     ],
     kpis: [
@@ -148,18 +102,20 @@ export const ARCHETYPES: _A[] = [
       { id: "k-bench", label: "Resource Bench", value: "14%", delta: -2, deltaLabel: "Available capacity", deltaPolarity: "up-bad", health: "good", sparkline: makeSparkline(14, 14, 3), reportKey: "bench", icon: "Users" },
     ],
     widgets: [
-      { id: "w-capacity-demand", type: "gauge", size: "half-short", layer: 1, title: "Capacity vs Demand", reportKey: "capacity", payload: { value: 7.2, max: 10, centerValue: "72%", centerLabel: "Demand Met", caption: "Available capacity", target: "Target 85%" } },
-      { id: "w-pipeline", type: "gauge", size: "half-short", layer: 1, title: "Pipeline Forecast", reportKey: "pipeline", payload: pipelineForecast },
-      
+      { id: "w-capacity-bench", type: "gauge", size: "half-short", layer: 1, title: "Capacity vs Bench", reportKey: "capacity", payload: { value: 1.4, max: 10, centerValue: "14%", centerLabel: "Available", caption: "On bench", target: "Bench" } },
+      { id: "w-invoice-stat", type: "statGroup", size: "half-short", layer: 1, title: "Invoice Status", reportKey: "invoices", payload: { columns: 3, stats: [ { label: "Paid", value: "₹35K", sub: "123 invoices", health: "good" }, { label: "Pending", value: "₹1.5K", sub: "Invoiced ₹57K", health: "warn" }, { label: "Overdue", value: "₹20K", sub: "of ₹57K", health: "bad" } ] } },
+      { id: "w-working", type: "statGroup", size: "half-short", layer: 1, title: "Avg Working Hrs", reportKey: "working-hours", payload: { columns: 2, stats: [ { label: "Effective Time", value: "43h 29m", sub: "355.58 Yesterday", delta: "+8%", health: "good", accent: "#0ea5e9" }, { label: "Production Time", value: "9h 49m", sub: "83.26 Yesterday", delta: "+4%", health: "good", accent: "#10b981" } ] } },
+      { id: "w-prod", type: "statGroup", size: "half-short", layer: 1, title: "Avg Productivity", reportKey: "productivity", payload: { columns: 4, stats: [ { label: "Productivity", value: "22%", delta: "+4%", health: "warn" }, { label: "Activity", value: "39%", delta: "+6%", health: "warn" }, { label: "Idle", value: "6%", delta: "+1%", health: "warn" }, { label: "Away", value: "0%", delta: "flat", health: "good" } ] } },
+
       { id: "w-utilization-pie", type: "donut", size: "half", layer: 2, title: "Utilization Split", reportKey: "utilization", payload: { slices: [{ key: "Billable", value: 72, color: "#10b981" }, { key: "Non-Billable", value: 14, color: "#f59e0b" }, { key: "Bench", value: 14, color: "#374151" }], centerValue: "100%", centerLabel: "Total Capacity" } },
+      { id: "w-classification", type: "segmentBar", size: "half", layer: 2, title: "Work Time Classification", reportKey: "productivity", payload: workTimeClassification },
       { id: "w-client-margin", type: "barList", size: "half", layer: 2, title: "Project Margin by Client", reportKey: "margin", payload: { items: clientMargin, unit: "%" } },
-      
-      { id: "w-prod-trend", type: "lineChart", size: "half", layer: 3, title: "Productivity Trend", subtitle: "Monthly", reportKey: "productivity", payload: profitLoss },
+
       { id: "w-budget", type: "barChart", size: "half", layer: 3, title: "Budget Trend", subtitle: "Quarterly", reportKey: "budget", payload: budgetTrend },
-      
-      { id: "w-members", type: "members", size: "half", layer: 3, title: "Team Members (103)", reportKey: "members", payload: membersData },
-      { id: "w-projects-worked", type: "donut", size: "half", layer: 3, title: "Projects Worked (1,402)", reportKey: "projects", payload: { slices: projectsWorked, centerValue: "1,402", centerLabel: "Total Projects" } },
-      { id: "w-table", type: "dataTable", size: "full-tall", layer: 3, title: "Detailed Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
+      { id: "w-pl", type: "lineChart", size: "half", layer: 3, title: "Profit & Loss", subtitle: "Quarterly", reportKey: "invoices", payload: profitLoss },
+
+      { id: "w-members", type: "members", size: "half", layer: 4, title: "Team Members", reportKey: "members", payload: membersData },
+      { id: "w-table", type: "dataTable", size: "full-tall", layer: 4, title: "Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
     ],
   },
 
@@ -219,7 +175,7 @@ export const ARCHETYPES: _A[] = [
       { id: "k-blockers", label: "Open Blockers", value: "18", delta: 20, deltaLabel: "+3 vs last week", deltaPolarity: "up-bad", health: "bad", sparkline: makeSparkline(14, 40, 9), reportKey: "tasks", icon: "Ban" },
     ],
     widgets: [
-      { id: "w-status", type: "donut", size: "half", layer: 2, title: "Delivery Status", reportKey: "projects", payload: { slices: [ { key: "On Track", value: 70, color: "#10b981" }, { key: "At Risk", value: 20, color: "#f59e0b" }, { key: "Delayed", value: 10, color: "#ef4444" } ], centerValue: "10", centerLabel: "Projects" } },
+      { id: "w-projects-worked", type: "donut", size: "half", layer: 2, title: "Projects Worked", reportKey: "projects", payload: { slices: projectsWorked, centerValue: "101", centerLabel: "Total Projects" } },
       { id: "w-budget", type: "barChart", size: "half", layer: 2, title: "Budget Trend", subtitle: "Quarterly", reportKey: "budget", payload: budgetTrend },
       { id: "w-top-profit", type: "barList", size: "half", layer: 2, title: "Top Profitable Projects", reportKey: "projects", payload: { items: topProfitable, unit: "₹M" } },
       { id: "w-cost", type: "barList", size: "half", layer: 2, title: "Top Cost Drivers", subtitle: "Spend by function (₹K)", reportKey: "cost-drivers", payload: { items: topCostDrivers, unit: "₹K" } },
