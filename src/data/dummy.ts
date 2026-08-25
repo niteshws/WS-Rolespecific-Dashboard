@@ -158,12 +158,11 @@ export const projectsWorked: DonutSlice[] = [
 ];
 
 export const taskStatus: DonutSlice[] = [
-  { key: "Due Tomorrow", value: 57, color: "#f59e0b" },
+  { key: "To Do", value: 2985, color: "#0ea5e9" },
+  { key: "In Progress", value: 1450, color: "#38bdf8" },
+  { key: "In Review", value: 524, color: "#8b5cf6" },
+  { key: "Completed", value: 15600, color: "#10b981" },
   { key: "Overdue", value: 1402, color: "#ef4444" },
-  { key: "Yet to Start", value: 2985, color: "#0ea5e9" },
-  { key: "Archived", value: 15600, color: "#10b981" },
-  { key: "Triage", value: 85, color: "#8b5cf6" },
-  { key: "Cancelled", value: 524, color: "#374151" },
 ];
 
 export const membersData: MembersPayload = {
@@ -191,11 +190,11 @@ export const topProfitable: BarListItem[] = [
 ];
 
 export const leastProfitable: BarListItem[] = [
-  { label: "VC_Angello", value: -4.7, color: "#ef4444" },
-  { label: "MATCT", value: -3.1, color: "#ef4444" },
-  { label: "cKymning App | FCP", value: -2.4, color: "#ef4444" },
-  { label: "Workstatus Product Dev…", value: -1.6, color: "#ef4444" },
-  { label: "VC_StudyAtHome App |…", value: -0.7, color: "#ef4444" },
+  { label: "Website Redesign", value: 8.4, color: "#ef4444" },
+  { label: "Mobile App Revamp", value: 11.2, color: "#ef4444" },
+  { label: "CRM Migration", value: 13.7, color: "#f59e0b" },
+  { label: "Workstatus Product Dev…", value: 15.6, color: "#f59e0b" },
+  { label: "VC_StudyAtHome App |…", value: 18.2, color: "#10b981" },
 ];
 
 export const clientMargin: BarListItem[] = [

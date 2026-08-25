@@ -32,9 +32,9 @@ export function KpiCard({
   return (
     <button
       type="button"
-      onClick={() => onOpenReport(spec.reportKey)}
+      onClick={() => spec.state !== "coming-soon" && onOpenReport(spec.reportKey)}
       aria-label={`${spec.label}: ${spec.value}, ${spec.deltaLabel}. Open detailed report.`}
-      className="group text-left focus-visible:outline-none"
+      className={cn("group text-left focus-visible:outline-none", spec.state === "coming-soon" && "cursor-default")}
     >
       <Card className="relative h-full overflow-hidden p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card-hover">
         <span
@@ -48,10 +48,16 @@ export function KpiCard({
             </span>
             <span className="text-xs font-medium text-muted">{spec.label}</span>
           </div>
-          <span
-            className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}
-            aria-label={`health: ${spec.health}`}
-          />
+          {spec.state === "coming-soon" ? (
+             <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground" aria-label="Coming Soon">
+               Coming Soon
+             </span>
+          ) : (
+             <span
+               className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}
+               aria-label={`health: ${spec.health}`}
+             />
+          )}
         </div>
 
         <div className="mt-3 flex items-end justify-between gap-2">
@@ -67,10 +73,16 @@ export function KpiCard({
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-          View detailed report
-          <ArrowUpRight className="h-3 w-3" />
-        </div>
+        {!spec.state || spec.state !== "coming-soon" ? (
+          <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+            View detailed report
+            <ArrowUpRight className="h-3 w-3" />
+          </div>
+        ) : (
+          <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-transparent">
+            &nbsp;
+          </div>
+        )}
       </Card>
     </button>
   );

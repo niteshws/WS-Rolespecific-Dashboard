@@ -69,7 +69,8 @@ export function WidgetRenderer({
   dateRange?: string;
   plan?: string;
 }) {
-  const openReport = widget.reportKey && onOpenReport ? () => onOpenReport(widget.reportKey) : undefined;
+  const hideActions = widget.title === "Workforce Ledger" || widget.title === "Project Delivery Ledger";
+  const openReport = widget.reportKey && onOpenReport && !hideActions ? () => onOpenReport(widget.reportKey) : undefined;
 
   function body() {
     switch (widget.type) {
@@ -115,6 +116,7 @@ export function WidgetRenderer({
             title={widget.title}
             subtitle={widget.subtitle}
             onOpenReport={openReport}
+            showExport={!hideActions}
             isEditing={editing}
           />
         );

@@ -66,6 +66,7 @@ export interface KpiSpec {
   /** Layer-3 report this KPI drills into. */
   reportKey?: string;
   icon?: string;
+  state?: "active" | "coming-soon";
 }
 
 /** A natural-language insight surfaced in the banner rail. */
