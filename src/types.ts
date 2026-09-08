@@ -50,7 +50,11 @@ export type WidgetType =
   | "personalAllocation"
   | "actionItems"
   | "myAllocation"
-  | "peakFocus";
+  | "peakFocus"
+  | "usagePie"
+  | "lowActivityMembers"
+  | "workloadCapacity"
+  | "memberActivityBars";
 
 /** Layer 1 (Macro) — a single glanceable KPI. */
 export interface KpiSpec {
@@ -61,6 +65,9 @@ export interface KpiSpec {
   delta: number; // signed percentage
   deltaLabel: string;
   deltaPolarity: "up-good" | "up-bad" | "neutral";
+  /** Optional non-delta secondary metric (e.g. bench hours under a %). */
+  secondaryValue?: string;
+  secondaryLabel?: string;
   health: HealthLevel;
   sparkline: number[];
   /** Layer-3 report this KPI drills into. */
@@ -87,10 +94,14 @@ export interface WidgetDescriptor {
   size: WidgetSize;
   title: string;
   subtitle?: string;
+  /** Optional help text shown in an info-icon tooltip next to the title. */
+  info?: string;
   payload?: unknown;
   layer: 1 | 2 | 3;
   /** Layer-3 report this widget drills into via its header action. */
   reportKey?: string;
+  /** Optional custom label for the header report action. */
+  actionLabel?: string;
   /** Runtime edit state (set while editing a dashboard). */
   hidden?: boolean;
 }
@@ -162,10 +173,26 @@ export interface DonutPayload {
   centerLabel?: string;
 }
 
+/** Applications / Websites usage donut with durations. */
+export interface UsagePieSlice {
+  key: string;
+  value: number;
+  color: string;
+  duration: string;
+}
+
+export interface UsagePiePayload {
+  slices: UsagePieSlice[];
+  totalUsage: string;
+  filterLabel?: string;
+  viewAllLabel?: string;
+}
+
 export interface MembersPayload {
   total: number;
   online: number;
   offline: number;
+  onLeave: number;
   devices: { name: string; count: number }[];
 }
 
@@ -192,6 +219,8 @@ export interface BarListItem {
   sub?: string;
   /** Optional trailing bubble (e.g. attention shifts / activity count). */
   bubble?: number;
+  /** When set, bar hover shows Activity % and Idle %. */
+  idle?: number;
 }
 export interface BarListPayload {
   items: BarListItem[];
@@ -209,6 +238,9 @@ export interface GaugePayload {
   centerLabel?: string;
   caption?: string;
   target?: string;
+  /** Large metric shown left of the gauge (e.g. "2:06"). */
+  headlineValue?: string;
+  headlineLabel?: string;
 }
 
 export interface ProgressRingPayload {
@@ -267,7 +299,7 @@ export interface TableColumn {
   label: string;
   align?: "left" | "right" | "center";
   pinned?: boolean;
-  render?: "text" | "health" | "hours" | "delta" | "avatar" | "bar" | "money" | "status";
+  render?: "text" | "health" | "hours" | "delta" | "avatar" | "bar" | "money" | "status" | "bandPct";
   width?: number;
 }
 
@@ -278,6 +310,44 @@ export interface TableRow {
 export interface DataTablePayload {
   columns: TableColumn[];
   rows: TableRow[];
+}
+
+export interface LowActivityMemberRow {
+  name: string;
+  department: string;
+  project: string;
+  activity: number;
+  idle: string;
+}
+
+export interface LowActivityMembersPayload {
+  rows: LowActivityMemberRow[];
+}
+
+export type WorkloadBand = "Over-allocated" | "Healthy" | "Under-utilized";
+
+export interface WorkloadCapacityRow {
+  name: string;
+  available: string;
+  capacityPct: number;
+  billablePct: number;
+  band: WorkloadBand;
+}
+
+export interface WorkloadCapacityPayload {
+  rows: WorkloadCapacityRow[];
+}
+
+export interface MemberActivityBarRow {
+  name: string;
+  /** Primary metric shown on the right and as bar width (0–100). */
+  activity: number;
+  /** Shown in the bar hover tooltip (0–100). */
+  idle: number;
+}
+
+export interface MemberActivityBarsPayload {
+  rows: MemberActivityBarRow[];
 }
 
 /* ------------------------------- Reports (L3) ----------------------------- */

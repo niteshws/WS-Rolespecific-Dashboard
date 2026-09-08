@@ -35,6 +35,16 @@ const HEIGHT: Record<WidgetSize, string> = {
   "full-short": "min-h-[176px] lg:h-[176px]",
 };
 
+/** Fixed height overrides for widgets that need a custom compact band. */
+const HEIGHT_OVERRIDE: Record<string, string> = {
+  "w-applications": "min-h-[232px] lg:h-[232px]",
+  "w-websites": "min-h-[232px] lg:h-[232px]",
+  "w-projects-worked": "min-h-[232px] lg:h-[232px]",
+  "w-classification": "min-h-[232px] lg:h-[232px]",
+  "w-workload-capacity": "min-h-[232px] lg:h-[232px]",
+  "w-members": "min-h-[232px] lg:h-[232px]",
+};
+
 /** Resize order for the grow / shrink controls. */
 export const SIZE_ORDER: WidgetSize[] = [
   "quarter",
@@ -82,7 +92,12 @@ export function BentoGrid({
           key={w.id}
           role="listitem"
           id={`widget-${w.id}`}
-          className={cn("scroll-mt-28", SPAN[w.size], HEIGHT[w.size], w.hidden && "lg:col-span-3 lg:h-[176px]")}
+          className={cn(
+            "scroll-mt-28",
+            SPAN[w.size],
+            HEIGHT_OVERRIDE[w.id] ?? HEIGHT[w.size],
+            w.hidden && "lg:col-span-3 lg:h-[176px]",
+          )}
         >
           {w.hidden ? (
             <HiddenWidgetCard title={w.title} onRestore={() => ops?.onRestore(w.id)} />

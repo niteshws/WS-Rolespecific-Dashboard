@@ -9,22 +9,24 @@ export function Tooltip({
   content,
   children,
   className,
+  wrapperClassName,
 }: {
   content: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  wrapperClassName?: string;
 }) {
   const [open, setOpen] = React.useState(false);
   const id = React.useId();
   return (
     <span
-      className="relative inline-flex"
+      className={cn("relative inline-flex", wrapperClassName)}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       onFocus={() => setOpen(true)}
       onBlur={() => setOpen(false)}
     >
-      <span aria-describedby={open ? id : undefined}>{children}</span>
+      <span className="w-full" aria-describedby={open ? id : undefined}>{children}</span>
       {open && (
         <span
           role="tooltip"

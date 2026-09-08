@@ -42,6 +42,7 @@ const MAP: Record<string, LucideIcon> = {
   Ban,
   MoonStar,
   Coffee,
+  Activity,
 };
 
 export function Icon({

@@ -9,8 +9,10 @@ import {
   ChevronDown,
   GripVertical,
   Lock,
+  Info,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface EditControls {
@@ -25,8 +27,10 @@ export interface EditControls {
 export function WidgetShell({
   title,
   subtitle,
+  info,
   highlight,
   onOpenReport,
+  actionLabel,
   editing,
   edit,
   children,
@@ -38,8 +42,10 @@ export function WidgetShell({
 }: {
   title: string;
   subtitle?: string;
+  info?: string;
   highlight?: boolean;
   onOpenReport?: () => void;
+  actionLabel?: string;
   editing?: boolean;
   edit?: EditControls;
   children: React.ReactNode;
@@ -77,7 +83,20 @@ export function WidgetShell({
           <div className="flex min-w-0 items-center gap-2">
           {editing && <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/60" />}
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>
+              {info && (
+                <Tooltip content={info}>
+                  <button
+                    type="button"
+                    className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:text-ink"
+                    aria-label={info}
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
+              )}
+            </div>
             {subtitle && <p className="mt-0.5 truncate text-xs text-muted-foreground">{subtitle}</p>}
           </div>
         </div>
@@ -99,7 +118,11 @@ export function WidgetShell({
                 className="flex items-center gap-0.5 rounded px-1.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
                 aria-label={`View detailed report for ${title}`}
               >
-                {["task", "action", "screenshot"].some((t) => title.toLowerCase().includes(t)) ? "View all" : "View report"}
+                {actionLabel
+                  ? actionLabel
+                  : ["task", "action", "screenshot"].some((t) => title.toLowerCase().includes(t))
+                    ? "View all"
+                    : "View report"}
                 <ArrowUpRight className="h-3 w-3" />
               </button>
             )}

@@ -6,8 +6,25 @@ import {
   makeTaskTable,
   makeAppUsageTable,
   makeScatter,
+  makeWorkedTodayTable,
+  makeTodaysActivityTable,
+  makeUtilizationTable,
+  makeBenchTable,
+  makeTrackedLeastHoursTable,
+  makeWorkloadCapacityTable,
+  makeProductivityTrendTable,
+  makeApplicationUsageTable,
+  makeWebsiteUsageTable,
   budgetTrend,
   profitLoss,
+  workedTodayTrend,
+  todaysActivityTrend,
+  utilizationTrend,
+  benchByTeam,
+  trackedLeastHours,
+  productivityTrend,
+  applicationsUsage,
+  websitesUsage,
 } from "./dummy";
 
 /**
@@ -22,8 +39,49 @@ const invoices = makeInvoiceTable();
 const tasks = makeTaskTable();
 const appUsage = makeAppUsageTable();
 const scatter = makeScatter();
+const workedToday = makeWorkedTodayTable();
+const todaysActivity = makeTodaysActivityTable();
+const utilizationRows = makeUtilizationTable();
+const benchRows = makeBenchTable();
+const trackedLeastTable = makeTrackedLeastHoursTable();
+const workloadCapacityTable = makeWorkloadCapacityTable();
+const productivityTrendTable = makeProductivityTrendTable();
+const applicationUsageTable = makeApplicationUsageTable();
+const websiteUsageTable = makeWebsiteUsageTable();
 
 const REPORTS: Record<string, ReportSpec> = {
+  "worked-today": {
+    key: "worked-today",
+    title: "Worked Today — Detailed Report",
+    subtitle: "Hours logged across the org so far today",
+    severity: "good",
+    narrative:
+      "Org-wide worked time is 1h 20m on average so far today — 12 minutes ahead of yesterday at this hour. Engineering leads volume; Support and Finance are still ramping after late clock-ins.",
+    stats: [
+      { label: "Avg Worked", value: "1h 20m", delta: "+12m vs yesterday", health: "good" },
+      { label: "Total Hours", value: "58h 40m", delta: "45 members", health: "good" },
+      { label: "Clocked In", value: "37", delta: "8 not yet", health: "warn" },
+      { label: "Top Team", value: "Engineering", delta: "22h 15m", health: "good" },
+    ],
+    chart: { type: "barChart", title: "Hours by time of day vs yesterday", payload: workedTodayTrend },
+    table: workedToday,
+  },
+  "todays-activity": {
+    key: "todays-activity",
+    title: "Today's Activity — Detailed Report",
+    subtitle: "Mouse/keyboard activity, idle, and away for today",
+    severity: "warn",
+    narrative:
+      "Average activity is 41% today — up 6pts vs yesterday. Peak focus landed mid-morning and mid-afternoon; the lunch dip and meeting blocks are the main drag on the score.",
+    stats: [
+      { label: "Activity", value: "41%", delta: "+6% vs yesterday", health: "warn" },
+      { label: "Idle", value: "9%", delta: "+1%", health: "warn" },
+      { label: "Away", value: "14%", delta: "−2%", health: "good" },
+      { label: "Active Time", value: "32h 10m", delta: "org total", health: "good" },
+    ],
+    chart: { type: "lineChart", title: "Activity vs idle by hour", payload: todaysActivityTrend },
+    table: todaysActivity,
+  },
   "working-hours": {
     key: "working-hours",
     title: "Working Hours — Detailed Report",
@@ -55,6 +113,28 @@ const REPORTS: Record<string, ReportSpec> = {
     ],
     chart: { type: "scatter", title: "Hours vs. productivity", payload: scatter },
     table: activity,
+  },
+  "productivity-trend": {
+    key: "productivity-trend",
+    title: "Productivity Trend — Detailed Report",
+    subtitle: "Daily productivity, activity, and idle for this week",
+    severity: "good",
+    narrative:
+      "Productivity peaked mid-week and dipped over the weekend. Activity tracked closely with productivity; idle rose on Sat–Sun as focus time fell.",
+    stats: (() => {
+      const prod = productivityTrend.series.find((s) => s.key === "Productivity")?.data ?? [];
+      const act = productivityTrend.series.find((s) => s.key === "Activity")?.data ?? [];
+      const idle = productivityTrend.series.find((s) => s.key === "Idle")?.data ?? [];
+      const avg = (arr: number[]) => Math.round(arr.reduce((s, n) => s + n, 0) / Math.max(arr.length, 1));
+      return [
+        { label: "Avg Productivity", value: `${avg(prod)}%`, health: "good" as const },
+        { label: "Avg Activity", value: `${avg(act)}%`, health: "good" as const },
+        { label: "Avg Idle", value: `${avg(idle)}%`, health: "warn" as const },
+        { label: "Peak Day", value: "Fri", delta: `${Math.max(...prod)}%`, health: "good" as const },
+      ];
+    })(),
+    chart: { type: "lineChart", title: "Productivity vs activity vs idle", payload: productivityTrend },
+    table: productivityTrendTable,
   },
   projects: {
     key: "projects",
@@ -113,10 +193,66 @@ const REPORTS: Record<string, ReportSpec> = {
     stats: [
       { label: "Apps Tracked", value: "312", health: "good" },
       { label: "Productive", value: "64%", delta: "+3%", health: "good" },
-      { label: "Distracting", value: "9%", delta: "+1%", health: "warn" },
+      { label: "Focus %", value: "72%", delta: "+2%", health: "good" },
       { label: "Shadow IT", value: "9 apps", delta: "+2", health: "bad" },
     ],
     table: appUsage,
+  },
+  "application-usage": {
+    key: "application-usage",
+    title: "Application Usage — Detailed Report",
+    subtitle: "Time share across desktop and work applications",
+    severity: "good",
+    narrative:
+      "VS Code and Slack lead application time. Productive tools dominate the top of the list; meeting and chat apps hold a smaller but consistent share.",
+    stats: [
+      { label: "Apps Shown", value: String(applicationUsageTable.rows.length), health: "good" },
+      {
+        label: "Top App",
+        value: applicationsUsage[0]?.label ?? "—",
+        delta: `${applicationsUsage[0]?.value ?? 0}%`,
+        health: "good",
+      },
+      {
+        label: "Productive Share",
+        value: `${applicationsUsage.filter((a) => a.color === "#22c55e").reduce((s, a) => s + a.value, 0)}%`,
+        health: "good",
+      },
+      {
+        label: "Distracting Share",
+        value: `${applicationsUsage.filter((a) => a.color === "#ef4444").reduce((s, a) => s + a.value, 0)}%`,
+        health: "warn",
+      },
+    ],
+    table: applicationUsageTable,
+  },
+  "website-usage": {
+    key: "website-usage",
+    title: "Website Usage — Detailed Report",
+    subtitle: "Time share across websites and web apps",
+    severity: "warn",
+    narrative:
+      "github.com and google.com lead website time. Distracting sites like youtube.com remain in the long tail and are worth a policy review.",
+    stats: [
+      { label: "Sites Shown", value: String(websiteUsageTable.rows.length), health: "good" },
+      {
+        label: "Top Site",
+        value: websitesUsage[0]?.label ?? "—",
+        delta: `${websitesUsage[0]?.value ?? 0}%`,
+        health: "good",
+      },
+      {
+        label: "Productive Share",
+        value: `${websitesUsage.filter((a) => a.color === "#22c55e").reduce((s, a) => s + a.value, 0)}%`,
+        health: "good",
+      },
+      {
+        label: "Distracting Share",
+        value: `${websitesUsage.filter((a) => a.color === "#ef4444").reduce((s, a) => s + a.value, 0)}%`,
+        health: "bad",
+      },
+    ],
+    table: websiteUsageTable,
   },
   members: {
     key: "members",
@@ -151,19 +287,35 @@ const REPORTS: Record<string, ReportSpec> = {
   },
   utilization: {
     key: "utilization",
-    title: "Utilization — Detailed Report",
-    subtitle: "Worked vs. capacity per member",
+    title: "Utilization Rate — Detailed Report",
+    subtitle: "Billable capacity vs worked hours by member",
     severity: "warn",
     narrative:
-      "Average worked time is 5h 15m against an 8h target — utilization is below the healthy band. The shortfall is concentrated in two teams with heavy meeting load.",
+      "Utilization is at 72% — 4pts under the 76% target. Billable work holds most of capacity, but Design and Support are dragging the average with higher non-billable load this week.",
     stats: [
-      { label: "Avg Worked", value: "5:15", delta: "target 8:00", health: "warn" },
-      { label: "Utilization", value: "66%", delta: "-4% vs last week", health: "warn" },
-      { label: "Core Work", value: "77%", health: "good" },
-      { label: "Overutilized", value: "6", delta: "+2", health: "bad" },
+      { label: "Utilization", value: "72%", delta: "−4% vs target", health: "warn" },
+      { label: "Billable", value: "72%", delta: "of capacity", health: "good" },
+      { label: "Non-Billable", value: "14%", health: "warn" },
+      { label: "Under Target", value: "11", delta: "members", health: "bad" },
     ],
-    chart: { type: "scatter", title: "Capacity vs. output", payload: scatter },
-    table: activity,
+    chart: { type: "barChart", title: "Utilization mix by week", payload: utilizationTrend },
+    table: utilizationRows,
+  },
+  bench: {
+    key: "bench",
+    title: "Resource Bench — Detailed Report",
+    subtitle: "Available capacity and bench hours by member",
+    severity: "good",
+    narrative:
+      "14% of capacity is on bench — 112h available this week. Engineering holds the largest pool (42h). Two members have been benched over 10 days and should be considered for upcoming pipeline work.",
+    stats: [
+      { label: "Bench %", value: "14%", delta: "of capacity", health: "good" },
+      { label: "Bench Hours", value: "112h", delta: "this week", health: "good" },
+      { label: "On Bench", value: "8", delta: "members", health: "warn" },
+      { label: "Longest Idle", value: "16 days", delta: "1 member", health: "warn" },
+    ],
+    chart: { type: "barChart", title: "Bench hours by team", payload: benchByTeam },
+    table: benchRows,
   },
   "cost-drivers": {
     key: "cost-drivers",
@@ -195,6 +347,68 @@ const REPORTS: Record<string, ReportSpec> = {
       { label: "Avg Mins/Break", value: "4.2", health: "warn" },
     ],
     table: activity,
+  },
+  "tracked-least-hours": {
+    key: "tracked-least-hours",
+    title: "Tracked Least Hours — Detailed Report",
+    subtitle: "Members with the lowest activity today",
+    severity: "bad",
+    narrative:
+      "These members have the lowest activity scores today. High idle share suggests blocked work, long meetings, or away time — review with managers before the day ends.",
+    stats: [
+      {
+        label: "Members",
+        value: String(trackedLeastHours.length),
+        health: "warn",
+      },
+      {
+        label: "Lowest Activity",
+        value: `${Math.min(...trackedLeastHours.map((i) => i.value))}%`,
+        health: "bad",
+      },
+      {
+        label: "Avg Activity",
+        value: `${Math.round(trackedLeastHours.reduce((s, i) => s + i.value, 0) / trackedLeastHours.length)}%`,
+        health: "bad",
+      },
+      {
+        label: "Avg Idle",
+        value: `${Math.round(trackedLeastHours.reduce((s, i) => s + (i.idle ?? 0), 0) / trackedLeastHours.length)}%`,
+        health: "warn",
+      },
+    ],
+    table: trackedLeastTable,
+  },
+  "workload-capacity": {
+    key: "workload-capacity",
+    title: "Workload Capacity — Detailed Report",
+    subtitle: "Available hours, capacity, billable mix, and allocation band",
+    severity: "warn",
+    narrative:
+      "Capacity bands show who is over-allocated vs healthy vs under-utilized. Over-allocated members are past available hours; under-utilized members still have room to take on work.",
+    stats: [
+      {
+        label: "Members",
+        value: String(workloadCapacityTable.rows.length),
+        health: "good",
+      },
+      {
+        label: "Over-allocated",
+        value: String(workloadCapacityTable.rows.filter((r) => r.band === "Over-allocated").length),
+        health: "bad",
+      },
+      {
+        label: "Healthy",
+        value: String(workloadCapacityTable.rows.filter((r) => r.band === "Healthy").length),
+        health: "good",
+      },
+      {
+        label: "Under-utilized",
+        value: String(workloadCapacityTable.rows.filter((r) => r.band === "Under-utilized").length),
+        health: "warn",
+      },
+    ],
+    table: workloadCapacityTable,
   },
   technology: {
     key: "technology",

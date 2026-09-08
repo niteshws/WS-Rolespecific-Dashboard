@@ -149,12 +149,12 @@ export function makeAppBreakdown(filter?: AppRow["category"]): AppRow[] {
 /* -------------------------------- Donuts ---------------------------------- */
 
 export const projectsWorked: DonutSlice[] = [
-  { key: "Yet to Start", value: 20, color: "#0ea5e9" },
-  { key: "In Progress", value: 28, color: "#f59e0b" },
-  { key: "On Hold", value: 4, color: "#8b5cf6" },
-  { key: "Complete", value: 4, color: "#10b981" },
-  { key: "Cancelled", value: 5, color: "#ef4444" },
-  { key: "Archived", value: 40, color: "#374151" },
+  { key: "Yet to Start", value: 16, color: "#38bdf8" },
+  { key: "In Progress", value: 85, color: "#f59e0b" },
+  { key: "On Hold", value: 6, color: "#8b5cf6" },
+  { key: "Complete", value: 7, color: "#10b981" },
+  { key: "Cancelled", value: 11, color: "#ef4444" },
+  { key: "Archived", value: 203, color: "#374151" },
 ];
 
 export const taskStatus: DonutSlice[] = [
@@ -169,6 +169,7 @@ export const membersData: MembersPayload = {
   total: 45,
   online: 37,
   offline: 8,
+  onLeave: 0,
   devices: [
     { name: "Android", count: 2 },
     { name: "iOS", count: 1 },
@@ -205,6 +206,56 @@ export const clientMargin: BarListItem[] = [
   { label: "PixelCrayons", value: 8.2, color: "#f59e0b" },
 ];
 
+/** Executive — members with low activity today. */
+export const lowActivityMembers = {
+  rows: [
+    { name: "Varun Joshi", department: "Engineering", project: "Payment Gateway", activity: 12, idle: "2h 18m" },
+    { name: "Kavya Reddy", department: "Marketing", project: "Blog Campaign Q2", activity: 8, idle: "1h 45m" },
+    { name: "Deepak Kumar", department: "Operations", project: "HR Policy Review", activity: 15, idle: "1h 20m" },
+  ],
+};
+
+/** Executive — per-member workload capacity. */
+export const workloadCapacity = {
+  rows: [
+    {
+      name: "Arjun Singh",
+      available: "40.00h",
+      capacityPct: 113.58,
+      billablePct: 92.14,
+      band: "Over-allocated" as const,
+    },
+    {
+      name: "Rahul Mehta",
+      available: "40.00h",
+      capacityPct: 87.78,
+      billablePct: 91.04,
+      band: "Healthy" as const,
+    },
+    {
+      name: "Neha Kapoor",
+      available: "40.00h",
+      capacityPct: 107.0,
+      billablePct: 88.5,
+      band: "Over-allocated" as const,
+    },
+    {
+      name: "Varun Joshi",
+      available: "40.00h",
+      capacityPct: 30.13,
+      billablePct: 25.0,
+      band: "Under-utilized" as const,
+    },
+    {
+      name: "Kavya Reddy",
+      available: "40.00h",
+      capacityPct: 95.0,
+      billablePct: 90.2,
+      band: "Healthy" as const,
+    },
+  ],
+};
+
 export const pipelineForecast = {
   value: 78,
   max: 100,
@@ -224,6 +275,75 @@ export function makeTrackedHours(order: "most" | "least"): BarListItem[] {
   return base.sort((a, b) => (order === "most" ? b.value - a.value : a.value - b.value));
 }
 
+/** Members with the least tracked activity — same bar-list UI as Application Usage. */
+export const trackedLeastHours: BarListItem[] = [
+  { label: "Ankur Yadav", value: 15, idle: 85, color: "rgba(239, 68, 68, 0.96)" },
+  { label: "Tamanna Chauhan", value: 18, idle: 82, color: "rgba(239, 68, 68, 0.96)" },
+  { label: "Abhishek Tiwari", value: 22, idle: 78, color: "rgba(239, 68, 68, 0.96)" },
+  { label: "Siddharth Wadhwani", value: 28, idle: 72, color: "rgba(239, 68, 68, 0.96)" },
+  { label: "Aman Bansal", value: 31, idle: 69, color: "rgba(239, 68, 68, 0.96)" },
+];
+
+/** Layer-3 table for Tracked Least Hours — same members/metrics as the widget. */
+export function makeTrackedLeastHoursTable(): DataTablePayload {
+  return {
+    columns: [
+      { key: "name", label: "Name", pinned: true, render: "avatar", width: 200 },
+      { key: "activity", label: "Activity %", render: "bar", width: 180 },
+      { key: "idle", label: "Idle %", width: 100 },
+    ],
+    rows: trackedLeastHours.map((item) => ({
+      name: item.label,
+      activity: item.value,
+      idle: `${item.idle ?? Math.max(0, 100 - item.value)}%`,
+    })),
+  };
+}
+
+/** Layer-3 table for Workload capacity — widget rows first, then expanded list. */
+export function makeWorkloadCapacityTable(): DataTablePayload {
+  const columns = [
+    { key: "name", label: "Name", pinned: true, render: "avatar" as const, width: 200 },
+    { key: "available", label: "Available", width: 110 },
+    { key: "capacityPct", label: "Capacity %", render: "bandPct" as const, width: 120 },
+    { key: "billablePct", label: "Billable %", render: "bandPct" as const, width: 120 },
+    { key: "band", label: "Band", render: "status" as const, width: 150 },
+  ];
+
+  const bandFor = (capacityPct: number): "Over-allocated" | "Healthy" | "Under-utilized" => {
+    if (capacityPct > 100) return "Over-allocated";
+    if (capacityPct >= 70) return "Healthy";
+    return "Under-utilized";
+  };
+
+  const seedRows = workloadCapacity.rows.map((row) => ({
+    name: row.name,
+    available: row.available,
+    capacityPct: row.capacityPct,
+    billablePct: row.billablePct,
+    band: row.band,
+  }));
+
+  const seen = new Set(seedRows.map((r) => r.name));
+  const extraRows: TableRow[] = expandPeople(2)
+    .filter((p) => !seen.has(p.name))
+    .slice(0, 20)
+    .map((p) => {
+      const capacityPct = round1(between(22, 128));
+      const billablePct = round1(Math.min(capacityPct, between(20, 98)));
+      const band = bandFor(capacityPct);
+      return {
+        name: p.name,
+        available: "40.00h",
+        capacityPct,
+        billablePct,
+        band,
+      };
+    });
+
+  return { columns, rows: [...seedRows, ...extraRows] };
+}
+
 /* ---------------------------- Axis-based charts --------------------------- */
 
 export const profitLoss: AxisChartPayload = {
@@ -234,6 +354,50 @@ export const profitLoss: AxisChartPayload = {
     { key: "Loss", color: "#ef4444", kind: "line", data: [180, 240, 300, 210] },
   ],
 };
+
+/** Weekly productivity / activity / idle trend for Executive Overview. */
+export const productivityTrend: AxisChartPayload = {
+  xLabels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  unit: "%",
+  series: [
+    { key: "Productivity", color: "#5d2bff", kind: "line", data: [62, 68, 71, 65, 74, 48, 42] },
+    { key: "Activity", color: "#0ea5e9", kind: "line", data: [58, 64, 69, 61, 72, 45, 38] },
+    { key: "Idle", color: "#f59e0b", kind: "line", data: [12, 10, 8, 14, 9, 18, 22] },
+  ],
+};
+
+/** Layer-3 table for Productivity Trend — same daily series as the widget. */
+export function makeProductivityTrendTable(): DataTablePayload {
+  const productivity = productivityTrend.series.find((s) => s.key === "Productivity")?.data ?? [];
+  const activity = productivityTrend.series.find((s) => s.key === "Activity")?.data ?? [];
+  const idle = productivityTrend.series.find((s) => s.key === "Idle")?.data ?? [];
+
+  // Week of Mon 7 Sep 2026 — matches "This week" on the widget.
+  const dates = [
+    "07 Sep, 2026",
+    "08 Sep, 2026",
+    "09 Sep, 2026",
+    "10 Sep, 2026",
+    "11 Sep, 2026",
+    "12 Sep, 2026",
+    "13 Sep, 2026",
+  ];
+
+  return {
+    columns: [
+      { key: "date", label: "Date", pinned: true, width: 140 },
+      { key: "productivity", label: "Productivity %", render: "bar", width: 180 },
+      { key: "activity", label: "Activity %", width: 120 },
+      { key: "idle", label: "Idle %", width: 100 },
+    ],
+    rows: dates.map((date, i) => ({
+      date,
+      productivity: productivity[i] ?? 0,
+      activity: `${activity[i] ?? 0}%`,
+      idle: `${idle[i] ?? 0}%`,
+    })),
+  };
+}
 
 export const budgetTrend: AxisChartPayload = {
   xLabels: ["Q1 (Jan–Mar)", "Q2 (Apr–Jun)", "Q3 (Jul–Sep)", "Q4 (Oct–Dec)"],
@@ -506,7 +670,7 @@ export function makeAppUsageTable(): DataTablePayload {
   return {
     columns: [
       { key: "app", label: "Application / URL", pinned: true, width: 200 },
-      { key: "category", label: "Policy", render: "status", width: 130 },
+      { key: "category", label: "Classification", render: "status", width: 130 },
       { key: "hours", label: "Hours", align: "right", render: "hours", width: 100 },
       { key: "users", label: "Users", align: "right", width: 90 },
       { key: "productivity", label: "Productivity", align: "right", render: "bar", width: 150 },
@@ -577,13 +741,106 @@ export const topCostDrivers: BarListItem[] = [
 
 /** Efficiency & Utilization — utilization gauge. */
 export const utilizationGauge = {
-  value: 5.25,
+  value: 7.6,
   max: 8,
-  centerValue: "5:15",
+  centerValue: "825:58",
   centerLabel: "Avg. worked",
-  caption: "Below average",
-  target: "Daily target 8:00",
+  headlineValue: "825:58",
+  headlineLabel: "Above Average",
+  target: "Avg. daily target: 8:00",
 };
+
+/** Application Usage — horizontal bar list (executive overview). */
+export const applicationsUsage: BarListItem[] = [
+  { label: "VS Code", value: 32, color: "#22c55e" },
+  { label: "Slack", value: 18, color: "#22c55e" },
+  { label: "Figma", value: 9, color: "#f59e0b" },
+  { label: "Notion", value: 7, color: "#f59e0b" },
+  { label: "Zoom", value: 5, color: "#ef4444" },
+  { label: "Teams", value: 4, color: "#ef4444" },
+];
+
+/** Website Usage — horizontal bar list (executive overview). */
+export const websitesUsage: BarListItem[] = [
+  { label: "github.com", value: 14, color: "#22c55e" },
+  { label: "google.com", value: 11, color: "#22c55e" },
+  { label: "stackoverflow.com", value: 8, color: "#f59e0b" },
+  { label: "linkedin.com", value: 6, color: "#f59e0b" },
+  { label: "youtube.com", value: 5, color: "#ef4444" },
+  { label: "figma.com", value: 4, color: "#ef4444" },
+];
+
+function usageClassFromColor(color?: string): "Productive" | "Neutral" | "Distracting" {
+  if (color === "#22c55e" || color === "#10b981") return "Productive";
+  if (color === "#ef4444") return "Distracting";
+  return "Neutral";
+}
+
+/** Layer-3 table for Application Usage — widget apps first, then more. */
+export function makeApplicationUsageTable(): DataTablePayload {
+  const extras: BarListItem[] = [
+    { label: "Chrome", value: 3.5, color: "#f59e0b" },
+    { label: "Jira", value: 3.2, color: "#22c55e" },
+    { label: "GitHub Desktop", value: 2.8, color: "#22c55e" },
+    { label: "Outlook", value: 2.4, color: "#f59e0b" },
+    { label: "Postman", value: 2.1, color: "#22c55e" },
+    { label: "Spotify", value: 1.8, color: "#ef4444" },
+    { label: "WhatsApp", value: 1.5, color: "#ef4444" },
+    { label: "Excel", value: 1.2, color: "#f59e0b" },
+    { label: "Terminal", value: 1.0, color: "#22c55e" },
+    { label: "Finder", value: 0.8, color: "#f59e0b" },
+  ];
+  const items = [...applicationsUsage, ...extras];
+  return {
+    columns: [
+      { key: "name", label: "Application", pinned: true, width: 180 },
+      { key: "usage", label: "Usage %", render: "bar", width: 160 },
+      { key: "classification", label: "Classification", render: "status", width: 130 },
+      { key: "hours", label: "Hours", width: 100 },
+      { key: "users", label: "Users", width: 90 },
+    ],
+    rows: items.map((item, i) => ({
+      name: item.label,
+      usage: item.value,
+      classification: usageClassFromColor(item.color),
+      hours: `${round1(item.value * 0.42)}h`,
+      users: Math.max(3, 40 - i * 3),
+    })),
+  };
+}
+
+/** Layer-3 table for Website Usage — widget sites first, then more. */
+export function makeWebsiteUsageTable(): DataTablePayload {
+  const extras: BarListItem[] = [
+    { label: "notion.so", value: 3.4, color: "#f59e0b" },
+    { label: "docs.google.com", value: 3.1, color: "#22c55e" },
+    { label: "chatgpt.com", value: 2.7, color: "#f59e0b" },
+    { label: "jira.atlassian.com", value: 2.3, color: "#22c55e" },
+    { label: "twitter.com", value: 2.0, color: "#ef4444" },
+    { label: "reddit.com", value: 1.6, color: "#ef4444" },
+    { label: "npmjs.com", value: 1.3, color: "#22c55e" },
+    { label: "medium.com", value: 1.1, color: "#f59e0b" },
+    { label: "vercel.com", value: 0.9, color: "#22c55e" },
+    { label: "amazon.com", value: 0.7, color: "#ef4444" },
+  ];
+  const items = [...websitesUsage, ...extras];
+  return {
+    columns: [
+      { key: "name", label: "Website", pinned: true, width: 200 },
+      { key: "usage", label: "Usage %", render: "bar", width: 160 },
+      { key: "classification", label: "Classification", render: "status", width: 130 },
+      { key: "hours", label: "Hours", width: 100 },
+      { key: "users", label: "Users", width: 90 },
+    ],
+    rows: items.map((item, i) => ({
+      name: item.label,
+      usage: item.value,
+      classification: usageClassFromColor(item.color),
+      hours: `${round1(item.value * 0.38)}h`,
+      users: Math.max(2, 36 - i * 2),
+    })),
+  };
+}
 
 /** Work Time Classification — core vs non-core split. */
 export const workTimeClassification = {
@@ -667,3 +924,222 @@ export function makeWorkloadBalance(): DataTablePayload {
     rows,
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Executive KPI Layer-3 tables                                               */
+/* -------------------------------------------------------------------------- */
+
+function expandPeople(multiplier = 3): typeof PEOPLE {
+  const extras = [
+    "Neha Kapoor",
+    "Rohan Mehta",
+    "Divya Nair",
+    "Vikram Joshi",
+    "Ishita Bose",
+    "Karan Malhotra",
+    "Meera Iyer",
+    "Siddharth Rao",
+    "Ananya Das",
+    "Rahul Verma",
+    "Pooja Sethi",
+    "Nikhil Jain",
+    "Shreya Pant",
+    "Aman Gupta",
+    "Tanvi Shah",
+  ];
+  const base = [...PEOPLE];
+  for (let m = 1; m < multiplier; m++) {
+    extras.forEach((name, i) => {
+      const src = PEOPLE[i % PEOPLE.length];
+      base.push({
+        name: m === 1 ? name : `${name} ${m}`,
+        team: src.team,
+        role: src.role,
+      });
+    });
+  }
+  return base;
+}
+
+function formatHm(totalMinutes: number): string {
+  const mins = Math.max(0, Math.round(totalMinutes));
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}h ${String(m).padStart(2, "0")}m`;
+}
+
+/** Worked Today — per-member hours logged today. */
+export function makeWorkedTodayTable(): DataTablePayload {
+  const rows: TableRow[] = expandPeople(3).map((p) => {
+    const workedMins = Math.round(between(20, 480));
+    const yesterdayMins = Math.round(workedMins * between(0.75, 1.2));
+    const deltaMins = workedMins - yesterdayMins;
+    const status = workedMins < 60 ? "Just started" : workedMins < 240 ? "In progress" : "On track";
+    return {
+      name: p.name,
+      team: p.team,
+      role: p.role,
+      worked: formatHm(workedMins),
+      vsYesterday: `${deltaMins >= 0 ? "+" : "−"}${formatHm(Math.abs(deltaMins))}`,
+      firstClockIn: `${8 + Math.floor(between(0, 3))}:${String(Math.floor(between(0, 59))).padStart(2, "0")} AM`,
+      status,
+      health: workedMins >= 300 ? "good" : workedMins >= 120 ? "warn" : "bad",
+    };
+  }).sort((a, b) => String(b.worked).localeCompare(String(a.worked)));
+
+  return {
+    columns: [
+      { key: "name", label: "Member", pinned: true, render: "avatar", width: 180 },
+      { key: "team", label: "Team", width: 110 },
+      { key: "worked", label: "Worked Today", align: "right", width: 110 },
+      { key: "vsYesterday", label: "vs Yesterday", align: "right", width: 120 },
+      { key: "firstClockIn", label: "First Clock-in", align: "right", width: 110 },
+      { key: "status", label: "Status", render: "status", width: 110 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 100 },
+    ],
+    rows,
+  };
+}
+
+/** Today's Activity — activity / idle / away per member today. */
+export function makeTodaysActivityTable(): DataTablePayload {
+  const rows: TableRow[] = expandPeople(3).map((p) => {
+    const activity = Math.round(between(18, 92));
+    const idle = Math.round(between(0, 18));
+    const away = Math.max(0, 100 - activity - idle);
+    return {
+      name: p.name,
+      team: p.team,
+      role: p.role,
+      activity,
+      idle,
+      away,
+      activeMins: formatHm(Math.round((activity / 100) * between(180, 420))),
+      delta: Math.round(between(-12, 14)),
+      health: healthFrom(activity, 60, 40),
+    };
+  }).sort((a, b) => Number(b.activity) - Number(a.activity));
+
+  return {
+    columns: [
+      { key: "name", label: "Member", pinned: true, render: "avatar", width: 190 },
+      { key: "team", label: "Team", width: 120 },
+      { key: "activity", label: "Activity", align: "right", render: "bar", width: 140 },
+      { key: "idle", label: "Idle %", align: "right", width: 90 },
+      { key: "away", label: "Away %", align: "right", width: 90 },
+      { key: "activeMins", label: "Active Time", align: "right", width: 110 },
+      { key: "delta", label: "vs Yday", align: "right", render: "delta", width: 90 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+    ],
+    rows,
+  };
+}
+
+/** Utilization Rate — billable vs capacity per member. */
+export function makeUtilizationTable(): DataTablePayload {
+  const rows: TableRow[] = expandPeople(3).map((p) => {
+    const utilization = Math.round(between(42, 98));
+    const billable = Math.round(utilization * between(0.7, 0.95));
+    const nonBillable = Math.max(0, utilization - billable);
+    const capacityHrs = 40;
+    const workedHrs = round1((utilization / 100) * capacityHrs);
+    return {
+      name: p.name,
+      team: p.team,
+      role: p.role,
+      utilization,
+      billable,
+      nonBillable,
+      workedHrs,
+      capacityHrs,
+      health: healthFrom(utilization, 75, 60),
+    };
+  }).sort((a, b) => Number(b.utilization) - Number(a.utilization));
+
+  return {
+    columns: [
+      { key: "name", label: "Member", pinned: true, render: "avatar", width: 190 },
+      { key: "team", label: "Team", width: 120 },
+      { key: "utilization", label: "Utilization", align: "right", render: "bar", width: 140 },
+      { key: "billable", label: "Billable %", align: "right", width: 100 },
+      { key: "nonBillable", label: "Non-Billable %", align: "right", width: 120 },
+      { key: "workedHrs", label: "Worked Hrs", align: "right", render: "hours", width: 110 },
+      { key: "capacityHrs", label: "Capacity", align: "right", render: "hours", width: 100 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+    ],
+    rows,
+  };
+}
+
+/** Resource Bench — people currently available / on bench. */
+export function makeBenchTable(): DataTablePayload {
+  const benchPeople = expandPeople(2).filter((_, i) => i % 2 === 0).slice(0, 18);
+  const rows: TableRow[] = benchPeople.map((p) => {
+    const benchHrs = round1(between(8, 36));
+    const daysOnBench = Math.floor(between(1, 18));
+    const availability = pick(["Immediate", "This week", "Next sprint"]);
+    return {
+      name: p.name,
+      team: p.team,
+      role: p.role,
+      benchHrs,
+      daysOnBench,
+      availability,
+      health: daysOnBench > 10 ? "warn" : "good",
+    };
+  }).sort((a, b) => Number(b.benchHrs) - Number(a.benchHrs));
+
+  return {
+    columns: [
+      { key: "name", label: "Member", pinned: true, render: "avatar", width: 190 },
+      { key: "team", label: "Team", width: 120 },
+      { key: "role", label: "Role", width: 180 },
+      { key: "benchHrs", label: "Bench Hours", align: "right", render: "hours", width: 120 },
+      { key: "daysOnBench", label: "Days on Bench", align: "right", width: 120 },
+      { key: "availability", label: "Availability", render: "status", width: 120 },
+      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+    ],
+    rows,
+  };
+}
+
+/** Hourly worked-hours trend for today (for Worked Today drawer chart). */
+export const workedTodayTrend: AxisChartPayload = {
+  xLabels: ["9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM"],
+  unit: "hrs",
+  series: [
+    { key: "Org hours", color: "#0ea5e9", kind: "bar", data: [4.2, 9.8, 12.4, 6.1, 3.2, 11.6, 10.8, 8.4] },
+    { key: "Yesterday", color: "#94a3b8", kind: "line", dashed: true, data: [3.8, 8.6, 11.2, 5.4, 2.9, 10.1, 9.4, 7.2] },
+  ],
+};
+
+/** Activity % by hour today. */
+export const todaysActivityTrend: AxisChartPayload = {
+  xLabels: ["9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM"],
+  unit: "%",
+  series: [
+    { key: "Activity", color: "#6366f1", kind: "line", data: [28, 46, 58, 34, 22, 52, 61, 41] },
+    { key: "Idle", color: "#f59e0b", kind: "line", data: [8, 6, 4, 12, 18, 7, 5, 9] },
+  ],
+};
+
+/** Utilization split trend by week. */
+export const utilizationTrend: AxisChartPayload = {
+  xLabels: ["W1", "W2", "W3", "W4"],
+  unit: "%",
+  series: [
+    { key: "Billable", color: "#10b981", kind: "bar", data: [74, 71, 69, 72] },
+    { key: "Non-Billable", color: "#f59e0b", kind: "bar", data: [12, 15, 16, 14] },
+    { key: "Bench", color: "#374151", kind: "bar", data: [14, 14, 15, 14] },
+  ],
+};
+
+/** Bench hours available by team. */
+export const benchByTeam: AxisChartPayload = {
+  xLabels: ["Engineering", "Design", "Product", "Sales", "Support"],
+  unit: "hrs",
+  series: [
+    { key: "Bench hours", color: "#6366f1", kind: "bar", data: [42, 18, 12, 24, 16] },
+  ],
+};
+

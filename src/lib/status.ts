@@ -13,8 +13,20 @@ const WARN = new Set([
   "triage",
   "neutral",
   "draft",
+  "under-utilized",
+  "under utilized",
 ]);
-const BAD = new Set(["overdue", "delayed", "absent", "bad", "at risk", "distracting", "cancelled"]);
+const BAD = new Set([
+  "overdue",
+  "delayed",
+  "absent",
+  "bad",
+  "at risk",
+  "distracting",
+  "cancelled",
+  "over-allocated",
+  "over allocated",
+]);
 
 /** Map an arbitrary status string to a Badge variant. */
 export function statusVariant(value: string): Variant {

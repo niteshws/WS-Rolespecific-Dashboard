@@ -22,18 +22,27 @@ export function KpiCard({
   spec: KpiSpec;
   onOpenReport: (reportKey?: string) => void;
 }) {
+  const hasSecondary = Boolean(spec.secondaryValue);
   const isBadDirection = spec.deltaPolarity === "up-bad" ? spec.delta > 0 : spec.delta < 0;
   const deltaColor =
     spec.deltaPolarity === "neutral" ? "text-muted" : isBadDirection ? "text-health-bad" : "text-health-good";
   const DeltaIcon = spec.delta >= 0 ? ArrowUpRight : ArrowDownRight;
   const sparkColor =
-    spec.deltaPolarity === "neutral" ? "#0ea5e9" : isBadDirection ? "#ef4444" : "#10b981";
+    spec.deltaPolarity === "neutral" || hasSecondary
+      ? "#6366f1"
+      : isBadDirection
+        ? "#ef4444"
+        : "#10b981";
+
+  const ariaDetail = hasSecondary
+    ? `${spec.secondaryValue} ${spec.secondaryLabel ?? ""}`.trim()
+    : spec.deltaLabel;
 
   return (
     <button
       type="button"
       onClick={() => spec.state !== "coming-soon" && onOpenReport(spec.reportKey)}
-      aria-label={`${spec.label}: ${spec.value}, ${spec.deltaLabel}. Open detailed report.`}
+      aria-label={`${spec.label}: ${spec.value}, ${ariaDetail}. Open detailed report.`}
       className={cn("group text-left focus-visible:outline-none", spec.state === "coming-soon" && "cursor-default")}
     >
       <Card className="relative h-full overflow-hidden p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card-hover">
@@ -42,33 +51,49 @@ export function KpiCard({
           aria-hidden="true"
         />
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded bg-primary/10 text-primary">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-primary/10 text-primary">
               <Icon name={spec.icon} className="h-3.5 w-3.5" />
             </span>
-            <span className="text-xs font-medium text-muted">{spec.label}</span>
+            <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted">
+              {spec.label}
+            </span>
           </div>
           {spec.state === "coming-soon" ? (
-             <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground" aria-label="Coming Soon">
-               Coming Soon
-             </span>
+            <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground" aria-label="Coming Soon">
+              Coming Soon
+            </span>
           ) : (
-             <span
-               className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}
-               aria-label={`health: ${spec.health}`}
-             />
+            <span
+              className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}
+              aria-label={`health: ${spec.health}`}
+            />
           )}
         </div>
 
-        <div className="mt-3 flex items-end justify-between gap-2">
-          <div>
-            <div className="tabular text-2xl font-semibold leading-none text-ink">{spec.value}</div>
-            <div className={cn("mt-2 flex items-center gap-0.5 text-xs font-medium", deltaColor)}>
-              <DeltaIcon className="h-3.5 w-3.5" />
-              <span className="tabular">{spec.deltaLabel}</span>
+        <div className="mt-3.5 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <div className="tabular text-[1.75rem] font-semibold leading-none tracking-tight text-ink">
+              {spec.value}
             </div>
+
+            {hasSecondary ? (
+              <div className="mt-2.5 flex items-baseline gap-1.5">
+                <span className="tabular text-sm font-semibold leading-none text-ink">
+                  {spec.secondaryValue}
+                </span>
+                <span className="text-[11px] font-medium leading-none text-muted">
+                  {spec.secondaryLabel}
+                </span>
+              </div>
+            ) : (
+              <div className={cn("mt-2.5 flex items-center gap-0.5 text-xs font-medium", deltaColor)}>
+                {spec.delta !== 0 && <DeltaIcon className="h-3.5 w-3.5" />}
+                <span className="tabular">{spec.deltaLabel}</span>
+              </div>
+            )}
           </div>
-          <div className="opacity-90">
+          <div className="mb-0.5 shrink-0 opacity-90">
             <Sparkline data={spec.sparkline} color={sparkColor} />
           </div>
         </div>

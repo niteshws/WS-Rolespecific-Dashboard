@@ -25,8 +25,10 @@ import { PersonalAllocationWidget } from "@/components/charts/PersonalAllocation
 import { MyActionItemsWidget } from "@/components/charts/MyActionItemsWidget";
 import { MyAllocationWidget } from "@/components/charts/MyAllocationWidget";
 import { PeakFocusWidget } from "@/components/charts/PeakFocusWidget";
+import { LowActivityMembersWidget } from "@/components/charts/LowActivityMembersWidget";
+import { WorkloadCapacityWidget } from "@/components/charts/WorkloadCapacityWidget";
+import { MemberActivityBarsWidget } from "@/components/charts/MemberActivityBarsWidget";
 import type {
-// ... (omitting lines to match exactly)
   WidgetDescriptor,
   StatGroupPayload,
   ScatterPoint,
@@ -45,6 +47,9 @@ import type {
   RangeBarPayload,
   ProgressBarsPayload,
   SegmentBarPayload,
+  LowActivityMembersPayload,
+  WorkloadCapacityPayload,
+  MemberActivityBarsPayload,
 } from "@/types";
 
 /**
@@ -118,6 +123,7 @@ export function WidgetRenderer({
             onOpenReport={openReport}
             showExport={!hideActions}
             isEditing={editing}
+            contentAlign="left"
           />
         );
       case "timeline":
@@ -136,12 +142,26 @@ export function WidgetRenderer({
         return <MyAllocationWidget />;
       case "peakFocus":
         return <PeakFocusWidget />;
+      case "lowActivityMembers":
+        return <LowActivityMembersWidget payload={widget.payload as LowActivityMembersPayload} />;
+      case "workloadCapacity":
+        return <WorkloadCapacityWidget payload={widget.payload as WorkloadCapacityPayload} />;
+      case "memberActivityBars":
+        return <MemberActivityBarsWidget payload={widget.payload as MemberActivityBarsPayload} />;
       default:
         return null;
     }
   }
 
   const isTable = widget.type === "dataTable";
+  const isMemberTable = widget.type === "lowActivityMembers";
+  const isCompactUsage =
+    widget.id === "w-applications" ||
+    widget.id === "w-websites" ||
+    widget.id === "w-projects-worked" ||
+    widget.id === "w-classification" ||
+    widget.id === "w-tracked-least" ||
+    widget.id === "w-workload-capacity";
   const isLocked = plan === "lower" && (
     widget.type === "timeline" ||
     widget.type === "screenshots" ||
@@ -151,7 +171,7 @@ export function WidgetRenderer({
     widget.type === "progressRing" ||
     widget.id === "w-milestones" ||
     widget.id === "w-workload" ||
-    widget.id === "w-utilization" ||
+    widget.id === "w-projects-worked" ||
     widget.id === "w-budget" ||
     widget.id === "w-scatter"
   );
@@ -160,11 +180,15 @@ export function WidgetRenderer({
     <WidgetShell
       title={widget.title}
       subtitle={widget.subtitle}
+      info={widget.info}
       highlight={highlight}
       editing={editing}
       edit={edit}
       onOpenReport={openReport}
-      bodyClassName={isTable ? "p-0" : undefined}
+      actionLabel={widget.actionLabel}
+      bodyClassName={
+        isTable || isMemberTable ? "p-0" : isCompactUsage ? "px-5 py-3" : undefined
+      }
       hideHeader={isTable && !editing}
       locked={isLocked}
     >

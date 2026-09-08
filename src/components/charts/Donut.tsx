@@ -47,10 +47,13 @@ export function Donut({ payload }: { payload: DonutPayload }) {
           </div>
         )}
       </div>
-      <ul className="thin-scrollbar grid max-h-full flex-1 grid-cols-1 content-center gap-x-3 gap-y-1.5 overflow-auto sm:grid-cols-2">
+      <ul className="thin-scrollbar grid max-h-full flex-1 grid-cols-1 content-center gap-x-4 gap-y-1 overflow-auto sm:grid-cols-2">
         {slices.map((s) => (
-          <li key={s.key} className="flex items-center justify-between gap-2 text-xs">
-            <span className="flex items-center gap-1.5 truncate text-ink">
+          <li
+            key={s.key}
+            className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-xs hover:bg-primary/[0.04]"
+          >
+            <span className="flex min-w-0 items-center gap-1.5 truncate text-ink">
               <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: s.color }} />
               <span className="truncate">{s.key}</span>
             </span>
