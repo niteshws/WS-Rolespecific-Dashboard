@@ -342,13 +342,6 @@ function Cell({
     }
     case "status": {
       const label = String(value);
-      if (label === "Under-utilized") {
-        return (
-          <span className="inline-flex items-center rounded-full border border-[#0ea5e9]/25 bg-[#0ea5e9]/10 px-2.5 py-0.5 text-[11px] font-medium leading-none text-[#0284c7] whitespace-nowrap">
-            {label}
-          </span>
-        );
-      }
       const pill = projectStatusPill(label);
       if (pill) {
         return (
@@ -374,7 +367,7 @@ function Cell({
           : band === "Healthy"
             ? "text-health-good"
             : band === "Under-utilized"
-              ? "text-[#0284c7]"
+              ? "text-health-bad"
               : "text-ink";
       return <span className={cn("tabular font-medium", tone)}>{n.toFixed(2)}%</span>;
     }

@@ -11,8 +11,8 @@ const BAND_STYLES: Record<WorkloadBand, { pill: string; pct: string }> = {
     pct: "text-health-good",
   },
   "Under-utilized": {
-    pill: "border-[#0ea5e9]/25 bg-[#0ea5e9]/10 text-[#0284c7]",
-    pct: "text-[#0284c7]",
+    pill: "border-health-bad/25 bg-health-bad/10 text-health-bad",
+    pct: "text-health-bad",
   },
 };
 
