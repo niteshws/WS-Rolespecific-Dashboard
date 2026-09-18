@@ -16,14 +16,14 @@ export const PROJECT_STATUS_COLORS: Record<string, string> = {
 export const PROJECT_STATUS_PILL: Record<string, { text: string; bg: string }> = {
   "Not Started": { text: "#6B7280", bg: "#F3F4F6" },
   "In Progress": { text: "#D97706", bg: "#FEF3C7" },
-  "Yet to Start": { text: "#0284C7", bg: "#E0F2FE" },
+  "Yet to Start": { text: "#6B7280", bg: "#F3F4F6" },
   "On Hold": { text: "#7C3AED", bg: "#EDE9FE" },
   Cancelled: { text: "#DC2626", bg: "#FEE2E2" },
   Completed: { text: "#059669", bg: "#D1FAE5" },
   "On Budget": { text: "#059669", bg: "#ECFDF5" },
   "At Risk": { text: "#D97706", bg: "#FFFBEB" },
   "Over Budget": { text: "#DC2626", bg: "#FEF2F2" },
-  "Under Budget": { text: "#0284C7", bg: "#E0F2FE" },
+  "Under Budget": { text: "#059669", bg: "#ECFDF5" },
   PTO: { text: "#0369A1", bg: "#E0F2FE" },
   Sick: { text: "#BE123C", bg: "#FFE4E6" },
   Casual: { text: "#B45309", bg: "#FEF3C7" },
@@ -34,14 +34,14 @@ export const PROJECT_STATUS_PILL: Record<string, { text: string; bg: string }> =
   Absent: { text: "#BE123C", bg: "#FFE4E6" },
   "Not In Yet": { text: "#6B7280", bg: "#F3F4F6" },
   Heavy: { text: "#D97706", bg: "#FEF3C7" },
-  "Under-utilized": { text: "#0284C7", bg: "#E0F2FE" },
+  "Under-utilized": { text: "#D97706", bg: "#FEF3C7" },
   "Over-allocated": { text: "#B91C1C", bg: "#FEE2E2" },
   Healthy: { text: "#059669", bg: "#ECFDF5" },
   Optimal: { text: "#059669", bg: "#ECFDF5" },
   "Over-utilized": { text: "#DC2626", bg: "#FEE2E2" },
   "High load": { text: "#DC2626", bg: "#FEE2E2" },
   Balanced: { text: "#059669", bg: "#ECFDF5" },
-  "Light load": { text: "#0284C7", bg: "#E0F2FE" },
+  "Light load": { text: "#D97706", bg: "#FEF3C7" },
 };
 
 export function projectStatusColor(status: string): string | undefined {
@@ -56,36 +56,36 @@ export function projectStatusPill(status: string): { text: string; bg: string } 
   return PROJECT_STATUS_PILL[status] ?? PROJECT_STATUS_PILL[trimmed];
 }
 
-const GOOD = new Set(["paid", "on track", "good", "healthy", "productive", "in progress", "completed", "on budget", "under budget", "approved", "on time"]);
+const GOOD = new Set(["paid", "on track", "good", "healthy", "productive", "completed", "on budget", "under budget", "approved", "on time", "optimal", "balanced"]);
 const WARN = new Set([
-  "pending",
   "at risk",
   "due tomorrow",
   "warn",
   "watch",
-  "not in yet",
   "triage",
-  "neutral",
   "draft",
   "under-utilized",
   "under utilized",
-  "not started",
-  "yet to start",
-  "on hold",
+  "in progress",
+  "casual",
+  "heavy",
+  "light load",
 ]);
 const BAD = new Set([
   "overdue",
   "delayed",
   "absent",
   "bad",
-  "at risk",
   "distracting",
   "cancelled",
   "over-allocated",
   "over allocated",
   "over budget",
+  "sick",
   "rejected",
   "late",
+  "high load",
+  "over-utilized",
 ]);
 
 /** Map an arbitrary status string to a Badge variant. */

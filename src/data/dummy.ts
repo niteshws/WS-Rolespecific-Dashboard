@@ -1789,20 +1789,25 @@ export function makeAttendance(): DataTablePayload {
   const checkins = ["09:30 AM|On Time", "09:40 AM|Late (10m)", "—|Absent", "10:00 AM|Late (30m)", "—|Not In Yet", "09:25 AM|On Time", "09:35 AM|Late (5m)", "09:28 AM|On Time"];
   const checkouts = ["06:30 PM|None", "07:00 PM|None", "None|—", "07:15 PM|None", "None|—", "06:45 PM|None", "07:30 PM|None", "06:10 PM|None"];
   const breakDurs = ["15m", "45m", "0m", "1h 10m", "0m", "30m", "1h 20m", "50m"];
-  const rows: TableRow[] = PEOPLE.slice(0, 12).map((p, i) => ({
-    member: p.name,
-    team: p.team,
-    status: checkins[i % checkins.length],
-    checkout: checkouts[i % checkouts.length],
-    breaks: breakDurs[i % breakDurs.length],
-  }));
+  const rows: TableRow[] = PEOPLE.slice(0, 12).map((p, i) => {
+    const [cTime, cStat] = checkins[i % checkins.length].split("|");
+    return {
+      member: p.name,
+      team: p.team,
+      checkinTime: cTime,
+      checkinStatus: cStat,
+      checkout: checkouts[i % checkouts.length],
+      breaks: breakDurs[i % breakDurs.length],
+    };
+  });
   return {
     columns: [
       { key: "member", label: "Member Name", pinned: true, render: "avatar", width: 190 },
       { key: "team", label: "Team", width: 130 },
-      { key: "status", label: "Check-in", align: "center", render: "timeStatus", width: 170 },
-      { key: "checkout", label: "Check-out", align: "center", render: "timeStatus", width: 140 },
-      { key: "breaks", label: "Breaks", align: "center", width: 90 },
+      { key: "checkinTime", label: "Check-in Time", width: 130 },
+      { key: "checkinStatus", label: "Status", render: "status", width: 120 },
+      { key: "checkout", label: "Check-out", render: "timeStatus", width: 140 },
+      { key: "breaks", label: "Breaks", width: 90 },
     ],
     rows,
   };
