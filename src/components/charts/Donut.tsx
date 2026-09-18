@@ -10,7 +10,7 @@ export function Donut({ payload }: { payload: DonutPayload }) {
 
   return (
     <div className="flex h-full items-center gap-4">
-      <div className="relative aspect-square h-full max-h-[200px] shrink-0">
+      <div className="relative aspect-square h-full max-h-[280px] shrink-0">
         <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
           <circle cx="50" cy="50" r={R} fill="none" stroke="#37415115" strokeWidth="11" />
           {slices.map((s) => {

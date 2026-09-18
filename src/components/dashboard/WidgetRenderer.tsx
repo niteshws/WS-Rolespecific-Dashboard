@@ -1,4 +1,5 @@
 import { WidgetShell, type EditControls } from "./WidgetShell";
+import { useState } from "react";
 import { DataTable } from "./DataTable";
 import { StatGroup } from "@/components/charts/StatGroup";
 import { ScatterChart } from "@/components/charts/ScatterChart";
@@ -28,6 +29,17 @@ import { PeakFocusWidget } from "@/components/charts/PeakFocusWidget";
 import { LowActivityMembersWidget } from "@/components/charts/LowActivityMembersWidget";
 import { WorkloadCapacityWidget } from "@/components/charts/WorkloadCapacityWidget";
 import { MemberActivityBarsWidget } from "@/components/charts/MemberActivityBarsWidget";
+import { ProjectsWorkedWidget } from "@/components/charts/ProjectsWorkedWidget";
+import {
+  TaskTimelineSummaryWidget,
+  TaskTimelineYearBadge,
+} from "@/components/charts/TaskTimelineSummaryWidget";
+import {
+  BudgetTrendWidget,
+  BudgetTrendPeriodBadge,
+} from "@/components/charts/BudgetTrendWidget";
+import { ProjectBudgetHealthWidget } from "@/components/charts/ProjectBudgetHealthWidget";
+import { UpcomingLeavesWidget } from "@/components/charts/UpcomingLeavesWidget";
 import type {
   WidgetDescriptor,
   StatGroupPayload,
@@ -50,6 +62,13 @@ import type {
   LowActivityMembersPayload,
   WorkloadCapacityPayload,
   MemberActivityBarsPayload,
+  ProjectsWorkedPayload,
+  TaskTimelineSummaryPayload,
+  TopContributorsPayload,
+  BudgetTrendPayload,
+  BudgetTrendPeriod,
+  ProjectBudgetHealthPayload,
+  UpcomingLeavesPayload,
 } from "@/types";
 
 /**
@@ -76,6 +95,11 @@ export function WidgetRenderer({
 }) {
   const hideActions = widget.title === "Workforce Ledger" || widget.title === "Project Delivery Ledger";
   const openReport = widget.reportKey && onOpenReport && !hideActions ? () => onOpenReport(widget.reportKey) : undefined;
+  const budgetPayload =
+    widget.type === "budgetTrend" ? (widget.payload as BudgetTrendPayload) : null;
+  const [budgetPeriod, setBudgetPeriod] = useState<BudgetTrendPeriod>(
+    budgetPayload?.defaultPeriod ?? "Quarterly",
+  );
 
   function body() {
     switch (widget.type) {
@@ -92,7 +116,11 @@ export function WidgetRenderer({
       case "members":
         return <MembersWidget payload={widget.payload as MembersPayload} />;
       case "leaderboard":
-        return <Leaderboard rows={widget.payload as LeaderRow[]} />;
+        return (
+          <Leaderboard
+            payload={widget.payload as TopContributorsPayload | LeaderRow[]}
+          />
+        );
       case "appBreakdown":
         return <AppBreakdown rows={widget.payload as AppRow[]} />;
       case "barList":
@@ -113,7 +141,12 @@ export function WidgetRenderer({
       case "segmentBar":
         return <SegmentBar payload={widget.payload as SegmentBarPayload} />;
       case "miniTable":
-        return <MiniTable payload={widget.payload as DataTablePayload} />;
+        return (
+          <MiniTable
+            payload={widget.payload as DataTablePayload}
+            onViewAll={openReport}
+          />
+        );
       case "dataTable":
         return (
           <DataTable 
@@ -148,6 +181,26 @@ export function WidgetRenderer({
         return <WorkloadCapacityWidget payload={widget.payload as WorkloadCapacityPayload} />;
       case "memberActivityBars":
         return <MemberActivityBarsWidget payload={widget.payload as MemberActivityBarsPayload} />;
+      case "projectsWorked":
+        return <ProjectsWorkedWidget payload={widget.payload as ProjectsWorkedPayload} />;
+      case "taskTimelineSummary":
+        return <TaskTimelineSummaryWidget payload={widget.payload as TaskTimelineSummaryPayload} />;
+      case "budgetTrend":
+        return (
+          <BudgetTrendWidget
+            payload={widget.payload as BudgetTrendPayload}
+            period={budgetPeriod}
+          />
+        );
+      case "projectBudgetHealth":
+        return (
+          <ProjectBudgetHealthWidget
+            payload={widget.payload as ProjectBudgetHealthPayload}
+            onViewAffected={openReport}
+          />
+        );
+      case "upcomingLeaves":
+        return <UpcomingLeavesWidget payload={widget.payload as UpcomingLeavesPayload} />;
       default:
         return null;
     }
@@ -158,10 +211,30 @@ export function WidgetRenderer({
   const isCompactUsage =
     widget.id === "w-applications" ||
     widget.id === "w-websites" ||
-    widget.id === "w-projects-worked" ||
     widget.id === "w-classification" ||
     widget.id === "w-tracked-least" ||
-    widget.id === "w-workload-capacity";
+    widget.id === "w-time-log-approval" ||
+    widget.id === "w-workload-capacity" ||
+    widget.id === "w-top-profit" ||
+    widget.id === "w-cost";
+  const isProjectsWorked = widget.type === "projectsWorked";
+  const isScatter = widget.type === "scatter";
+  const isTaskTimeline = widget.type === "taskTimelineSummary";
+  const isBudgetTrend = widget.type === "budgetTrend";
+  const isProjectBudgetHealth = widget.type === "projectBudgetHealth";
+  const isUpcomingLeaves = widget.type === "upcomingLeaves";
+  const taskTimelinePayload = isTaskTimeline
+    ? (widget.payload as TaskTimelineSummaryPayload)
+    : null;
+  const isTopContributors = widget.type === "leaderboard" && !Array.isArray(widget.payload);
+  const topContributorsPayload = isTopContributors
+    ? (widget.payload as TopContributorsPayload)
+    : null;
+  const milestonesPayload =
+    widget.type === "miniTable" && (widget.payload as DataTablePayload).insight
+      ? (widget.payload as DataTablePayload)
+      : null;
+  const headerReport = milestonesPayload ? undefined : openReport;
   const isLocked = plan === "lower" && (
     widget.type === "timeline" ||
     widget.type === "screenshots" ||
@@ -181,13 +254,35 @@ export function WidgetRenderer({
       title={widget.title}
       subtitle={widget.subtitle}
       info={widget.info}
+      icon={widget.icon}
       highlight={highlight}
       editing={editing}
       edit={edit}
-      onOpenReport={openReport}
-      actionLabel={widget.actionLabel}
+      onOpenReport={headerReport}
+      actionLabel={
+        topContributorsPayload ? "View all" : widget.actionLabel
+      }
+      badgeBelowAction={false}
+      badgeBeforeAction={isTaskTimeline || isBudgetTrend}
+      badge={
+        taskTimelinePayload ? (
+          <TaskTimelineYearBadge label={taskTimelinePayload.yearLabel} />
+        ) : isBudgetTrend && budgetPayload ? (
+          <BudgetTrendPeriodBadge period={budgetPeriod} onChange={setBudgetPeriod} />
+        ) : undefined
+      }
       bodyClassName={
-        isTable || isMemberTable ? "p-0" : isCompactUsage ? "px-5 py-3" : undefined
+        isTable || isMemberTable
+          ? "p-0"
+          : isScatter
+            ? "px-3 py-2"
+            : isProjectsWorked || isTopContributors || isUpcomingLeaves
+              ? "px-5 py-4"
+              : isTaskTimeline || isProjectBudgetHealth
+                ? "px-5 py-4"
+                : isCompactUsage
+                  ? "px-5 py-3"
+                  : undefined
       }
       hideHeader={isTable && !editing}
       locked={isLocked}

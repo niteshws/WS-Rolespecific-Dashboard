@@ -14,6 +14,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/Icon";
 
 export interface EditControls {
   onHide: () => void;
@@ -39,6 +40,9 @@ export function WidgetShell({
   badge,
   hideHeader,
   locked,
+  icon,
+  badgeBelowAction,
+  badgeBeforeAction,
 }: {
   title: string;
   subtitle?: string;
@@ -54,6 +58,11 @@ export function WidgetShell({
   badge?: React.ReactNode;
   hideHeader?: boolean;
   locked?: boolean;
+  icon?: string;
+  /** Stack badge under the report action (right-aligned). */
+  badgeBelowAction?: boolean;
+  /** Render badge before the report action (same row). */
+  badgeBeforeAction?: boolean;
 }) {
   return (
     <Card
@@ -82,6 +91,11 @@ export function WidgetShell({
         <div className="flex items-start justify-between gap-3 border-b border-border/60 px-5 py-3.5">
           <div className="flex min-w-0 items-center gap-2">
           {editing && <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/60" />}
+          {icon && (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Icon name={icon} className="h-4 w-4" />
+            </span>
+          )}
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
               <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>
@@ -110,8 +124,13 @@ export function WidgetShell({
             <IconBtn label="Hide widget" onClick={edit.onHide}><EyeOff className="h-3.5 w-3.5" /></IconBtn>
           </div>
         ) : (
-          <div className="flex shrink-0 items-center gap-1">
-            {badge}
+          <div
+            className={cn(
+              "flex shrink-0 items-center gap-2",
+              badgeBelowAction && "flex-col items-end gap-1.5",
+            )}
+          >
+            {badgeBeforeAction && badge}
             {onOpenReport && (
               <button
                 onClick={onOpenReport}
@@ -126,6 +145,7 @@ export function WidgetShell({
                 <ArrowUpRight className="h-3 w-3" />
               </button>
             )}
+            {!badgeBeforeAction && badge}
           </div>
         )}
       </div>

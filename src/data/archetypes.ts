@@ -1,22 +1,24 @@
 import {
   makeSparkline,
-  makeScatter,
   makeHeatmap,
-  makeLeaderboard,
+  makeTopContributors,
   makeAppBreakdown,
   makeActivityTable,
   makeProjectTable,
   makeMilestones,
   makeCategoryChanges,
   makeWorkloadBalance,
-  projectsWorked,
+  projectsWorkedPayload,
+  taskTimelineSummary,
   taskStatus,
   membersData,
   topProfitable,
   leastProfitable,
   topCostDrivers,
   productivityTrend,
-  budgetTrend,
+  budgetTrendPayload,
+  projectBudgetHealthPayload,
+  velocityCapacityScatter,
   categories,
   categoryAllocation,
   appsAffectingFocus,
@@ -31,6 +33,8 @@ import {
   workloadCapacity,
   trackedLeastHours,
   pipelineForecast,
+  upcomingLeavesPayload,
+  timeLogApprovalStatus,
 } from "./dummy";
 import type { Archetype as _A } from "@/types";
 export type { Archetype } from "@/types";
@@ -42,7 +46,7 @@ export type { Archetype } from "@/types";
  * The grid never knows about roles; it renders whatever descriptors it's handed.
  */
 
-const scatter = makeScatter();
+const scatter = velocityCapacityScatter;
 const heatmap = makeHeatmap();
 const activityTable = makeActivityTable();
 const projectTable = makeProjectTable();
@@ -100,17 +104,21 @@ export const ARCHETYPES: _A[] = [
     kpis: [
       { id: "k-utilization", label: "Utilization Rate", value: "72%", delta: -4, deltaLabel: "-4% vs target", deltaPolarity: "up-bad", health: "warn", sparkline: makeSparkline(14, 72, 4), reportKey: "utilization", icon: "Gauge" },
       { id: "k-todays-activity", label: "Today's Activity", value: "41%", delta: 6, deltaLabel: "+6% vs yesterday", deltaPolarity: "up-good", health: "good", sparkline: [8, 8, 8, 9, 8, 8, 9, 8, 8, 10, 8, 45, 92, 28], reportKey: "todays-activity", icon: "Activity" },
-      { id: "k-bench", label: "Resource Bench", value: "14%", delta: 0, deltaLabel: "", deltaPolarity: "neutral", secondaryValue: "112h", secondaryLabel: "bench hours", health: "good", sparkline: makeSparkline(14, 14, 3), reportKey: "bench", icon: "Users" },
+      { id: "k-attendance", label: "Attendance Today", value: "37 / 45", delta: -2, deltaLabel: "-2 vs yesterday", deltaPolarity: "up-good", health: "warn", sparkline: makeSparkline(14, 82, 4), reportKey: "attendance", icon: "UserCheck" },
       { id: "k-worked-today", label: "Worked Today", value: "1h 20m", delta: 12, deltaLabel: "+12m vs yesterday", deltaPolarity: "up-good", health: "good", sparkline: [8, 8, 8, 9, 8, 8, 9, 8, 8, 10, 8, 45, 92, 28], reportKey: "worked-today", icon: "Clock" },
     ],
     widgets: [
-      { id: "w-projects-worked", type: "donut", size: "half-short", layer: 2, title: "Projects Worked", info: "Project count by status across the portfolio", actionLabel: "View all", reportKey: "projects", payload: { slices: projectsWorked, centerValue: "328", centerLabel: "Total Projects" } },
-      { id: "w-classification", type: "segmentBar", size: "half-short", layer: 2, title: "Work Time Classification", reportKey: "productivity", payload: workTimeClassification },
-      { id: "w-workload-capacity", type: "workloadCapacity", size: "half-short", layer: 2, title: "Workload capacity", info: "Logged hours vs available capacity per member", actionLabel: "View all", reportKey: "workload-capacity", payload: workloadCapacity },
-      { id: "w-members", type: "members", size: "half-short", layer: 2, title: "Team Members", subtitle: "Total team size and current availability", actionLabel: "View report", reportKey: "members", payload: membersData },
+      { id: "w-productivity-trend", type: "lineChart", size: "half", layer: 2, title: "Productivity Trend", subtitle: "This week", reportKey: "productivity-trend", payload: productivityTrend },
+      { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Projects Worked", subtitle: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
 
-      { id: "w-productivity-trend", type: "lineChart", size: "half", layer: 3, title: "Productivity Trend", subtitle: "This week", reportKey: "productivity-trend", payload: productivityTrend },
-      { id: "w-tracked-least", type: "barList", size: "half", layer: 3, title: "Tracked Least Hours", actionLabel: "View all", reportKey: "tracked-least-hours", payload: { items: trackedLeastHours, unit: "%" } },
+      { id: "w-members", type: "members", size: "half-short", layer: 3, title: "Team Members", subtitle: "Total team size and current availability", actionLabel: "View report", reportKey: "members", payload: membersData },
+      { id: "w-upcoming-leaves", type: "upcomingLeaves", size: "half-short", layer: 3, title: "Upcoming Leaves", info: "Team members currently on leave or returning soon", actionLabel: "View all", reportKey: "upcoming-leaves", icon: "CalendarDays", payload: upcomingLeavesPayload },
+
+      { id: "w-workload-capacity", type: "workloadCapacity", size: "half-short", layer: 2, title: "Workload capacity", info: "Logged hours vs available capacity per member", actionLabel: "View all", reportKey: "workload-capacity", payload: workloadCapacity },
+      { id: "w-classification", type: "segmentBar", size: "half-short", layer: 2, title: "Work Time Classification", reportKey: "productivity", payload: workTimeClassification },
+
+      { id: "w-tracked-least", type: "barList", size: "half-short", layer: 3, title: "Tracked Least Hours", actionLabel: "View all", reportKey: "tracked-least-hours", payload: { items: trackedLeastHours, unit: "%" } },
+      { id: "w-time-log-approval", type: "barList", size: "half-short", layer: 3, title: "Time Log Approval Status", subtitle: "Sum: 53.68 hrs Log Hours", info: "Approval status of submitted time logs this period", actionLabel: "View report", reportKey: "time-log-approval", payload: timeLogApprovalStatus },
 
       { id: "w-applications", type: "barList", size: "half-short", layer: 4, title: "Application Usage", info: "Time spent in each application", actionLabel: "View all", reportKey: "application-usage", payload: { items: applicationsUsage, unit: "%" } },
       { id: "w-websites", type: "barList", size: "half-short", layer: 4, title: "Website Usage", info: "Time spent on each website", actionLabel: "View all", reportKey: "website-usage", payload: { items: websitesUsage, unit: "%" } },
@@ -166,23 +174,49 @@ export const ARCHETYPES: _A[] = [
     templateId: "pmo",
     insights: [
       { id: "pmo-i1", severity: "bad", title: "2 projects trending late", body: "VC_Angello and MATCT are burning budget faster than progress. Suggest a scope review this week.", metricRef: "At-Risk Projects", action: "Open projects report", reportKey: "projects" },
-      { id: "pmo-i2", severity: "warn", title: "Cost drivers rising", body: "QA & testing cost is up 18% this quarter — outpacing headcount. Review the per-project cost breakdown.", metricRef: "Cost Drivers", action: "Open cost drivers report", reportKey: "cost-drivers" },
+      { id: "pmo-i2", severity: "warn", title: "Budget health slipping", body: "3 projects are over budget with ~$80K expected overrun (8%). Avg burn hit 78% — rebaseline scope before Q4 lock.", metricRef: "Budget Health", action: "Open budget health report", reportKey: "budget-health" },
     ],
     kpis: [
       { id: "k-ontrack", label: "On-Track Projects", value: "7 / 10", delta: -10, deltaLabel: "-1 vs last week", deltaPolarity: "up-good", health: "warn", sparkline: makeSparkline(14, 72, 6), reportKey: "projects", icon: "Target" },
-      { id: "k-burn", label: "Avg Budget Burn", value: "78%", delta: 9, deltaLabel: "+9% vs last week", deltaPolarity: "up-bad", health: "warn", sparkline: makeSparkline(14, 66, 6), reportKey: "budget", icon: "Flame" },
+      { id: "k-bench", label: "Resource Bench", value: "14%", delta: 0, deltaLabel: "", deltaPolarity: "neutral", secondaryValue: "112h", secondaryLabel: "bench hours", health: "good", sparkline: makeSparkline(14, 14, 3), reportKey: "bench", icon: "Users" },
       { id: "k-velocity", label: "Sprint Velocity", value: "213 pts", delta: 7, deltaLabel: "+14 pts vs last sprint", deltaPolarity: "up-good", health: "good", sparkline: makeSparkline(14, 60, 8), reportKey: "projects", icon: "Gauge", state: "coming-soon" },
       { id: "k-overdue", label: "Overdue Tasks", value: "12", delta: -4, deltaLabel: "-4 vs last week", deltaPolarity: "up-bad", health: "bad", sparkline: makeSparkline(14, 20, 5), reportKey: "tasks", icon: "Clock" },
     ],
     widgets: [
-      { id: "w-projects-worked", type: "donut", size: "half", layer: 2, title: "Projects Worked", reportKey: "projects", payload: { slices: projectsWorked, centerValue: "328", centerLabel: "Total Projects" } },
-      { id: "w-budget", type: "barChart", size: "half", layer: 2, title: "Budget Trend", subtitle: "Quarterly", reportKey: "budget", payload: budgetTrend },
-      { id: "w-top-profit", type: "barList", size: "half", layer: 2, title: "Top Profitable Projects", reportKey: "projects", payload: { items: topProfitable, unit: "₹M" } },
-      { id: "w-cost", type: "barList", size: "half", layer: 2, title: "Least Profitable Projects", reportKey: "margin", payload: { items: leastProfitable, unit: "% margin" } },
-      { id: "w-scatter", type: "scatter", size: "half", layer: 2, title: "Velocity vs. Capacity", subtitle: "Hours tracked against throughput", reportKey: "projects", payload: scatter },
-      { id: "w-stacked", type: "donut", size: "half", layer: 2, title: "Task Status", reportKey: "tasks", payload: { slices: taskStatus, centerValue: "21961", centerLabel: "Total Tasks" } },
-      { id: "w-milestones", type: "miniTable", size: "half", layer: 2, title: "Upcoming Milestones", reportKey: "projects", payload: milestones },
-      { id: "w-leader", type: "leaderboard", size: "half", layer: 2, title: "Top Contributors", reportKey: "projects", payload: makeLeaderboard("pts") },
+      {
+        id: "w-budget-health",
+        type: "projectBudgetHealth",
+        size: "half",
+        layer: 2,
+        title: "Project Budget Health",
+        subtitle: "Overview of project spending vs. allocated budget",
+        info: "Projects grouped by on-budget, at-risk, and over-budget spend",
+        icon: "Coins",
+        actionLabel: "View report",
+        reportKey: "budget-health",
+        payload: projectBudgetHealthPayload,
+      },
+      {
+        id: "w-task-timeline",
+        type: "taskTimelineSummary",
+        size: "half",
+        layer: 2,
+        title: "Task Timeline Summary",
+        subtitle: "Trend of created vs completed tasks over time",
+        info: "Monthly created and completed task volume across the portfolio",
+        icon: "CalendarPlus",
+        actionLabel: "View report",
+        reportKey: "task-timeline",
+        payload: taskTimelineSummary,
+      },
+      { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Projects Worked", subtitle: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
+      { id: "w-stacked", type: "donut", size: "half", layer: 2, title: "Task Status", reportKey: "task-status", payload: { slices: taskStatus, centerValue: "21961", centerLabel: "Total Tasks" } },
+      { id: "w-milestones", type: "miniTable", size: "half", layer: 2, title: "Upcoming Milestones", info: "Next milestones across active projects with progress and hours", reportKey: "milestones", payload: milestones },
+      { id: "w-budget", type: "budgetTrend", size: "half", layer: 2, title: "Budget Trend", info: "Allocated budget, billing, and burn rate over time", actionLabel: "View all", reportKey: "budget", payload: budgetTrendPayload },
+      { id: "w-top-profit", type: "barList", size: "half-short", layer: 2, title: "Top Profitable Projects", info: "Highest profit contribution this period", actionLabel: "View all", reportKey: "top-profitable", payload: { items: topProfitable, unit: "₹M", insight: "VC_Table Booking Manager leads at ₹2.3M (34% margin) — nearly 40% of top-five profit." } },
+      { id: "w-cost", type: "barList", size: "half-short", layer: 2, title: "Least Profitable Projects", info: "Lowest profit contribution this period", actionLabel: "View all", reportKey: "least-profitable", payload: { items: leastProfitable, unit: "₹M", insight: "Website Redesign is lowest at ₹0.2M (8.4% margin) — review scope and staffing before next sprint." } },
+      { id: "w-scatter", type: "scatter", size: "half-tall", layer: 2, title: "Velocity vs. Capacity", subtitle: "Hours tracked against throughput", reportKey: "velocity-capacity", payload: scatter },
+      { id: "w-leader", type: "leaderboard", size: "half-tall", layer: 2, title: "Top Contributors", info: "Members ranked by tracked hours this period", icon: "BarChart3", actionLabel: "View all", reportKey: "top-contributors", payload: makeTopContributors() },
       { id: "w-table", type: "dataTable", size: "full-tall", layer: 3, title: "Project Delivery Ledger", subtitle: "Status, burn, and blockers across the portfolio", reportKey: "projects", payload: projectTable },
     ],
   },

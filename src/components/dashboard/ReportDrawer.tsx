@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "./DataTable";
 import { ScatterChart } from "@/components/charts/ScatterChart";
 import { AxisChart } from "@/components/charts/AxisChart";
+import { ProgressBars } from "@/components/charts/ProgressBars";
 import { cn } from "@/lib/utils";
 import { getReport } from "@/data/reports";
 import { downloadCsv } from "@/lib/csv";
-import type { AxisChartPayload, HealthLevel, ScatterPoint } from "@/types";
+import type { AxisChartPayload, HealthLevel, ProgressBarsPayload, ScatterPoint } from "@/types";
 
 const HEALTH_DOT: Record<string, string> = {
   good: "bg-health-good",
@@ -92,6 +93,8 @@ export function ReportDrawer({
             <div className="h-[240px] w-full">
               {report.chart.type === "scatter" ? (
                 <ScatterChart points={report.chart.payload as ScatterPoint[]} />
+              ) : report.chart.type === "progressBars" ? (
+                <ProgressBars payload={report.chart.payload as ProgressBarsPayload} />
               ) : (
                 <AxisChart payload={report.chart.payload as AxisChartPayload} />
               )}

@@ -54,7 +54,12 @@ export type WidgetType =
   | "usagePie"
   | "lowActivityMembers"
   | "workloadCapacity"
-  | "memberActivityBars";
+  | "memberActivityBars"
+  | "projectsWorked"
+  | "taskTimelineSummary"
+  | "budgetTrend"
+  | "projectBudgetHealth"
+  | "upcomingLeaves";
 
 /** Layer 1 (Macro) — a single glanceable KPI. */
 export interface KpiSpec {
@@ -102,6 +107,8 @@ export interface WidgetDescriptor {
   reportKey?: string;
   /** Optional custom label for the header report action. */
   actionLabel?: string;
+  /** Optional Lucide icon name shown beside the title. */
+  icon?: string;
   /** Runtime edit state (set while editing a dashboard). */
   hidden?: boolean;
 }
@@ -200,9 +207,20 @@ export interface LeaderRow {
   id: string;
   name: string;
   team: string;
+  /** Decimal hours used for bar width / ranking. */
   metric: number;
   unit: string;
   health: HealthLevel;
+  /** Display label e.g. "15h 0m". Falls back to metric + unit. */
+  hoursLabel?: string;
+  /** Share of total contribution (0–100). */
+  percent?: number;
+}
+
+export interface TopContributorsPayload {
+  periodLabel: string;
+  rows: LeaderRow[];
+  insight: string;
 }
 
 export interface AppRow {
@@ -221,6 +239,8 @@ export interface BarListItem {
   bubble?: number;
   /** When set, bar hover shows Activity % and Idle %. */
   idle?: number;
+  /** Optional tracked time shown in the Activity/Idle tooltip (e.g. "1h 12m"). */
+  time?: string;
 }
 export interface BarListPayload {
   items: BarListItem[];
@@ -229,6 +249,8 @@ export interface BarListPayload {
   /** Render a sized trailing bubble per item. */
   bubbles?: boolean;
   bubbleLegend?: string;
+  /** Optional footer insight (e.g. Top / Least Profitable). */
+  insight?: string;
 }
 
 export interface GaugePayload {
@@ -268,6 +290,57 @@ export interface ProgressBarRow {
 }
 export interface ProgressBarsPayload {
   rows: ProgressBarRow[];
+  /** Where to show 0/50/100 markers. Default: under each row. */
+  scale?: "each" | "shared" | "none";
+}
+
+/** Projects Worked — status bars with a side insight panel. */
+export interface ProjectsWorkedStatus {
+  key: string;
+  value: number;
+  color: string;
+}
+export interface ProjectsWorkedPayload {
+  statuses: ProjectsWorkedStatus[];
+  insight: {
+    suggestion: string;
+  };
+}
+
+/** Task Timeline Summary — created vs completed tasks over months. */
+export interface TaskTimelinePoint {
+  month: string;
+  fullLabel: string;
+  created: number;
+  completed: number;
+}
+
+export interface TaskTimelineSummaryPayload {
+  yearLabel: string;
+  points: TaskTimelinePoint[];
+  totals: {
+    created: number;
+    createdYoY: number;
+    createdPriorYear: number;
+    createdAvgPerMonth: number;
+    createdHigh: { month: string; value: number };
+    createdLow: { month: string; value: number };
+    completed: number;
+    completedYoY: number;
+    completedPriorYear: number;
+    completedAvgPerMonth: number;
+    completedHigh: { month: string; value: number };
+    completedLow: { month: string; value: number };
+    completionRate: number;
+    completionRateYoY: number;
+    completionRatePriorYear: number;
+  };
+  insights: {
+    title: string;
+    message: string;
+    highlights?: string[];
+    icon: "lightbulb" | "target";
+  }[];
 }
 
 export interface SegmentBarPayload {
@@ -282,11 +355,69 @@ export interface Series {
   data: number[];
   kind?: "bar" | "line";
   dashed?: boolean;
+  /** Optional per-point colors (e.g. status bars with unique colors). */
+  pointColors?: string[];
 }
 export interface AxisChartPayload {
   xLabels: string[];
   series: Series[];
   unit?: string;
+}
+
+export type BudgetTrendPeriod = "Weekly" | "Monthly" | "Quarterly" | "Yearly";
+
+export interface BudgetTrendPayload {
+  defaultPeriod: BudgetTrendPeriod;
+  periods: Record<BudgetTrendPeriod, AxisChartPayload>;
+}
+
+/** Project Budget Health — donut + utilization + status bands. */
+export interface ProjectBudgetHealthBand {
+  key: string;
+  percentLabel: string;
+  projects: number;
+  color: string;
+  bg: string;
+}
+
+export interface ProjectBudgetHealthPayload {
+  slices: { key: string; value: number; color: string }[];
+  healthPercent: number;
+  healthLabel: string;
+  healthStatus: string;
+  utilization: {
+    spentShort: string;
+    budgetShort: string;
+    percent: number;
+    detail: string;
+  };
+  bands: ProjectBudgetHealthBand[];
+  insight: {
+    title: string;
+    body: string;
+  };
+}
+
+export type LeaveType = "PTO" | "Sick" | "Casual" | "WFH";
+
+export interface UpcomingLeaveRow {
+  id: string;
+  name: string;
+  department: string;
+  leaveType: LeaveType;
+  /** Short return label shown in the widget (e.g. "Back Mon", "Today"). */
+  returnLabel: string;
+  /** Full return date for the detailed report. */
+  returnDate: string;
+  startDate: string;
+  days: number;
+}
+
+export interface UpcomingLeavesPayload {
+  totalOnLeave: number;
+  rows: UpcomingLeaveRow[];
+  /** Optional footer insight (matches Top Contributors / Milestones). */
+  insight?: string;
 }
 
 export interface CategoriesPayload {
@@ -299,7 +430,7 @@ export interface TableColumn {
   label: string;
   align?: "left" | "right" | "center";
   pinned?: boolean;
-  render?: "text" | "health" | "hours" | "delta" | "avatar" | "bar" | "money" | "status" | "bandPct";
+  render?: "text" | "health" | "hours" | "delta" | "avatar" | "avatarOnly" | "avatarStack" | "bar" | "money" | "status" | "bandPct" | "dueDate";
   width?: number;
 }
 
@@ -310,6 +441,8 @@ export interface TableRow {
 export interface DataTablePayload {
   columns: TableColumn[];
   rows: TableRow[];
+  /** Optional footer insight (e.g. Upcoming Milestones). */
+  insight?: string;
 }
 
 export interface LowActivityMemberRow {

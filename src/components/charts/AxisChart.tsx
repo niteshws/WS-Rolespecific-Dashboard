@@ -105,12 +105,14 @@ export function AxisChart({ payload }: { payload: AxisChartPayload }) {
                   width={Math.max(2, barW - (bars.length > 1 ? 3 : 0))}
                   height={h}
                   rx="3"
-                  fill={s.color}
+                  fill={s.pointColors?.[i] ?? s.color}
                   onMouseEnter={() =>
                     setHover({
                       x,
                       y,
-                      label: `${s.key} · ${xLabels[i]}: ${v}${unit ? ` ${unit}` : ""}`,
+                      label: s.pointColors
+                        ? `${xLabels[i]}: ${v}${unit ? ` ${unit}` : ""}`
+                        : `${s.key} · ${xLabels[i]}: ${v}${unit ? ` ${unit}` : ""}`,
                     })
                   }
                   onMouseLeave={() => setHover(null)}
@@ -182,16 +184,27 @@ export function AxisChart({ payload }: { payload: AxisChartPayload }) {
           </div>
         )}
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-center gap-4">
-        {series.map((s) => (
-          <span key={s.key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span
-              className="inline-block h-2.5 w-2.5 rounded-sm"
-              style={{ background: s.color, opacity: s.kind === "bar" ? 1 : 0.9 }}
-            />
-            {s.key}
-          </span>
-        ))}
+      <div className="flex shrink-0 flex-wrap items-center justify-center gap-3">
+        {series.some((s) => s.pointColors?.length) ? (
+          series.flatMap((s) =>
+            (s.pointColors ?? []).map((color, i) => (
+              <span key={`${s.key}-${xLabels[i]}`} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: color }} />
+                {xLabels[i]}
+              </span>
+            )),
+          )
+        ) : (
+          series.map((s) => (
+            <span key={s.key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-sm"
+                style={{ background: s.color, opacity: s.kind === "bar" ? 1 : 0.9 }}
+              />
+              {s.key}
+            </span>
+          ))
+        )}
       </div>
     </div>
   );

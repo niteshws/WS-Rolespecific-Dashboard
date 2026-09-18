@@ -10,11 +10,13 @@ export function Tooltip({
   children,
   className,
   wrapperClassName,
+  side = "top",
 }: {
   content: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   wrapperClassName?: string;
+  side?: "top" | "bottom";
 }) {
   const [open, setOpen] = React.useState(false);
   const id = React.useId();
@@ -32,7 +34,8 @@ export function Tooltip({
           role="tooltip"
           id={id}
           className={cn(
-            "pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-ink px-2 py-1 text-[11px] font-medium text-white shadow-pop animate-fade-in",
+            "pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded bg-ink px-2 py-1 text-[11px] font-medium text-white shadow-pop animate-fade-in",
+            side === "top" ? "bottom-full mb-2" : "top-full mt-2",
             className,
           )}
         >

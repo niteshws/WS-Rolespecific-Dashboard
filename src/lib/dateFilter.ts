@@ -1,4 +1,12 @@
-import type { Dashboard, WidgetDescriptor, KpiSpec, AxisChartPayload, DataTablePayload } from "@/types";
+import type {
+  Dashboard,
+  WidgetDescriptor,
+  KpiSpec,
+  AxisChartPayload,
+  DataTablePayload,
+  LeaderRow,
+  TopContributorsPayload,
+} from "@/types";
 
 function getScaleFactor(range: string, start?: string, end?: string): number {
   if (range === "Today") return 0.2;
@@ -181,6 +189,15 @@ export function getFilteredDashboard(
           value: Math.round(slice.value * scale),
         })),
       };
+    } else if (widget.type === "projectsWorked") {
+      const p = payload as { statuses: any[]; insight: { suggestion: string } };
+      newWidget.payload = {
+        ...p,
+        statuses: p.statuses.map((status) => ({
+          ...status,
+          value: Math.round(status.value * scale),
+        })),
+      };
     } else if (widget.type === "categoriesBar") {
       const p = payload as { segments: any[] };
       newWidget.payload = {
@@ -222,14 +239,17 @@ export function getFilteredDashboard(
       }
       newWidget.payload = pointsToProcess;
     } else if (widget.type === "leaderboard") {
-      const p = payload as any[];
-      let rowsToProcess = p;
+      const raw = payload as TopContributorsPayload | LeaderRow[];
+      const rows = Array.isArray(raw) ? raw : raw.rows;
+      let rowsToProcess = rows;
       if (filterType === "team") {
-        rowsToProcess = p.filter(r => String(r.team).toLowerCase() === filterValue.toLowerCase());
+        rowsToProcess = rows.filter((r) => String(r.team).toLowerCase() === filterValue.toLowerCase());
       } else if (filterType === "member") {
-        rowsToProcess = p.filter(r => String(r.name).toLowerCase() === filterValue.toLowerCase());
+        rowsToProcess = rows.filter((r) => String(r.name).toLowerCase() === filterValue.toLowerCase());
       }
-      newWidget.payload = rowsToProcess;
+      newWidget.payload = Array.isArray(raw)
+        ? rowsToProcess
+        : { ...raw, rows: rowsToProcess };
     } else if (widget.type === "lineChart" || widget.type === "barChart") {
       const p = payload as AxisChartPayload;
       let newLabels = p.xLabels;

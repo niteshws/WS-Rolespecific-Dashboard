@@ -3,8 +3,9 @@ import { ArrowUpDown, ArrowUp, ArrowDown, Download, Search, ArrowUpRight, Chevro
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { statusVariant } from "@/lib/status";
+import { statusVariant, projectStatusPill } from "@/lib/status";
 import { fmt } from "@/lib/utils";
 import { downloadCsv } from "@/lib/csv";
 import type { DataTablePayload, TableColumn, TableRow } from "@/types";
@@ -275,6 +276,47 @@ function Cell({
           <span className="truncate font-medium">{value}</span>
         </span>
       );
+    case "avatarOnly":
+      return (
+        <Tooltip content={String(value)} side="bottom">
+          <span className="inline-flex cursor-default" tabIndex={0}>
+            <Avatar name={String(value)} size={28} className="rounded-full" />
+          </span>
+        </Tooltip>
+      );
+    case "avatarStack": {
+      const names = String(value)
+        .split(",")
+        .map((n) => n.trim())
+        .filter(Boolean);
+      const visible = names.slice(0, 4);
+      const extra = names.length - visible.length;
+      return (
+        <span className="flex items-center">
+          {visible.map((name, i) => (
+            <Tooltip key={`${name}-${i}`} content={name} side="bottom">
+              <span
+                className="relative inline-flex cursor-default rounded-full ring-2 ring-card"
+                style={{ marginLeft: i === 0 ? 0 : -8, zIndex: visible.length - i }}
+                tabIndex={0}
+              >
+                <Avatar name={name} size={26} className="rounded-full" />
+              </span>
+            </Tooltip>
+          ))}
+          {extra > 0 && (
+            <Tooltip content={names.slice(4).join(", ")} side="bottom">
+              <span
+                className="relative ml-[-8px] inline-flex h-[26px] min-w-[26px] cursor-default items-center justify-center rounded-full bg-muted px-1 text-[10px] font-semibold text-muted-foreground ring-2 ring-card"
+                tabIndex={0}
+              >
+                +{extra}
+              </span>
+            </Tooltip>
+          )}
+        </span>
+      );
+    }
     case "health": {
       const raw = String(value);
       const label =
@@ -289,12 +331,26 @@ function Cell({
       const label = String(value);
       if (label === "Under-utilized") {
         return (
-          <span className="inline-flex items-center rounded border border-[#0ea5e9]/25 bg-[#0ea5e9]/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-[#0284c7] whitespace-nowrap">
+          <span className="inline-flex items-center rounded-full border border-[#0ea5e9]/25 bg-[#0ea5e9]/10 px-2.5 py-0.5 text-[11px] font-medium leading-none text-[#0284c7] whitespace-nowrap">
             {label}
           </span>
         );
       }
-      return <Badge variant={statusVariant(label)}>{label}</Badge>;
+      const pill = projectStatusPill(label);
+      if (pill) {
+        return (
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium leading-none whitespace-nowrap"
+            style={{
+              color: pill.text,
+              background: pill.bg,
+            }}
+          >
+            {label}
+          </span>
+        );
+      }
+      return <Badge variant={statusVariant(label)} className="rounded-full px-2.5">{label}</Badge>;
     }
     case "bandPct": {
       const n = Number(value);
@@ -337,6 +393,15 @@ function Cell({
         </span>
       );
     }
+    case "dueDate": {
+      const text = String(value ?? "");
+      const overdue = isPastDueDate(text);
+      return (
+        <span className={cn("whitespace-nowrap tabular", overdue && "font-medium text-health-bad")}>
+          {text}
+        </span>
+      );
+    }
     default: {
       const text = String(value ?? "");
       const isSignedTime = /^[+\-−]/.test(text) && /h\s*\d*m/.test(text);
@@ -351,4 +416,17 @@ function Cell({
       return <span className="truncate tabular">{value}</span>;
     }
   }
+}
+
+/** Parse display dates like "Aug 10, 2026" and treat anything before today as overdue. */
+function isPastDueDate(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "—" || trimmed.toUpperCase() === "TBD") return false;
+  const parsed = Date.parse(trimmed);
+  if (Number.isNaN(parsed)) return false;
+  const due = new Date(parsed);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  due.setHours(0, 0, 0, 0);
+  return due.getTime() < today.getTime();
 }

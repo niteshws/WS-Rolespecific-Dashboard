@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Sparkline } from "@/components/charts/Sparkline";
 import { cn } from "@/lib/utils";
@@ -37,20 +37,43 @@ export function KpiCard({
   const ariaDetail = hasSecondary
     ? `${spec.secondaryValue} ${spec.secondaryLabel ?? ""}`.trim()
     : spec.deltaLabel;
+  const isComingSoon = spec.state === "coming-soon";
 
   return (
     <button
       type="button"
-      onClick={() => spec.state !== "coming-soon" && onOpenReport(spec.reportKey)}
-      aria-label={`${spec.label}: ${spec.value}, ${ariaDetail}. Open detailed report.`}
-      className={cn("group text-left focus-visible:outline-none", spec.state === "coming-soon" && "cursor-default")}
+      onClick={() => !isComingSoon && onOpenReport(spec.reportKey)}
+      aria-label={
+        isComingSoon
+          ? `${spec.label}: Coming Soon`
+          : `${spec.label}: ${spec.value}, ${ariaDetail}. Open detailed report.`
+      }
+      className={cn("group text-left focus-visible:outline-none", isComingSoon && "cursor-default")}
+      disabled={isComingSoon}
     >
-      <Card className="relative h-full overflow-hidden p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card-hover">
+      <Card
+        className={cn(
+          "relative h-full overflow-hidden p-4 transition-all duration-200",
+          !isComingSoon && "hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card-hover",
+        )}
+      >
+        {isComingSoon && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm p-4 text-center">
+            <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <Clock className="h-4 w-4" />
+            </div>
+            <h4 className="mt-2 text-xs font-bold text-foreground">Coming Soon</h4>
+            <p className="mt-1 max-w-[160px] text-[10px] leading-tight text-muted-foreground">
+              This metric will be available in a future update.
+            </p>
+          </div>
+        )}
+
         <span
           className="absolute inset-y-0 left-0 w-0.5 bg-primary opacity-0 transition-opacity group-hover:opacity-100"
           aria-hidden="true"
         />
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-2" aria-hidden={isComingSoon}>
           <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-primary/10 text-primary">
               <Icon name={spec.icon} className="h-3.5 w-3.5" />
@@ -59,19 +82,13 @@ export function KpiCard({
               {spec.label}
             </span>
           </div>
-          {spec.state === "coming-soon" ? (
-            <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground" aria-label="Coming Soon">
-              Coming Soon
-            </span>
-          ) : (
-            <span
-              className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}
-              aria-label={`health: ${spec.health}`}
-            />
-          )}
+          <span
+            className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}
+            aria-label={`health: ${spec.health}`}
+          />
         </div>
 
-        <div className="mt-3.5 flex items-end justify-between gap-3">
+        <div className="mt-3.5 flex items-end justify-between gap-3" aria-hidden={isComingSoon}>
           <div className="min-w-0">
             <div className="tabular text-[1.75rem] font-semibold leading-none tracking-tight text-ink">
               {spec.value}
@@ -98,16 +115,16 @@ export function KpiCard({
           </div>
         </div>
 
-        {!spec.state || spec.state !== "coming-soon" ? (
-          <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-            View detailed report
-            <ArrowUpRight className="h-3 w-3" />
-          </div>
-        ) : (
-          <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-transparent">
-            &nbsp;
-          </div>
-        )}
+        <div
+          className={cn(
+            "mt-3 flex items-center gap-1 text-[11px] font-medium text-primary opacity-0 transition-opacity",
+            !isComingSoon && "group-hover:opacity-100",
+          )}
+          aria-hidden={isComingSoon}
+        >
+          View detailed report
+          <ArrowUpRight className="h-3 w-3" />
+        </div>
       </Card>
     </button>
   );

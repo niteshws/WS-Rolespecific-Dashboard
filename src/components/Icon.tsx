@@ -19,12 +19,20 @@ import {
   Activity,
   Clock,
   FolderKanban,
+  CalendarPlus,
+  CalendarDays,
+  BarChart3,
+  Coins,
   type LucideIcon,
 } from "lucide-react";
 
 const MAP: Record<string, LucideIcon> = {
   Clock,
   FolderKanban,
+  CalendarPlus,
+  CalendarDays,
+  BarChart3,
+  Coins,
   Crown,
   ShieldCheck,
   KanbanSquare,

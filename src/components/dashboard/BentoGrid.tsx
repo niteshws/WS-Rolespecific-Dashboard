@@ -39,10 +39,17 @@ const HEIGHT: Record<WidgetSize, string> = {
 const HEIGHT_OVERRIDE: Record<string, string> = {
   "w-applications": "min-h-[232px] lg:h-[232px]",
   "w-websites": "min-h-[232px] lg:h-[232px]",
-  "w-projects-worked": "min-h-[232px] lg:h-[232px]",
+  "w-projects-worked": "min-h-[300px] lg:h-[300px]",
   "w-classification": "min-h-[232px] lg:h-[232px]",
+  "w-tracked-least": "min-h-[248px] lg:h-[248px]",
+  "w-time-log-approval": "min-h-[248px] lg:h-[248px]",
   "w-workload-capacity": "min-h-[232px] lg:h-[232px]",
-  "w-members": "min-h-[232px] lg:h-[232px]",
+  "w-members": "min-h-[248px] lg:h-[248px]",
+  "w-upcoming-leaves": "min-h-[248px] lg:h-[248px]",
+  "w-top-profit": "min-h-[248px] lg:h-[248px]",
+  "w-cost": "min-h-[248px] lg:h-[248px]",
+  "w-task-timeline": "min-h-[360px] lg:h-[380px]",
+  "w-budget-health": "min-h-[360px] lg:h-[380px]",
 };
 
 /** Resize order for the grow / shrink controls. */

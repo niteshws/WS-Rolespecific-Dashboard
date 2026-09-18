@@ -5,16 +5,21 @@ import {
   makeInvoiceTable,
   makeTaskTable,
   makeAppUsageTable,
-  makeScatter,
   makeWorkedTodayTable,
   makeTodaysActivityTable,
   makeUtilizationTable,
   makeBenchTable,
+  makeAttendance,
+  makeUpcomingLeavesTable,
+  getUpcomingLeavesReportMeta,
+  makeTimeLogApprovalTable,
+  timeLogApprovalChart,
   makeTrackedLeastHoursTable,
   makeWorkloadCapacityTable,
   makeProductivityTrendTable,
   makeApplicationUsageTable,
   makeWebsiteUsageTable,
+  makeProjectsWorkedTable,
   budgetTrend,
   profitLoss,
   workedTodayTrend,
@@ -25,6 +30,31 @@ import {
   productivityTrend,
   applicationsUsage,
   websitesUsage,
+  projectsWorkedPayload,
+  projectsWorkedByStatus,
+  taskTimelineSummary,
+  taskTimelineTrend,
+  makeTaskTimelineTable,
+  topContributorsPayload,
+  topContributorsByHours,
+  makeTopContributorsTable,
+  milestonesProgressChart,
+  makeMilestonesTable,
+  getMilestonesReportMeta,
+  velocityCapacityScatter,
+  makeVelocityCapacityTable,
+  getVelocityCapacityReportMeta,
+  velocityCapacityByTeam,
+  taskStatusByProject,
+  makeTaskStatusTable,
+  getTaskStatusReportMeta,
+  projectBudgetHealthPayload,
+  makeBudgetHealthTable,
+  getBudgetHealthReportMeta,
+  makeTopProfitableTable,
+  makeLeastProfitableTable,
+  getTopProfitableReportMeta,
+  getLeastProfitableReportMeta,
 } from "./dummy";
 
 /**
@@ -38,16 +68,40 @@ const projects = makeProjectTable();
 const invoices = makeInvoiceTable();
 const tasks = makeTaskTable();
 const appUsage = makeAppUsageTable();
-const scatter = makeScatter();
 const workedToday = makeWorkedTodayTable();
 const todaysActivity = makeTodaysActivityTable();
 const utilizationRows = makeUtilizationTable();
 const benchRows = makeBenchTable();
+const attendanceRows = makeAttendance();
+const upcomingLeavesTable = makeUpcomingLeavesTable();
+const upcomingLeavesMeta = getUpcomingLeavesReportMeta();
+const timeLogApprovalTable = makeTimeLogApprovalTable();
 const trackedLeastTable = makeTrackedLeastHoursTable();
 const workloadCapacityTable = makeWorkloadCapacityTable();
 const productivityTrendTable = makeProductivityTrendTable();
 const applicationUsageTable = makeApplicationUsageTable();
 const websiteUsageTable = makeWebsiteUsageTable();
+const projectsWorkedTable = makeProjectsWorkedTable();
+const taskTimelineTable = makeTaskTimelineTable();
+const topContributorsTable = makeTopContributorsTable();
+const milestonesTable = makeMilestonesTable();
+const milestonesMeta = getMilestonesReportMeta();
+const velocityCapacityTable = makeVelocityCapacityTable();
+const velocityCapacityMeta = getVelocityCapacityReportMeta();
+const taskStatusTable = makeTaskStatusTable();
+const taskStatusMeta = getTaskStatusReportMeta();
+const budgetHealthTable = makeBudgetHealthTable();
+const budgetHealthMeta = getBudgetHealthReportMeta();
+const topProfitableTable = makeTopProfitableTable();
+const topProfitableMeta = getTopProfitableReportMeta();
+const leastProfitableTable = makeLeastProfitableTable();
+const leastProfitableMeta = getLeastProfitableReportMeta();
+const scatter = velocityCapacityScatter;
+const projectsWorkedTotal = projectsWorkedPayload.statuses.reduce((s, x) => s + x.value, 0);
+const projectsWorkedTop = projectsWorkedPayload.statuses.reduce(
+  (best, s) => (s.value > best.value ? s : best),
+  projectsWorkedPayload.statuses[0],
+);
 
 const REPORTS: Record<string, ReportSpec> = {
   "worked-today": {
@@ -152,6 +206,35 @@ const REPORTS: Record<string, ReportSpec> = {
     chart: { type: "barChart", title: "Budget vs. invoiced by quarter", payload: budgetTrend },
     table: projects,
   },
+  "projects-worked": {
+    key: "projects-worked",
+    title: "Projects Worked — Detailed Report",
+    subtitle: "Portfolio count by status with delivery detail",
+    severity: "warn",
+    narrative: `${projectsWorkedTotal} projects across the portfolio. ${Math.round((projectsWorkedTop.value / projectsWorkedTotal) * 100)}% are in ${projectsWorkedTop.key} — review resourcing and timelines to move more work into active delivery.`,
+    stats: [
+      { label: "Total Projects", value: String(projectsWorkedTotal), health: "good" },
+      {
+        label: "Not Started",
+        value: String(projectsWorkedPayload.statuses.find((s) => s.key === "Not Started")?.value ?? 0),
+        delta: `${Math.round(((projectsWorkedPayload.statuses.find((s) => s.key === "Not Started")?.value ?? 0) / projectsWorkedTotal) * 100)}%`,
+        health: "warn",
+      },
+      {
+        label: "In Progress",
+        value: String(projectsWorkedPayload.statuses.find((s) => s.key === "In Progress")?.value ?? 0),
+        delta: `${Math.round(((projectsWorkedPayload.statuses.find((s) => s.key === "In Progress")?.value ?? 0) / projectsWorkedTotal) * 100)}%`,
+        health: "good",
+      },
+      {
+        label: "Completed",
+        value: String(projectsWorkedPayload.statuses.find((s) => s.key === "Completed")?.value ?? 0),
+        health: "good",
+      },
+    ],
+    chart: { type: "barChart", title: "Projects by status", payload: projectsWorkedByStatus },
+    table: projectsWorkedTable,
+  },
   invoices: {
     key: "invoices",
     title: "Invoices — Detailed Report",
@@ -182,6 +265,203 @@ const REPORTS: Record<string, ReportSpec> = {
       { label: "Yet to Start", value: "2,985", health: "warn" },
     ],
     table: tasks,
+  },
+  "task-status": {
+    key: "task-status",
+    title: "Task Status — Detailed Report",
+    subtitle: "Open pipeline, overdue concentration, and triage queue",
+    severity: taskStatusMeta.overdue > 0 ? "bad" : "warn",
+    narrative: taskStatusMeta.narrative,
+    stats: [
+      {
+        label: "Total Tasks",
+        value: taskStatusMeta.total.toLocaleString(),
+        delta: `${taskStatusMeta.completionRate}% done`,
+        health: "good",
+      },
+      {
+        label: "Open",
+        value: taskStatusMeta.open.toLocaleString(),
+        delta: `${taskStatusMeta.inReview} in review`,
+        health: "warn",
+      },
+      {
+        label: "Overdue",
+        value: taskStatusMeta.overdue.toLocaleString(),
+        delta: `${Math.round((taskStatusMeta.overdue / Math.max(taskStatusMeta.open, 1)) * 100)}% of open`,
+        health: "bad",
+      },
+      {
+        label: "Top Overdue",
+        value: String(taskStatusMeta.topOverdueCount),
+        delta: taskStatusMeta.topOverdueProject.split("|")[0]?.trim().slice(0, 18) ?? "project",
+        health: "bad",
+      },
+    ],
+    chart: {
+      type: "barChart",
+      title: "Open tasks vs overdue by project",
+      payload: taskStatusByProject,
+    },
+    table: taskStatusTable,
+  },
+  "task-timeline": {
+    key: "task-timeline",
+    title: "Task Timeline Summary — Detailed Report",
+    subtitle: "Created vs completed tasks by month for 2026",
+    severity: "good",
+    narrative:
+      "684 tasks were created and 617 completed this year — a 90% completion rate, up 5pts vs last year. September closed more work than it opened (+4), and completion peaked that month at 72 tasks.",
+    stats: [
+      {
+        label: "Total Created",
+        value: String(taskTimelineSummary.totals.created),
+        delta: `+${taskTimelineSummary.totals.createdYoY}% vs last year`,
+        health: "good",
+      },
+      {
+        label: "Total Completed",
+        value: String(taskTimelineSummary.totals.completed),
+        delta: `+${taskTimelineSummary.totals.completedYoY}% vs last year`,
+        health: "good",
+      },
+      {
+        label: "Completion Rate",
+        value: `${taskTimelineSummary.totals.completionRate}%`,
+        delta: `+${taskTimelineSummary.totals.completionRateYoY}% vs last year`,
+        health: "good",
+      },
+      {
+        label: "Peak Completed",
+        value: String(taskTimelineSummary.totals.completedHigh.value),
+        delta: taskTimelineSummary.totals.completedHigh.month,
+        health: "good",
+      },
+    ],
+    chart: {
+      type: "lineChart",
+      title: "Created vs completed tasks by month",
+      payload: taskTimelineTrend,
+    },
+    table: taskTimelineTable,
+  },
+  "top-contributors": {
+    key: "top-contributors",
+    title: "Top Contributors — Detailed Report",
+    subtitle: "Members ranked by tracked hours this month",
+    severity: "good",
+    narrative: topContributorsPayload.insight,
+    stats: (() => {
+      const rows = topContributorsPayload.rows;
+      const totalHours = rows.reduce((s, r) => s + r.metric, 0);
+      const totalMins = Math.round(totalHours * 60);
+      const h = Math.floor(totalMins / 60);
+      const m = totalMins % 60;
+      const top = rows[0];
+      return [
+        { label: "Top Contributor", value: top.name.split(" ")[0], delta: top.hoursLabel, health: "good" as const },
+        { label: "Hours Tracked", value: `${h}h ${m}m`, delta: "top 6 this month", health: "good" as const },
+        { label: "Top Share", value: `${top.percent}%`, delta: "of listed hours", health: "good" as const },
+        { label: "Contributors", value: String(topContributorsTable.rows.length), health: "good" as const },
+      ];
+    })(),
+    chart: {
+      type: "barChart",
+      title: "Hours by team (aggregated)",
+      payload: topContributorsByHours,
+    },
+    table: topContributorsTable,
+  },
+  "velocity-capacity": {
+    key: "velocity-capacity",
+    title: "Velocity vs. Capacity — Detailed Report",
+    subtitle: "Hours tracked against productivity for every member",
+    severity:
+      velocityCapacityMeta.atRisk > 0
+        ? "warn"
+        : velocityCapacityMeta.watch > 0
+          ? "warn"
+          : "good",
+    narrative: velocityCapacityMeta.narrative,
+    stats: [
+      {
+        label: "Members",
+        value: String(velocityCapacityMeta.members),
+        delta: `${velocityCapacityMeta.healthy} healthy`,
+        health: "good",
+      },
+      {
+        label: "Avg Hours",
+        value: `${velocityCapacityMeta.avgHours}h`,
+        delta: "tracked this period",
+        health: "good",
+      },
+      {
+        label: "Avg Productivity",
+        value: `${velocityCapacityMeta.avgProductivity}%`,
+        delta: `${velocityCapacityMeta.watch} on watch`,
+        health: velocityCapacityMeta.avgProductivity < 70 ? "warn" : "good",
+      },
+      {
+        label: "At Risk",
+        value: String(velocityCapacityMeta.atRisk),
+        delta:
+          velocityCapacityMeta.highLoadAtRisk > 0
+            ? `${velocityCapacityMeta.highLoadAtRisk} high-load`
+            : "low throughput",
+        health: velocityCapacityMeta.atRisk > 0 ? "bad" : "good",
+      },
+    ],
+    chart: {
+      type: "barChart",
+      title: "Avg hours vs avg productivity by team",
+      payload: velocityCapacityByTeam,
+    },
+    table: velocityCapacityTable,
+  },
+  milestones: {
+    key: "milestones",
+    title: "Upcoming Milestones — Detailed Report",
+    subtitle: "Open delivery windows — due dates, remaining tasks, and hour burn",
+    severity:
+      milestonesMeta.overdue > 0 || milestonesMeta.atRisk > 0 ? "warn" : "good",
+    narrative: milestonesMeta.narrative,
+    stats: [
+      {
+        label: "Upcoming",
+        value: String(milestonesMeta.total),
+        delta: `${milestonesMeta.inProgress} in progress`,
+        health: "good",
+      },
+      {
+        label: "Due in 7 Days",
+        value: String(milestonesMeta.dueThisWeek),
+        delta:
+          milestonesMeta.overdue > 0
+            ? `${milestonesMeta.overdue} overdue`
+            : `${milestonesMeta.atRisk} at risk`,
+        health:
+          milestonesMeta.overdue > 0 || milestonesMeta.dueThisWeek > 0 ? "warn" : "good",
+      },
+      {
+        label: "Open Tasks",
+        value: String(milestonesMeta.openTasks),
+        delta: `${milestonesMeta.avgCompletion}% avg done`,
+        health: milestonesMeta.avgCompletion < 40 ? "warn" : "good",
+      },
+      {
+        label: "Hours Invested",
+        value: String(milestonesMeta.totalHours),
+        delta: `${milestonesMeta.notStarted} not started`,
+        health: milestonesMeta.atRisk > 0 ? "warn" : "good",
+      },
+    ],
+    chart: {
+      type: "barChart",
+      title: "Upcoming milestones by due window vs hours invested",
+      payload: milestonesProgressChart,
+    },
+    table: milestonesTable,
   },
   apps: {
     key: "apps",
@@ -317,6 +597,72 @@ const REPORTS: Record<string, ReportSpec> = {
     chart: { type: "barChart", title: "Bench hours by team", payload: benchByTeam },
     table: benchRows,
   },
+  attendance: {
+    key: "attendance",
+    title: "Attendance Today — Detailed Report",
+    subtitle: "Who is present, late, absent, or not in yet",
+    severity: "warn",
+    narrative:
+      "37 of 45 members are present today (82%). 8 are offline — a mix of absent and not-in-yet. Late check-ins are concentrated on Developer and Marketing teams.",
+    stats: [
+      { label: "Present", value: "37", delta: "of 45", health: "good" },
+      { label: "Attendance", value: "82%", delta: "-2 pts vs yesterday", health: "warn" },
+      { label: "Not In Yet", value: "5", health: "warn" },
+      { label: "Absent", value: "3", health: "bad" },
+    ],
+    table: attendanceRows,
+  },
+  "upcoming-leaves": {
+    key: "upcoming-leaves",
+    title: "Upcoming Leaves — Detailed Report",
+    subtitle: "Active and scheduled leave across the team",
+    severity: upcomingLeavesMeta.sick > 0 ? "warn" : "good",
+    narrative: upcomingLeavesMeta.narrative,
+    stats: [
+      {
+        label: "On Leave",
+        value: String(upcomingLeavesMeta.total),
+        delta: "members",
+        health: "warn",
+      },
+      {
+        label: "Sick",
+        value: String(upcomingLeavesMeta.sick),
+        health: "bad",
+      },
+      {
+        label: "PTO",
+        value: String(upcomingLeavesMeta.pto),
+        health: "warn",
+      },
+      {
+        label: "Back Today",
+        value: String(upcomingLeavesMeta.returningToday),
+        health: "good",
+      },
+    ],
+    table: upcomingLeavesTable,
+  },
+  "time-log-approval": {
+    key: "time-log-approval",
+    title: "Time Log Approval — Detailed Report",
+    subtitle: "Submitted log hours awaiting approval",
+    severity: "warn",
+    narrative:
+      "53.68 hours of time logs this period: 42.5 approved, 9.08 pending, and 2.1 rejected. Clear the pending queue before payroll cutoff.",
+    stats: [
+      { label: "Pending Hours", value: "9.08", delta: "hrs", health: "warn" },
+      { label: "Approved", value: "42.5", delta: "hrs", health: "good" },
+      { label: "Rejected", value: "2.1", delta: "hrs", health: "bad" },
+      { label: "Members", value: String(timeLogApprovalTable.rows.length), health: "warn" },
+    ],
+    chart: {
+      type: "barChart",
+      title: "Hours by approval status",
+      payload: timeLogApprovalChart,
+    },
+    table: timeLogApprovalTable,
+  },
   "cost-drivers": {
     key: "cost-drivers",
     title: "Cost Drivers — Detailed Report",
@@ -440,6 +786,108 @@ const REPORTS: Record<string, ReportSpec> = {
     ],
     chart: { type: "barChart", title: "Budget vs. invoiced by quarter", payload: budgetTrend },
     table: projects,
+  },
+  "budget-health": {
+    key: "budget-health",
+    title: "Budget Health — Detailed Report",
+    subtitle: "Spend vs allocated budget by project band",
+    severity: "warn",
+    narrative: budgetHealthMeta.narrative,
+    stats: [
+      {
+        label: "Budget Health",
+        value: `${budgetHealthMeta.healthPercent}%`,
+        delta: projectBudgetHealthPayload.healthStatus,
+        health: "warn",
+      },
+      {
+        label: "Over Budget",
+        value: String(budgetHealthMeta.overBudget),
+        delta: `${budgetHealthMeta.overrunTotal} overrun`,
+        health: "bad",
+      },
+      {
+        label: "At Risk",
+        value: String(budgetHealthMeta.atRisk),
+        delta: ">85% burn",
+        health: "warn",
+      },
+      {
+        label: "Avg Burn",
+        value: `${budgetHealthMeta.avgBurn}%`,
+        delta: "+9% vs last week",
+        health: "warn",
+      },
+    ],
+    table: budgetHealthTable,
+  },
+  "top-profitable": {
+    key: "top-profitable",
+    title: "Top Profitable Projects — Detailed Report",
+    subtitle: "Highest profit contribution and margin this period",
+    severity: "good",
+    narrative: topProfitableMeta.narrative,
+    stats: [
+      {
+        label: "Top Project",
+        value: topProfitableMeta.topProject.split(" ").slice(0, 2).join(" "),
+        delta: topProfitableMeta.topMargin,
+        health: "good",
+      },
+      {
+        label: "Listed Profit",
+        value: topProfitableMeta.totalProfit,
+        delta: "8 projects",
+        health: "good",
+      },
+      {
+        label: "Best Margin",
+        value: topProfitableMeta.topMargin,
+        delta: "VC_Table Booking",
+        health: "good",
+      },
+      {
+        label: "Avg Margin",
+        value: topProfitableMeta.avgMargin,
+        delta: "top eight",
+        health: "good",
+      },
+    ],
+    table: topProfitableTable,
+  },
+  "least-profitable": {
+    key: "least-profitable",
+    title: "Least Profitable Projects — Detailed Report",
+    subtitle: "Lowest profit contribution and margin this period",
+    severity: "warn",
+    narrative: leastProfitableMeta.narrative,
+    stats: [
+      {
+        label: "Lowest Margin",
+        value: leastProfitableMeta.lowestMargin,
+        delta: leastProfitableMeta.lowestProject.split(" ").slice(0, 2).join(" "),
+        health: "bad",
+      },
+      {
+        label: "Below 15%",
+        value: String(leastProfitableMeta.under15),
+        delta: "of listed projects",
+        health: "bad",
+      },
+      {
+        label: "Avg Margin",
+        value: leastProfitableMeta.avgMargin,
+        delta: "listed set",
+        health: "warn",
+      },
+      {
+        label: "Projects",
+        value: String(leastProfitableTable.rows.length),
+        delta: "in review",
+        health: "warn",
+      },
+    ],
+    table: leastProfitableTable,
   },
 };
 
