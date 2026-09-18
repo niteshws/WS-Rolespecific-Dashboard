@@ -1810,12 +1810,13 @@ export function makeAttendance(): DataTablePayload {
   const breakDurs = ["15m", "45m", "0m", "1h 10m", "0m", "30m", "1h 20m", "50m"];
   const rows: TableRow[] = PEOPLE.slice(0, 12).map((p, i) => {
     const [cTime, cStat] = checkins[i % checkins.length].split("|");
+    const [coTime] = checkouts[i % checkouts.length].split("|");
     return {
       member: p.name,
       team: p.team,
       checkinTime: cTime,
       checkinStatus: cStat,
-      checkout: checkouts[i % checkouts.length],
+      checkout: coTime === "None" ? "—" : coTime,
       breaks: breakDurs[i % breakDurs.length],
     };
   });
@@ -1824,7 +1825,7 @@ export function makeAttendance(): DataTablePayload {
       { key: "member", label: "Member Name", pinned: true, render: "avatar", width: 190 },
       { key: "team", label: "Team", width: 130 },
       { key: "checkinTime", label: "Check-in Time", width: 130 },
-      { key: "checkout", label: "Check-out", render: "timeStatus", width: 140 },
+      { key: "checkout", label: "Check-out", width: 140 },
       { key: "breaks", label: "Breaks", width: 90 },
       { key: "checkinStatus", label: "Status", render: "status", width: 120 },
     ],
