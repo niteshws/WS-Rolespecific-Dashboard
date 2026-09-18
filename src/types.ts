@@ -79,6 +79,8 @@ export interface KpiSpec {
   reportKey?: string;
   icon?: string;
   state?: "active" | "coming-soon";
+  /** Plain-language help shown in the info tooltip. */
+  info?: string;
 }
 
 /** A natural-language insight surfaced in the banner rail. */
@@ -491,6 +493,8 @@ export interface ReportStat {
   delta?: string;
   health?: HealthLevel;
   color?: string;
+  /** Plain-language help shown in the info tooltip. */
+  info?: string;
 }
 
 export interface ReportSpec {

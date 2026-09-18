@@ -40,6 +40,7 @@ import {
 } from "@/components/charts/BudgetTrendWidget";
 import { ProjectBudgetHealthWidget } from "@/components/charts/ProjectBudgetHealthWidget";
 import { UpcomingLeavesWidget } from "@/components/charts/UpcomingLeavesWidget";
+import { getWidgetHelp } from "@/data/helpText";
 import type {
   WidgetDescriptor,
   StatGroupPayload,
@@ -141,18 +142,14 @@ export function WidgetRenderer({
       case "segmentBar":
         return <SegmentBar payload={widget.payload as SegmentBarPayload} />;
       case "miniTable":
-        return (
-          <MiniTable
-            payload={widget.payload as DataTablePayload}
-            onViewAll={openReport}
-          />
-        );
+        return <MiniTable payload={widget.payload as DataTablePayload} />;
       case "dataTable":
         return (
           <DataTable 
             payload={widget.payload as DataTablePayload} 
             title={widget.title}
             subtitle={widget.subtitle}
+            info={widget.info ?? getWidgetHelp(widget.id, widget.title)}
             onOpenReport={openReport}
             showExport={!hideActions}
             isEditing={editing}
@@ -230,11 +227,7 @@ export function WidgetRenderer({
   const topContributorsPayload = isTopContributors
     ? (widget.payload as TopContributorsPayload)
     : null;
-  const milestonesPayload =
-    widget.type === "miniTable" && (widget.payload as DataTablePayload).insight
-      ? (widget.payload as DataTablePayload)
-      : null;
-  const headerReport = milestonesPayload ? undefined : openReport;
+  const headerReport = openReport;
   const isLocked = plan === "lower" && (
     widget.type === "timeline" ||
     widget.type === "screenshots" ||
@@ -253,7 +246,7 @@ export function WidgetRenderer({
     <WidgetShell
       title={widget.title}
       subtitle={widget.subtitle}
-      info={widget.info}
+      info={widget.info ?? getWidgetHelp(widget.id, widget.title)}
       icon={widget.icon}
       highlight={highlight}
       editing={editing}

@@ -9,10 +9,9 @@ import {
   ChevronDown,
   GripVertical,
   Lock,
-  Info,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Tooltip } from "@/components/ui/tooltip";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/Icon";
 
@@ -99,17 +98,7 @@ export function WidgetShell({
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
               <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>
-              {info && (
-                <Tooltip content={info}>
-                  <button
-                    type="button"
-                    className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:text-ink"
-                    aria-label={info}
-                  >
-                    <Info className="h-3.5 w-3.5" />
-                  </button>
-                </Tooltip>
-              )}
+              {info && <InfoTip content={info} />}
             </div>
             {subtitle && <p className="mt-0.5 truncate text-xs text-muted-foreground">{subtitle}</p>}
           </div>

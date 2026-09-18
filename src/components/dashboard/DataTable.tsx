@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpDown, ArrowUp, ArrowDown, Download, Search, ArrowUpRight, ChevronDown } from "lucide-react";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,10 +41,12 @@ export function DataTable({
   pageSize = DEFAULT_PAGE_SIZE,
   fillHeight = true,
   contentAlign = "auto",
+  info,
 }: {
   payload: DataTablePayload;
   title?: string;
   subtitle?: string;
+  info?: string;
   showExport?: boolean;
   onOpenReport?: () => void;
   isEditing?: boolean;
@@ -126,7 +129,10 @@ export function DataTable({
       <div className="flex shrink-0 items-center justify-between gap-2 px-4 pb-3 pt-3">
         {!isEditing && title && (
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>
+              {info && <InfoTip content={info} />}
+            </div>
             {subtitle && <p className="mt-0.5 truncate text-xs text-muted-foreground">{subtitle}</p>}
           </div>
         )}

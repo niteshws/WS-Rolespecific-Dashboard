@@ -1,6 +1,8 @@
 import { ArrowUpRight, ArrowDownRight, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Sparkline } from "@/components/charts/Sparkline";
+import { getKpiHelp } from "@/data/helpText";
 import { cn } from "@/lib/utils";
 import type { KpiSpec } from "@/types";
 import { Icon } from "@/components/Icon";
@@ -38,6 +40,7 @@ export function KpiCard({
     ? `${spec.secondaryValue} ${spec.secondaryLabel ?? ""}`.trim()
     : spec.deltaLabel;
   const isComingSoon = spec.state === "coming-soon";
+  const info = spec.info ?? getKpiHelp(spec.id, spec.label);
 
   return (
     <button
@@ -53,7 +56,7 @@ export function KpiCard({
     >
       <Card
         className={cn(
-          "relative h-full overflow-hidden p-4 transition-all duration-200",
+          "relative h-full overflow-visible p-4 transition-all duration-200",
           !isComingSoon && "hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card-hover",
         )}
       >
@@ -81,6 +84,7 @@ export function KpiCard({
             <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted">
               {spec.label}
             </span>
+            {info && <InfoTip content={info} side="top" />}
           </div>
           <span
             className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", HEALTH_DOT[spec.health])}

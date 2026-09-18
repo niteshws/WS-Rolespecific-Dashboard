@@ -6,7 +6,9 @@ import { DataTable } from "./DataTable";
 import { ScatterChart } from "@/components/charts/ScatterChart";
 import { AxisChart } from "@/components/charts/AxisChart";
 import { ProgressBars } from "@/components/charts/ProgressBars";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { cn } from "@/lib/utils";
+import { getReportStatHelp } from "@/data/helpText";
 import { getReport } from "@/data/reports";
 import { downloadCsv } from "@/lib/csv";
 import type { AxisChartPayload, HealthLevel, ProgressBarsPayload, ScatterPoint } from "@/types";
@@ -66,7 +68,10 @@ export function ReportDrawer({
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {report.stats.map((s) => (
+          {report.stats.map((s) => {
+            const statInfo =
+              s.info ?? getReportStatHelp(s.label, report.key);
+            return (
             <div key={s.label} className="rounded border border-border bg-card p-3">
               <div className="flex items-center gap-1.5">
                 {(s.color || s.health) && (
@@ -79,6 +84,7 @@ export function ReportDrawer({
                   />
                 )}
                 <span className="text-[11px] text-muted-foreground">{s.label}</span>
+                {statInfo && <InfoTip content={statInfo} side="top" />}
               </div>
               <div className="tabular mt-1 text-lg font-semibold text-ink">{s.value}</div>
               {s.delta && (
@@ -92,7 +98,8 @@ export function ReportDrawer({
                 </div>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
 
         {report.chart && (

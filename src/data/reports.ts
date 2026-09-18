@@ -210,7 +210,7 @@ const REPORTS: Record<string, ReportSpec> = {
   },
   "projects-worked": {
     key: "projects-worked",
-    title: "Projects Worked — Detailed Report",
+    title: "Project Status — Detailed Report",
     subtitle: "Portfolio count by status with delivery detail",
     severity: "warn",
     narrative: `${projectsWorkedTotal} projects across the portfolio. ${Math.round((projectsWorkedTop.value / projectsWorkedTotal) * 100)}% are in ${projectsWorkedTop.key} — review resourcing and timelines to move more work into active delivery.`,
@@ -787,10 +787,10 @@ const REPORTS: Record<string, ReportSpec> = {
     narrative:
       "Average budget burn is 78%, up 9pts. Q3 shows the widest gap between budgeted and invoiced — a signal to re-baseline scope on the two at-risk projects.",
     stats: [
-      { label: "Avg Burn", value: "78%", delta: "+9%", health: "warn" },
-      { label: "Over Budget", value: "3", delta: "+1", health: "bad" },
-      { label: "Under Budget", value: "6", health: "good" },
-      { label: "Forecast Var.", value: "±6%", health: "warn" },
+      { label: "Avg Burn", value: "78%", delta: "+9% vs last week", health: "warn" },
+      { label: "Over Budget", value: "3", delta: "+1 vs last week", health: "bad" },
+      { label: "Under Budget", value: "6", delta: "+2 vs last week", health: "good" },
+      { label: "Forecast Var.", value: "±6%", delta: "±2% vs last quarter", health: "warn" },
     ],
     chart: { type: "barChart", title: "Budget vs. invoiced by quarter", payload: budgetTrend },
     table: budgetBurnTable,
@@ -845,7 +845,7 @@ const REPORTS: Record<string, ReportSpec> = {
       {
         label: "Listed Profit",
         value: topProfitableMeta.totalProfit,
-        delta: "8 projects",
+        delta: `${topProfitableMeta.projectCount} projects`,
         health: "good",
       },
       {
@@ -857,7 +857,7 @@ const REPORTS: Record<string, ReportSpec> = {
       {
         label: "Avg Margin",
         value: topProfitableMeta.avgMargin,
-        delta: "top eight",
+        delta: `across ${topProfitableMeta.projectCount}`,
         health: "good",
       },
     ],

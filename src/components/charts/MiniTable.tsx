@@ -1,4 +1,4 @@
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -7,13 +7,7 @@ import { statusVariant } from "@/lib/status";
 import type { DataTablePayload, TableColumn, TableRow } from "@/types";
 
 /** Layer 2 — compact, scrollable read-only table embedded in the grid. */
-export function MiniTable({
-  payload,
-  onViewAll,
-}: {
-  payload: DataTablePayload;
-  onViewAll?: () => void;
-}) {
+export function MiniTable({ payload }: { payload: DataTablePayload }) {
   const { columns, rows, insight } = payload;
   const isMilestones = columns.some((c) => c.key === "milestone");
 
@@ -64,16 +58,6 @@ export function MiniTable({
         <div className="flex shrink-0 items-start gap-2 rounded-xl bg-sky-50/90 px-3 py-2.5">
           <TrendingUp className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-600" />
           <p className="min-w-0 flex-1 text-[11px] leading-snug text-slate-600">{insight}</p>
-          {onViewAll && (
-            <button
-              type="button"
-              onClick={onViewAll}
-              className="inline-flex shrink-0 items-center gap-0.5 text-[11px] font-semibold text-primary transition-colors hover:text-primary/80"
-            >
-              View all
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          )}
         </div>
       )}
     </div>

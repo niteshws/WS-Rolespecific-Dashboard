@@ -28,7 +28,7 @@ export function MemberActivityBarsWidget({ payload }: { payload: MemberActivityB
             </span>
 
             <Tooltip
-              wrapperClassName="w-full min-w-0"
+              wrapperClassName="block w-full min-w-0"
               className="whitespace-normal"
               content={
                 <span className="flex flex-col gap-0.5 text-left font-normal leading-snug">

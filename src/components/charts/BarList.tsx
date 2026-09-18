@@ -43,18 +43,32 @@ export function BarList({ payload }: { payload: BarListPayload }) {
           const bar = (
             <div
               className={cn(
-                "w-full overflow-hidden rounded-full bg-muted/10",
+                "w-full min-w-0 overflow-hidden rounded-full bg-muted/10",
                 compact ? "h-2" : "h-2.5",
-                !hasTooltip ? "flex-1" : "",
+              )}
+            >
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${Math.max(pct, 4)}%`, background: color }}
+              />
+            </div>
+          );
+          const barWithOptionalLabel = bubbles ? (
+            <div
+              className={cn(
+                "w-full min-w-0 overflow-hidden rounded-full bg-muted/10",
+                compact ? "h-2" : "h-2.5",
               )}
             >
               <div
                 className="flex h-full items-center justify-end rounded-full px-1 text-[9px] font-medium text-white/90 transition-all"
-                style={{ width: `${Math.max(6, pct)}%`, background: color }}
+                style={{ width: `${Math.max(pct, 6)}%`, background: color }}
               >
-                {bubbles ? it.value : ""}
+                {it.value}
               </div>
             </div>
+          ) : (
+            bar
           );
           return (
             <li
@@ -69,11 +83,11 @@ export function BarList({ payload }: { payload: BarListPayload }) {
               <span className="truncate text-[11px] font-medium text-ink" title={it.label}>
                 {it.label}
               </span>
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 {hasTooltip ? (
                   <Tooltip
                     side={tooltipSide}
-                    wrapperClassName="min-w-0 flex-1"
+                    wrapperClassName="block w-full min-w-0 flex-1"
                     className="whitespace-normal"
                     content={
                       <span className="flex flex-col gap-0.5 text-left font-normal leading-snug">
@@ -89,12 +103,12 @@ export function BarList({ payload }: { payload: BarListPayload }) {
                       </span>
                     }
                   >
-                    <span className="flex w-full cursor-default py-0.5" tabIndex={0}>
-                      {bar}
+                    <span className="block w-full min-w-0 cursor-default py-0.5" tabIndex={0}>
+                      {barWithOptionalLabel}
                     </span>
                   </Tooltip>
                 ) : (
-                  bar
+                  barWithOptionalLabel
                 )}
                 {bubbles && it.bubble != null && (
                   <span

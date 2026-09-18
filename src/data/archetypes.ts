@@ -109,7 +109,7 @@ export const ARCHETYPES: _A[] = [
     ],
     widgets: [
       { id: "w-productivity-trend", type: "lineChart", size: "half", layer: 2, title: "Productivity Trend", subtitle: "This week", reportKey: "productivity-trend", payload: productivityTrend },
-      { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Projects Worked", subtitle: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
+      { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Project Status", subtitle: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
 
       { id: "w-members", type: "members", size: "half-short", layer: 3, title: "Team Members", subtitle: "Total team size and current availability", actionLabel: "View report", reportKey: "members", payload: membersData },
       { id: "w-upcoming-leaves", type: "upcomingLeaves", size: "half-short", layer: 3, title: "Upcoming Leaves", info: "Team members currently on leave or returning soon", actionLabel: "View all", reportKey: "upcoming-leaves", icon: "CalendarDays", payload: upcomingLeavesPayload },
@@ -209,9 +209,9 @@ export const ARCHETYPES: _A[] = [
         reportKey: "task-timeline",
         payload: taskTimelineSummary,
       },
-      { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Projects Worked", subtitle: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
+      { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Project Status", subtitle: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
       { id: "w-stacked", type: "donut", size: "half", layer: 2, title: "Task Status", reportKey: "task-status", payload: { slices: taskStatus, centerValue: "21961", centerLabel: "Total Tasks" } },
-      { id: "w-milestones", type: "miniTable", size: "half", layer: 2, title: "Upcoming Milestones", info: "Next milestones across active projects with progress and hours", reportKey: "milestones", payload: milestones },
+      { id: "w-milestones", type: "miniTable", size: "half", layer: 2, title: "Upcoming Milestones", info: "Next milestones across active projects with progress and hours", actionLabel: "View all", reportKey: "milestones", payload: milestones },
       { id: "w-budget", type: "budgetTrend", size: "half", layer: 2, title: "Budget Trend", info: "Allocated budget, billing, and burn rate over time", actionLabel: "View all", reportKey: "budget", payload: budgetTrendPayload },
       { id: "w-top-profit", type: "barList", size: "half-short", layer: 2, title: "Top Profitable Projects", info: "Highest profit contribution this period", actionLabel: "View all", reportKey: "top-profitable", payload: { items: topProfitable, unit: "₹M", insight: "VC_Table Booking Manager leads at ₹2.3M (34% margin) — nearly 40% of top-five profit." } },
       { id: "w-cost", type: "barList", size: "half-short", layer: 2, title: "Least Profitable Projects", info: "Lowest profit contribution this period", actionLabel: "View all", reportKey: "least-profitable", payload: { items: leastProfitable, unit: "₹M", insight: "Website Redesign is lowest at ₹0.2M (8.4% margin) — review scope and staffing before next sprint." } },

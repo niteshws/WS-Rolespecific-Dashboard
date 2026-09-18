@@ -886,6 +886,14 @@ const TOP_PROFITABLE_ROWS: ProfitRow[] = [
   { project: "cKymning App | FCP", client: "PixelCrayons", lead: "Dev Malhotra", profitM: 0.28, marginPct: 21, revenueM: 1.33, costM: 1.05, status: "In Progress" },
   { project: "Hadeeco Analytics Pack", client: "Hadeeco", lead: "Neha Kapoor", profitM: 0.22, marginPct: 20, revenueM: 1.1, costM: 0.88, status: "Completed" },
   { project: "Ottova Support Retainer", client: "Ottova Inc", lead: "Arjun Patel", profitM: 0.19, marginPct: 19, revenueM: 1.0, costM: 0.81, status: "In Progress" },
+  { project: "VC_PR Automation Phase 2", client: "Battforia", lead: "Priya Sharma", profitM: 0.17, marginPct: 18, revenueM: 0.94, costM: 0.77, status: "In Progress" },
+  { project: "VC_Career AI Platform", client: "PixelCrayons", lead: "Anita Desai", profitM: 0.16, marginPct: 18, revenueM: 0.89, costM: 0.73, status: "In Progress" },
+  { project: "VC_StudyAtHome App | FCP", client: "Ottova Inc", lead: "Rahul Mehta", profitM: 0.15, marginPct: 17, revenueM: 0.88, costM: 0.73, status: "In Progress" },
+  { project: "VC_Food Ordering | FCP", client: "Hadeeco", lead: "Vikram Singh", profitM: 0.14, marginPct: 17, revenueM: 0.82, costM: 0.68, status: "Yet to Start" },
+  { project: "VC_New Cloud Networks", client: "KIOO Labs", lead: "Dev Malhotra", profitM: 0.13, marginPct: 16, revenueM: 0.81, costM: 0.68, status: "In Progress" },
+  { project: "VC_ShopperSense_FCP", client: "Battforia", lead: "Sara Khan", profitM: 0.12, marginPct: 16, revenueM: 0.75, costM: 0.63, status: "In Progress" },
+  { project: "PXL_Aurelic_Wordpress || FCP", client: "PixelCrayons", lead: "Neha Kapoor", profitM: 0.11, marginPct: 15, revenueM: 0.73, costM: 0.62, status: "Completed" },
+  { project: "Workstatus Intelligence Dashboard", client: "Internal", lead: "Arjun Patel", profitM: 0.1, marginPct: 15, revenueM: 0.67, costM: 0.57, status: "In Progress" },
 ];
 
 const LEAST_PROFITABLE_ROWS: ProfitRow[] = [
@@ -944,20 +952,22 @@ export function getTopProfitableReportMeta(): {
   topProject: string;
   topMargin: string;
   avgMargin: string;
+  projectCount: number;
   narrative: string;
 } {
-  const total = TOP_PROFITABLE_ROWS.reduce((s, r) => s + r.profitM, 0);
-  const top = TOP_PROFITABLE_ROWS[0];
-  const avg = Math.round(
-    TOP_PROFITABLE_ROWS.reduce((s, r) => s + r.marginPct, 0) / TOP_PROFITABLE_ROWS.length,
-  );
+  const sorted = [...TOP_PROFITABLE_ROWS].sort((a, b) => b.profitM - a.profitM);
+  const total = sorted.reduce((s, r) => s + r.profitM, 0);
+  const top = sorted[0];
+  const avg = Math.round(sorted.reduce((s, r) => s + r.marginPct, 0) / sorted.length);
   const share = Math.round((top.profitM / total) * 100);
+  const count = sorted.length;
   return {
     totalProfit: formatInrM(total),
     topProject: top.project,
     topMargin: `${top.marginPct}%`,
     avgMargin: `${avg}%`,
-    narrative: `${top.project} leads at ${formatInrM(top.profitM)} (${top.marginPct}% margin) — ${share}% of listed profit. Top eight projects total ${formatInrM(total)} with an average margin of ${avg}%.`,
+    projectCount: count,
+    narrative: `${top.project} leads at ${formatInrM(top.profitM)} (${top.marginPct}% margin) — ${share}% of listed profit. ${count} projects total ${formatInrM(total)} with an average margin of ${avg}%.`,
   };
 }
 
@@ -1786,7 +1796,16 @@ export function makeRecentTimesheets(): DataTablePayload {
 }
 
 export function makeAttendance(): DataTablePayload {
-  const checkins = ["09:30 AM|On Time", "09:40 AM|Late (10m)", "—|Absent", "10:00 AM|Late (30m)", "—|Not In Yet", "09:25 AM|On Time", "09:35 AM|Late (5m)", "09:28 AM|On Time"];
+  const checkins = [
+    "09:30 AM|On Time",
+    "09:40 AM|Late by 10 min",
+    "—|Absent",
+    "10:00 AM|Late by 30 min",
+    "—|Not In Yet",
+    "09:25 AM|On Time",
+    "09:35 AM|Late by 5 min",
+    "10:30 AM|Late by 1hr",
+  ];
   const checkouts = ["06:30 PM|None", "07:00 PM|None", "None|—", "07:15 PM|None", "None|—", "06:45 PM|None", "07:30 PM|None", "06:10 PM|None"];
   const breakDurs = ["15m", "45m", "0m", "1h 10m", "0m", "30m", "1h 20m", "50m"];
   const rows: TableRow[] = PEOPLE.slice(0, 12).map((p, i) => {
@@ -1805,9 +1824,9 @@ export function makeAttendance(): DataTablePayload {
       { key: "member", label: "Member Name", pinned: true, render: "avatar", width: 190 },
       { key: "team", label: "Team", width: 130 },
       { key: "checkinTime", label: "Check-in Time", width: 130 },
-      { key: "checkinStatus", label: "Status", render: "status", width: 120 },
       { key: "checkout", label: "Check-out", render: "timeStatus", width: 140 },
       { key: "breaks", label: "Breaks", width: 90 },
+      { key: "checkinStatus", label: "Status", render: "status", width: 120 },
     ],
     rows,
   };
