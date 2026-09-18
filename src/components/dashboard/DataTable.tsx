@@ -184,7 +184,12 @@ export function DataTable({
                   key={col.key}
                   style={{ width: col.width, minWidth: col.width }}
                   className={cn(
-                    "border-b border-border bg-[#f7f8fa] px-3 py-2 text-left font-semibold text-muted",
+                    "border-b border-border bg-[#f7f8fa] px-3 py-2 font-semibold text-muted",
+                    (forceLeft && col.align !== "center" ? "left" : col.align) === "right"
+                      ? "text-right"
+                      : (forceLeft && col.align !== "center" ? "left" : col.align) === "center"
+                        ? "text-center"
+                        : "text-left",
                     col.pinned &&
                       "sticky left-0 z-30 bg-[#f7f8fa] shadow-[2px_0_0_0_rgba(55,65,81,0.08)]",
                   )}
@@ -192,7 +197,14 @@ export function DataTable({
                   <button
                     type="button"
                     onClick={() => toggleSort(col.key)}
-                    className="inline-flex items-center gap-1 hover:text-ink"
+                    className={cn(
+                      "inline-flex items-center gap-1 hover:text-ink w-full",
+                      (forceLeft && col.align !== "center" ? "left" : col.align) === "right"
+                        ? "justify-end"
+                        : (forceLeft && col.align !== "center" ? "left" : col.align) === "center"
+                          ? "justify-center"
+                          : "justify-start"
+                    )}
                   >
                     {col.label}
                     {sortKey === col.key ? (
@@ -220,7 +232,7 @@ export function DataTable({
             {visibleRows.map((row, ri) => (
               <tr key={ri} className={cn("group hover:bg-primary/[0.03]", ri % 2 === 1 && "bg-muted/[0.03]")}>
                 {columns.map((col) => {
-                  const align = forceLeft ? "left" : col.align;
+                  const align = forceLeft && col.align !== "center" ? "left" : col.align;
                   return (
                   <td
                     key={col.key}
@@ -267,6 +279,7 @@ function Cell({
 }) {
   const value = row[col.key];
   const alignRight = !forceLeft && col.align === "right";
+  const alignCenter = col.align === "center";
 
   switch (col.render) {
     case "avatar":
@@ -393,6 +406,23 @@ function Cell({
         </span>
       );
     }
+    case "fractionBar": {
+      const parts = String(value).split("|");
+      const num = Number(parts[0]) || 0;
+      const den = Number(parts[1]) || 1;
+      const pct = (num / den) * 100;
+      const color = pct >= 75 ? "#10b981" : pct >= 55 ? "#f59e0b" : "#ef4444";
+      return (
+        <span className={cn("flex items-center gap-2", alignRight ? "justify-end" : alignCenter ? "justify-center" : "justify-start")}>
+          <span className={cn("tabular w-10 text-xs text-muted-foreground", alignRight ? "text-right" : alignCenter ? "text-center" : "text-left")}>
+            {num}/{den}
+          </span>
+          <span className="h-1.5 w-16 overflow-hidden rounded-full bg-muted/10 shrink-0">
+            <span className="block h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, pct))}%`, backgroundColor: color }} />
+          </span>
+        </span>
+      );
+    }
     case "dueDate": {
       const text = String(value ?? "");
       const overdue = isPastDueDate(text);
@@ -402,6 +432,58 @@ function Cell({
         </span>
       );
     }
+    case "timeStatus": {
+      const parts = String(value).split("|");
+      const time = parts[0]?.trim();
+      const statusLabel = parts[1]?.trim();
+      
+      let statusNode = null;
+      if (statusLabel && statusLabel !== "None" && statusLabel !== "—") {
+        const pill = projectStatusPill(statusLabel);
+        if (pill) {
+          statusNode = (
+            <span
+              className="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-medium leading-none whitespace-nowrap w-[76px] text-center"
+              style={{ color: pill.text, background: pill.bg }}
+            >
+              {statusLabel}
+            </span>
+          );
+        } else {
+          statusNode = (
+            <Badge variant={statusVariant(statusLabel)} className="rounded-full px-2 py-0.5 text-[10px] w-[76px] justify-center text-center">
+              {statusLabel}
+            </Badge>
+          );
+        }
+      }
+
+      return (
+        <span className={cn("flex items-center gap-2", alignRight ? "justify-end" : alignCenter ? "justify-center" : "justify-start")}>
+          {time && time !== "None" && (
+            <span className={cn(
+              "tabular text-xs text-muted-foreground",
+              (alignRight || alignCenter) && "w-[64px] shrink-0",
+              alignRight ? "text-right" : alignCenter ? "text-center" : "text-left"
+            )}>{time}</span>
+          )}
+          {statusNode}
+        </span>
+      );
+    }
+    case "hoverTooltip": {
+      const parts = String(value).split("|");
+      const main = parts[0]?.trim();
+      const tooltip = parts[1]?.trim();
+      if (!tooltip) return <span className={cn("tabular", alignRight && "text-right block w-full")}>{main}</span>;
+      return (
+        <Tooltip content={tooltip} side="top">
+          <span className={cn("tabular cursor-help border-b border-dotted border-muted-foreground/50", alignRight && "text-right block w-full inline-block text-right")}>{main}</span>
+        </Tooltip>
+      );
+    }
+    case "chipStack":
+      return <ChipStack value={value as string} />;
     default: {
       const text = String(value ?? "");
       const isSignedTime = /^[+\-−]/.test(text) && /h\s*\d*m/.test(text);
@@ -429,4 +511,26 @@ function isPastDueDate(value: string): boolean {
   today.setHours(0, 0, 0, 0);
   due.setHours(0, 0, 0, 0);
   return due.getTime() < today.getTime();
+}
+
+function ChipStack({ value }: { value: string | number }) {
+  const [open, setOpen] = useState(false);
+  const items = String(value).split('||').map(s => s.trim()).filter(Boolean);
+  if (items.length === 0) return <span>-</span>;
+  if (items.length === 1) {
+    return <Badge variant="neutral" className="font-normal rounded-md">{items[0]}</Badge>;
+  }
+  return (
+    <div className="flex flex-wrap gap-1 items-center">
+      <Badge variant="neutral" className="font-normal rounded-md truncate max-w-[120px]">{items[0]}</Badge>
+      {!open && (
+        <button onClick={() => setOpen(true)} className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-white cursor-pointer hover:bg-muted/80">
+          +{items.length - 1}
+        </button>
+      )}
+      {open && items.slice(1).map(item => (
+        <Badge key={item} variant="neutral" className="font-normal rounded-md truncate max-w-[120px]">{item}</Badge>
+      ))}
+    </div>
+  );
 }

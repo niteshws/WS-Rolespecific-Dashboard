@@ -430,7 +430,7 @@ export interface TableColumn {
   label: string;
   align?: "left" | "right" | "center";
   pinned?: boolean;
-  render?: "text" | "health" | "hours" | "delta" | "avatar" | "avatarOnly" | "avatarStack" | "bar" | "money" | "status" | "bandPct" | "dueDate";
+  render?: "text" | "health" | "hours" | "delta" | "avatar" | "avatarOnly" | "avatarStack" | "bar" | "fractionBar" | "money" | "status" | "timeStatus" | "bandPct" | "dueDate" | "hoverTooltip" | "chipStack";
   width?: number;
 }
 
@@ -490,6 +490,7 @@ export interface ReportStat {
   value: string;
   delta?: string;
   health?: HealthLevel;
+  color?: string;
 }
 
 export interface ReportSpec {

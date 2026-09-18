@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Search, Bell, Calendar, ChevronRight, Filter, ChevronDown, Check } from "lucide-react";
+import { Search, Bell, Calendar, ChevronRight, Filter, ChevronDown, Check, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/lib/utils";
 import type { Dashboard } from "@/types";
 
 /** Top app bar: breadcrumb into the active Intelligence view + date range dropdown + filters. */
-export function Topbar({ 
+export function Topbar({
   dashboard,
   dateRange,
   setDateRange,
@@ -14,7 +14,7 @@ export function Topbar({
   setCustomStartDate,
   customEndDate,
   setCustomEndDate,
-}: { 
+}: {
   dashboard: Dashboard;
   dateRange: string;
   setDateRange: (val: string) => void;
@@ -24,6 +24,17 @@ export function Topbar({
   setCustomEndDate: (val: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  function toggleDark() {
+    const next = !isDark;
+    setIsDark(next);
+    if (next) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-card/80 px-6 backdrop-blur">
@@ -46,6 +57,10 @@ export function Topbar({
             className="h-9 w-64 rounded border border-border bg-background pl-8 pr-3 text-sm text-ink placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none"
           />
         </div>
+
+        <Button variant="ghost" size="icon" aria-label="Toggle Theme" onClick={toggleDark}>
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
 
         <Button variant="ghost" size="icon" aria-label="Notifications" className="relative">
           <Bell className="h-4 w-4" />

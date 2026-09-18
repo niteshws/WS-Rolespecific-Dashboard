@@ -41,6 +41,12 @@ const between = (min: number, max: number) => min + rand() * (max - min);
 const pick = <T>(arr: T[]) => arr[Math.floor(rand() * arr.length)];
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+function formatAmPm(hour: number, min: number): string {
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const h = hour % 12 || 12;
+  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')} ${ampm}`;
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Realistic entities                                                         */
 /* -------------------------------------------------------------------------- */
@@ -137,18 +143,16 @@ export function makeVelocityCapacityTable(): DataTablePayload {
     columns: [
       { key: "name", label: "Member", render: "avatar", pinned: true, width: 180 },
       { key: "team", label: "Team", width: 120 },
-      { key: "hours", label: "Hours Tracked", align: "right", width: 120 },
-      { key: "productivity", label: "Productivity", align: "right", render: "bar", width: 140 },
-      { key: "status", label: "Status", render: "status", width: 110 },
-      { key: "load", label: "Load", width: 110 },
+      { key: "hours", label: "Hours Tracked", width: 120 },
+      { key: "productivity", label: "Productivity", render: "bar", width: 140 },
+      { key: "band", label: "Band", render: "status", width: 130 },
     ],
     rows: points.map((p) => ({
       name: p.name,
       team: p.team,
       hours: `${p.x}h`,
       productivity: p.y,
-      status: scatterHealthLabel(p.health),
-      load: scatterLoadBand(p.x),
+      band: scatterLoadBand(p.x),
     })),
   };
 }
@@ -360,24 +364,22 @@ export function makeTopContributorsTable(): DataTablePayload {
 
   return {
     columns: [
-      { key: "rank", label: "#", align: "right", width: 50 },
       { key: "name", label: "Member", render: "avatar", pinned: true, width: 200 },
       { key: "team", label: "Team", width: 120 },
-      { key: "hours", label: "Invested Hours", align: "right", width: 130 },
-      { key: "share", label: "Share", align: "right", render: "bar", width: 140 },
-      { key: "tasksCompleted", label: "Tasks Completed", align: "right", width: 140 },
-      { key: "projects", label: "Projects", align: "right", width: 100 },
+      { key: "hours", label: "Invested Hours", width: 130 },
+      { key: "tasksCompleted", label: "Tasks Completed", width: 140 },
+      { key: "projects", label: "Projects", render: "chipStack", width: 150 },
     ],
     rows: all.map((r, i) => {
       const share = Math.round((r.metric / total) * 100);
+      const numProjects = Math.floor(between(1, 4));
+      const projList = Array.from({ length: numProjects }, () => pick(["VC_LiveCart", "KIOO Labs", "Workstatus Product Dev", "VC_Angello", "MATCT", "cKymning App | FCP"]));
       return {
-        rank: i + 1,
         name: r.name,
         team: r.team,
         hours: `${r.hours}h ${r.mins}m`,
-        share,
         tasksCompleted: Math.floor(between(8, 42)),
-        projects: Math.floor(between(1, 5)),
+        projects: Array.from(new Set(projList)).join("||"),
       };
     }),
   };
@@ -538,40 +540,38 @@ export function makeProjectsWorkedTable(): DataTablePayload {
     return `${hours}h ${String(mins).padStart(2, "0")}m`;
   };
 
-  const catalog: { project: string; status: string; lead: string; hours: number; mins: number; memberCount: number; due: string }[] = [
-    { project: "VC_Table Booking Manager", status: "Not Started", lead: PEOPLE[0].name, hours: 12, mins: 10, memberCount: 4, due: "Oct 12, 2026" },
-    { project: "Hadeeco Principal Platform", status: "Not Started", lead: PEOPLE[1].name, hours: 8, mins: 25, memberCount: 3, due: "Oct 20, 2026" },
-    { project: "PS Automation MVP | FCP", status: "Not Started", lead: PEOPLE[2].name, hours: 4, mins: 5, memberCount: 2, due: "Nov 2, 2026" },
-    { project: "cKymning App | FCP", status: "Not Started", lead: PEOPLE[3].name, hours: 6, mins: 40, memberCount: 3, due: "Nov 8, 2026" },
-    { project: "VC_LiveCart", status: "In Progress", lead: PEOPLE[4].name, hours: 428, mins: 15, memberCount: 7, due: "Sep 28, 2026" },
-    { project: "Workstatus Product Development", status: "In Progress", lead: PEOPLE[5].name, hours: 612, mins: 30, memberCount: 6, due: "Oct 5, 2026" },
-    { project: "KIOO Labs", status: "In Progress", lead: PEOPLE[6].name, hours: 356, mins: 45, memberCount: 5, due: "Sep 22, 2026" },
-    { project: "VC_StudyAtHome App | FCP", status: "In Progress", lead: PEOPLE[7].name, hours: 214, mins: 20, memberCount: 4, due: "Oct 15, 2026" },
-    { project: "PixelCrayons Design System", status: "Yet to Start", lead: PEOPLE[0].name, hours: 2, mins: 10, memberCount: 2, due: "Nov 18, 2026" },
-    { project: "Battforia Onboarding Hub", status: "Yet to Start", lead: PEOPLE[1].name, hours: 0, mins: 0, memberCount: 3, due: "Dec 1, 2026" },
-    { project: "VC_Angello", status: "On Hold", lead: PEOPLE[2].name, hours: 188, mins: 35, memberCount: 4, due: "TBD" },
-    { project: "MATCT", status: "On Hold", lead: PEOPLE[3].name, hours: 142, mins: 50, memberCount: 3, due: "TBD" },
-    { project: "Legacy CRM Migration", status: "Cancelled", lead: PEOPLE[4].name, hours: 96, mins: 5, memberCount: 2, due: "—" },
-    { project: "Internal Wiki Refresh", status: "Cancelled", lead: PEOPLE[5].name, hours: 28, mins: 15, memberCount: 1, due: "—" },
-    { project: "Ottova Portal v1", status: "Completed", lead: PEOPLE[6].name, hours: 504, mins: 40, memberCount: 6, due: "Aug 30, 2026" },
-    { project: "QA Automation Suite", status: "Completed", lead: PEOPLE[7].name, hours: 276, mins: 25, memberCount: 4, due: "Sep 4, 2026" },
+  const catalog: { project: string; lead: string; hours: number; mins: number; tasks: string; due: string }[] = [
+    { project: "VC_Table Booking Manager", lead: PEOPLE[0].name, hours: 12, mins: 10, tasks: "5|20", due: "Oct 12, 2026" },
+    { project: "Hadeeco Principal Platform", lead: PEOPLE[1].name, hours: 8, mins: 25, tasks: "2|18", due: "Oct 20, 2026" },
+    { project: "PS Automation MVP | FCP", lead: PEOPLE[2].name, hours: 4, mins: 5, tasks: "1|10", due: "Nov 2, 2026" },
+    { project: "cKymning App | FCP", lead: PEOPLE[3].name, hours: 6, mins: 40, tasks: "3|12", due: "Nov 8, 2026" },
+    { project: "VC_LiveCart", lead: PEOPLE[4].name, hours: 428, mins: 15, tasks: "142|160", due: "Sep 28, 2026" },
+    { project: "Workstatus Product Development", lead: PEOPLE[5].name, hours: 612, mins: 30, tasks: "284|300", due: "Oct 5, 2026" },
+    { project: "KIOO Labs", lead: PEOPLE[6].name, hours: 356, mins: 45, tasks: "110|150", due: "Sep 22, 2026" },
+    { project: "VC_StudyAtHome App | FCP", lead: PEOPLE[7].name, hours: 214, mins: 20, tasks: "85|120", due: "Oct 15, 2026" },
+    { project: "PixelCrayons Design System", lead: PEOPLE[0].name, hours: 2, mins: 10, tasks: "0|15", due: "Nov 18, 2026" },
+    { project: "Battforia Onboarding Hub", lead: PEOPLE[1].name, hours: 0, mins: 0, tasks: "0|8", due: "Dec 1, 2026" },
+    { project: "VC_Angello", lead: PEOPLE[2].name, hours: 188, mins: 35, tasks: "54|100", due: "TBD" },
+    { project: "MATCT", lead: PEOPLE[3].name, hours: 142, mins: 50, tasks: "38|80", due: "TBD" },
+    { project: "Legacy CRM Migration", lead: PEOPLE[4].name, hours: 96, mins: 5, tasks: "45|50", due: "—" },
+    { project: "Internal Wiki Refresh", lead: PEOPLE[5].name, hours: 28, mins: 15, tasks: "12|20", due: "—" },
+    { project: "Ottova Portal v1", lead: PEOPLE[6].name, hours: 504, mins: 40, tasks: "210|210", due: "Aug 30, 2026" },
+    { project: "QA Automation Suite", lead: PEOPLE[7].name, hours: 276, mins: 25, tasks: "92|92", due: "Sep 4, 2026" },
   ];
 
   return {
     columns: [
       { key: "project", label: "Project", pinned: true, width: 220 },
-      { key: "status", label: "Status", render: "status", width: 120 },
       { key: "lead", label: "Lead", render: "avatarOnly", width: 72 },
+      { key: "tasks", label: "Tasks Completed", render: "fractionBar", width: 180 },
       { key: "hours", label: "Hours Invested", align: "right", width: 120 },
-      { key: "members", label: "Members", render: "avatarStack", width: 140 },
       { key: "due", label: "Due", align: "right", width: 120 },
     ],
-    rows: catalog.map((row, i) => ({
+    rows: catalog.map((row) => ({
       project: row.project,
-      status: row.status,
       lead: row.lead,
+      tasks: row.tasks,
       hours: formatInvested(row.hours, row.mins),
-      members: membersFor(row.memberCount, i),
       due: row.due,
     })),
   };
@@ -813,20 +813,16 @@ export function makeUpcomingLeavesTable(): DataTablePayload {
     member: r.name,
     department: r.department,
     leaveType: r.leaveType,
-    start: r.startDate,
-    return: r.returnDate,
+    duration: `${r.startDate} - ${r.returnDate}`,
     days: r.days,
-    health: r.leaveType === "Sick" ? "bad" : r.leaveType === "PTO" ? "warn" : "good",
   }));
   return {
     columns: [
       { key: "member", label: "Member", pinned: true, render: "avatar", width: 190 },
       { key: "department", label: "Department", width: 120 },
       { key: "leaveType", label: "Leave Type", render: "status", width: 110 },
-      { key: "start", label: "Starts", width: 120 },
-      { key: "return", label: "Returns", width: 120 },
+      { key: "duration", label: "Leave Duration", width: 220 },
       { key: "days", label: "Days", align: "right", width: 80 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
     ],
     rows,
   };
@@ -915,17 +911,10 @@ const makeProfitabilityTable = (rows: ProfitRow[], polarity: "top" | "least"): D
       { key: "client", label: "Client", width: 120 },
       { key: "lead", label: "Lead", render: "avatar", width: 140 },
       { key: "status", label: "Status", render: "status", width: 110 },
-      { key: "revenue", label: "Revenue", align: "right", width: 100 },
-      { key: "cost", label: "Cost", align: "right", width: 100 },
-      { key: "profit", label: "Profit", align: "right", width: 100 },
-      { key: "margin", label: "Margin %", align: "right", render: "bar", width: 140 },
-      {
-        key: "health",
-        label: "Health",
-        align: "center",
-        render: "health",
-        width: 90,
-      },
+      { key: "revenue", label: "Revenue", width: 100 },
+      { key: "cost", label: "Cost", width: 100 },
+      { key: "profit", label: "Profit", width: 100 },
+      { key: "margin", label: "Margin %", render: "bar", width: 140 },
     ],
     rows: ordered.map((r) => ({
       project: r.project,
@@ -1100,7 +1089,7 @@ export function makeTrackedLeastHoursTable(): DataTablePayload {
 export function makeWorkloadCapacityTable(): DataTablePayload {
   const columns = [
     { key: "name", label: "Name", pinned: true, render: "avatar" as const, width: 200 },
-    { key: "available", label: "Available", width: 110 },
+    { key: "available", label: "Avl Hrs.", width: 110 },
     { key: "capacityPct", label: "Capacity %", render: "bandPct" as const, width: 120 },
     { key: "billablePct", label: "Billable %", render: "bandPct" as const, width: 120 },
     { key: "band", label: "Band", render: "status" as const, width: 150 },
@@ -1365,12 +1354,9 @@ export function makeBudgetHealthTable(): DataTablePayload {
     columns: [
       { key: "project", label: "Project", pinned: true, width: 220 },
       { key: "lead", label: "Lead", render: "avatar", width: 140 },
-      { key: "band", label: "Budget Band", render: "status", width: 120 },
-      { key: "spent", label: "Spent", align: "right", width: 90 },
-      { key: "budget", label: "Budget", align: "right", width: 90 },
-      { key: "burn", label: "Burn %", align: "right", render: "bar", width: 140 },
-      { key: "overrun", label: "Overrun", align: "right", width: 90 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+      { key: "budget", label: "Budget", width: 90 },
+      { key: "spent", label: "Spent", width: 90 },
+      { key: "overrun", label: "Overrun", width: 90 },
     ],
     rows,
   };
@@ -1690,12 +1676,9 @@ export function makeMilestonesTable(): DataTablePayload {
       { key: "project", label: "Project", width: 180 },
       { key: "lead", label: "Lead", render: "avatar", width: 160 },
       { key: "due", label: "Due", render: "dueDate", width: 110 },
-      { key: "dueIn", label: "Due in", align: "right", width: 90 },
-      { key: "status", label: "Status", render: "status", width: 110 },
-      { key: "tasks", label: "Tasks", align: "right", width: 90 },
-      { key: "remaining", label: "Remaining", align: "right", width: 100 },
-      { key: "completion", label: "Completion", align: "right", render: "bar", width: 130 },
-      { key: "hours", label: "Hours", align: "right", width: 90 },
+      { key: "tasks", label: "Tasks", width: 90 },
+      { key: "completion", label: "Completion", render: "bar", width: 130 },
+      { key: "hours", label: "Hours", width: 90 },
     ],
     rows: upcoming.map((m) => {
       const completion = Math.round((m.done / Math.max(m.total, 1)) * 100);
@@ -1784,8 +1767,8 @@ export function makeRecentTimesheets(): DataTablePayload {
         "Internal_Business Development",
       ]),
       date: "07 Aug, 2026",
-      start: `${start}:${String(min).padStart(2, "0")} AM`,
-      stop: `${start}:${String(Math.min(59, min + 6)).padStart(2, "0")} AM`,
+      start: formatAmPm(start, min),
+      stop: formatAmPm(start, Math.min(59, min + 6)),
       duration: `00:0${Math.floor(dur)}:${String(Math.floor(between(0, 59))).padStart(2, "0")}`,
     };
   });
@@ -1803,21 +1786,23 @@ export function makeRecentTimesheets(): DataTablePayload {
 }
 
 export function makeAttendance(): DataTablePayload {
-  const statuses = ["09:20:22", "05:56:45", "Absent", "01:59:53", "NOT IN YET", "03:26:28", "NOT IN YET", "09:38:29", "09:59:59"];
+  const checkins = ["09:30 AM|On Time", "09:40 AM|Late (10m)", "—|Absent", "10:00 AM|Late (30m)", "—|Not In Yet", "09:25 AM|On Time", "09:35 AM|Late (5m)", "09:28 AM|On Time"];
+  const checkouts = ["06:30 PM|None", "07:00 PM|None", "None|—", "07:15 PM|None", "None|—", "06:45 PM|None", "07:30 PM|None", "06:10 PM|None"];
+  const breakDurs = ["15m", "45m", "0m", "1h 10m", "0m", "30m", "1h 20m", "50m"];
   const rows: TableRow[] = PEOPLE.slice(0, 12).map((p, i) => ({
     member: p.name,
     team: p.team,
-    status: statuses[i % statuses.length],
-    breaks: `${Math.floor(between(1, 4))}`,
-    late: i % 3 === 0 ? "Yes" : "No",
+    status: checkins[i % checkins.length],
+    checkout: checkouts[i % checkouts.length],
+    breaks: breakDurs[i % breakDurs.length],
   }));
   return {
     columns: [
       { key: "member", label: "Member Name", pinned: true, render: "avatar", width: 190 },
       { key: "team", label: "Team", width: 130 },
-      { key: "status", label: "Check-in", align: "right", render: "status", width: 120 },
-      { key: "breaks", label: "Breaks", align: "right", width: 90 },
-      { key: "late", label: "Late", align: "center", width: 80 },
+      { key: "status", label: "Check-in", align: "center", render: "timeStatus", width: 170 },
+      { key: "checkout", label: "Check-out", align: "center", render: "timeStatus", width: 140 },
+      { key: "breaks", label: "Breaks", align: "center", width: 90 },
     ],
     rows,
   };
@@ -1844,7 +1829,6 @@ export function makeActivityTable(): DataTablePayload {
       productivity,
       focus,
       delta: Math.round(between(-18, 22)),
-      health: healthFrom(productivity),
       updated: `${Math.floor(between(1, 58))}m ago`,
     };
   });
@@ -1853,14 +1837,13 @@ export function makeActivityTable(): DataTablePayload {
       { key: "name", label: "Team Member", pinned: true, render: "avatar", width: 200 },
       { key: "team", label: "Team", width: 120 },
       { key: "role", label: "Role", width: 180 },
-      { key: "tracked", label: "Tracked", align: "right", render: "hours", width: 100 },
-      { key: "active", label: "Active", align: "right", render: "hours", width: 100 },
-      { key: "idle", label: "Idle", align: "right", render: "hours", width: 90 },
-      { key: "productivity", label: "Productivity", align: "right", render: "bar", width: 140 },
-      { key: "focus", label: "Focus", align: "right", render: "bar", width: 120 },
-      { key: "delta", label: "WoW", align: "right", render: "delta", width: 90 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
-      { key: "updated", label: "Updated", align: "right", width: 100 },
+      { key: "tracked", label: "Productive Time", render: "hours", width: 120 },
+      { key: "active", label: "Active Time", render: "hours", width: 110 },
+      { key: "idle", label: "Idle Time", render: "hours", width: 100 },
+      { key: "productivity", label: "Productivity", render: "bar", width: 140 },
+      { key: "focus", label: "Focus", render: "bar", width: 120 },
+      { key: "delta", label: "WoW", render: "delta", width: 90 },
+      { key: "updated", label: "Updated", width: 100 },
     ],
     rows,
   };
@@ -1894,7 +1877,7 @@ export function makeProjectTable(): DataTablePayload {
     "Aug 15, 2026",
     "Nov 12, 2026",
   ];
-  const statuses = ["Not Started", "In Progress", "Yet to Start", "In Progress", "Not Started"];
+  const statuses = ["Not Started", "In Progress", "At Risk", "On Hold", "Completed", "Cancelled"];
   const rows: TableRow[] = projects.map((name, i) => {
     const status = pick(statuses);
     const count = leadCounts[i] ?? 1;
@@ -1915,7 +1898,73 @@ export function makeProjectTable(): DataTablePayload {
       budgetUsed: `₹${Math.round(budgetUsedAmt / 1000)}K / ₹${Math.round(totalBudget / 1000)}K`,
       openTasks: `${openTasks} / ${totalTasks}`,
       completedTasks: `${completedTasks} / ${totalTasks}`,
-      health: status === "In Progress" ? "warn" : "good",
+      health: status === "At Risk" ? "bad" : status === "In Progress" || status === "On Hold" ? "warn" : "good",
+      due: dueDates[i] ?? `Oct ${10 + i}, 2026`,
+    };
+  });
+  return {
+    columns: [
+      { key: "project", label: "Project", pinned: true, width: 220 },
+      { key: "lead", label: "Lead", render: "avatarStack", width: 140 },
+      { key: "investedHours", label: "Invested Hours", width: 130 },
+      { key: "budgetUsed", label: "Budget Used", width: 150 },
+      { key: "openTasks", label: "Open Tasks", width: 120 },
+      { key: "completedTasks", label: "Completed Tasks", width: 140 },
+    ],
+    rows,
+  };
+}
+
+export function makeBudgetBurnTable(): DataTablePayload {
+  const projects = [
+    "VC_Table Booking Manager",
+    "VC_LiveCart",
+    "KIOO Labs",
+    "VC_Angello",
+    "MATCT",
+    "PS Automation MVP | FCP",
+    "Workstatus Product Development",
+    "cKymning App | FCP",
+    "VC_StudyAtHome App | FCP",
+    "Hadeeco Principal Platform",
+  ];
+  /** Vary lead count per row: 1, 2, or 3+ people. */
+  const leadCounts = [1, 2, 3, 1, 2, 4, 1, 2, 3, 2];
+  /** Mix past (red) and upcoming due dates — today is Sep 10, 2026. */
+  const dueDates = [
+    "Aug 10, 2026",
+    "Oct 18, 2026",
+    "Aug 22, 2026",
+    "Nov 2, 2026",
+    "Sep 4, 2026",
+    "Dec 1, 2026",
+    "Jul 28, 2026",
+    "Oct 30, 2026",
+    "Aug 15, 2026",
+    "Nov 12, 2026",
+  ];
+  const statuses = ["Not Started", "In Progress", "At Risk", "On Hold", "Completed", "Cancelled"];
+  const rows: TableRow[] = projects.map((name, i) => {
+    const status = pick(statuses);
+    const count = leadCounts[i] ?? 1;
+    const leads = Array.from({ length: count }, (_, j) => PEOPLE[(i + j * 3) % PEOPLE.length].name);
+    const hours = Math.floor(between(2, 940));
+    const mins = Math.floor(between(0, 59));
+    const totalTasks = Math.floor(between(20, 80));
+    const completedTasks = Math.floor(between(0, totalTasks));
+    const openTasks = totalTasks - completedTasks;
+    const totalBudget = Math.floor(between(40, 200)) * 1000;
+    const budgetUsedAmt = Math.floor(between(0.35, 0.98) * totalBudget);
+    return {
+      project: name,
+      lead: leads.join(", "),
+      status,
+      progress: Math.round((completedTasks / Math.max(totalTasks, 1)) * 100),
+      investedHours: `${hours}h ${mins}m`,
+      budgetUsed: `₹${Math.round(budgetUsedAmt / 1000)}K / ₹${Math.round(totalBudget / 1000)}K`,
+      openTasks: `${openTasks} / ${totalTasks}`,
+      completedTasks: `${completedTasks} / ${totalTasks}`,
+      health: status === "At Risk" ? "bad" : status === "In Progress" || status === "On Hold" ? "warn" : "good",
       due: dueDates[i] ?? `Oct ${10 + i}, 2026`,
     };
   });
@@ -1924,17 +1973,13 @@ export function makeProjectTable(): DataTablePayload {
       { key: "project", label: "Project", pinned: true, width: 220 },
       { key: "lead", label: "Lead", render: "avatarStack", width: 140 },
       { key: "status", label: "Status", render: "status", width: 110 },
-      { key: "progress", label: "Progress", align: "right", render: "bar", width: 150 },
-      { key: "investedHours", label: "Invested Hours", align: "right", width: 130 },
-      { key: "budgetUsed", label: "Budget Used", align: "right", width: 150 },
-      { key: "openTasks", label: "Open Tasks", align: "right", width: 120 },
-      { key: "completedTasks", label: "Completed Tasks", align: "right", width: 140 },
-      { key: "due", label: "Due", align: "right", render: "dueDate", width: 120 },
+      { key: "progress", label: "Progress", render: "bar", width: 150 },
+      { key: "investedHours", label: "Invested Hours", width: 130 },
+      { key: "budgetUsed", label: "Budget Used", width: 150 },
     ],
     rows,
   };
 }
-
 export function makeInvoiceTable(): DataTablePayload {
   const rows: TableRow[] = Array.from({ length: 12 }).map((_, i) => {
     const status = pick(["Paid", "Pending", "Overdue", "Paid", "Draft"]);
@@ -1989,8 +2034,7 @@ export function makeTaskTable(): DataTablePayload {
       { key: "assignee", label: "Assignee", render: "avatar", width: 180 },
       { key: "status", label: "Status", render: "status", width: 130 },
       { key: "priority", label: "Priority", width: 100 },
-      { key: "logged", label: "Logged", align: "right", width: 90 },
-      { key: "health", label: "Health", align: "center", width: 90 },
+      { key: "logged", label: "Logged", width: 90 },
     ],
     rows,
   };
@@ -2256,38 +2300,24 @@ export const timeLogApprovalChart: AxisChartPayload = {
 };
 
 export function makeTimeLogApprovalTable(): DataTablePayload {
-  const entries: Array<{ hours: number; status: "Pending" | "Approved" | "Rejected" }> = [
-    { hours: 2.15, status: "Pending" },
-    { hours: 1.8, status: "Pending" },
-    { hours: 1.5, status: "Pending" },
-    { hours: 1.25, status: "Pending" },
-    { hours: 1.1, status: "Pending" },
-    { hours: 0.78, status: "Pending" },
-    { hours: 0.5, status: "Pending" },
-    { hours: 8.2, status: "Approved" },
-    { hours: 7.5, status: "Approved" },
-    { hours: 6.8, status: "Approved" },
-    { hours: 6.1, status: "Approved" },
-    { hours: 5.4, status: "Approved" },
-    { hours: 4.5, status: "Approved" },
-    { hours: 4.0, status: "Approved" },
-    { hours: 1.2, status: "Rejected" },
-    { hours: 0.9, status: "Rejected" },
-  ];
-  const rows: TableRow[] = entries.map((e, i) => ({
-    member: PEOPLE[i % PEOPLE.length].name,
-    team: PEOPLE[i % PEOPLE.length].team,
-    project: pick([
-      "Workstatus Product Development",
-      "VC_LiveCart",
-      "KIOO Labs",
-      "PixelCrayons | Internal",
-    ]),
-    hours: e.hours.toFixed(2),
-    status: e.status,
-    submitted: "Sep 11, 2026",
-    health: e.status === "Rejected" ? "bad" : e.status === "Pending" ? "warn" : "good",
-  }));
+  const rows: TableRow[] = PEOPLE.slice(0, 16).map((p, i) => {
+    const status = pick(["Pending", "Approved", "Rejected", "Pending", "Approved"]);
+    const hours = round1(between(0.5, 8.5));
+    return {
+      member: p.name,
+      team: p.team,
+      project: pick([
+        "Workstatus Product Development",
+        "VC_LiveCart",
+        "KIOO Labs",
+        "PixelCrayons | Internal",
+      ]),
+      hours: hours.toFixed(2),
+      status,
+      submitted: "Sep 11, 2026",
+      health: status === "Rejected" ? "bad" : status === "Pending" ? "warn" : "good",
+    };
+  });
   return {
     columns: [
       { key: "member", label: "Member", pinned: true, render: "avatar", width: 180 },
@@ -2296,7 +2326,6 @@ export function makeTimeLogApprovalTable(): DataTablePayload {
       { key: "hours", label: "Hours", align: "right", width: 90 },
       { key: "status", label: "Status", render: "status", width: 110 },
       { key: "submitted", label: "Submitted", width: 120 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
     ],
     rows,
   };
@@ -2391,31 +2420,39 @@ function formatHm(totalMinutes: number): string {
 /** Worked Today — per-member hours logged today. */
 export function makeWorkedTodayTable(): DataTablePayload {
   const rows: TableRow[] = expandPeople(3).map((p) => {
-    const workedMins = Math.round(between(20, 480));
-    const yesterdayMins = Math.round(workedMins * between(0.75, 1.2));
-    const deltaMins = workedMins - yesterdayMins;
-    const status = workedMins < 60 ? "Just started" : workedMins < 240 ? "In progress" : "On track";
+    const productiveMins = Math.round(between(60, 480));
+    const idleMins = Math.round(productiveMins * between(0.05, 0.25));
+    const activityMins = Math.max(0, productiveMins - idleMins);
+    const effectiveMins = productiveMins + Math.round(between(10, 45));
+    const breakMins = Math.round(between(15, 60));
+    const activityPct = Math.round((activityMins / Math.max(1, productiveMins)) * 100);
+    const yesterdayMins = Math.round(productiveMins * between(0.75, 1.2));
+    const deltaMins = productiveMins - yesterdayMins;
+
     return {
       name: p.name,
       team: p.team,
       role: p.role,
-      worked: formatHm(workedMins),
+      productiveTime: formatHm(productiveMins),
+      effectiveTime: formatHm(effectiveMins),
+      activityTime: formatHm(activityMins),
+      idleTime: formatHm(idleMins),
+      breakTime: formatHm(breakMins),
+      activity: activityPct,
       vsYesterday: `${deltaMins >= 0 ? "+" : "−"}${formatHm(Math.abs(deltaMins))}`,
-      firstClockIn: `${8 + Math.floor(between(0, 3))}:${String(Math.floor(between(0, 59))).padStart(2, "0")} AM`,
-      status,
-      health: workedMins >= 300 ? "good" : workedMins >= 120 ? "warn" : "bad",
     };
-  }).sort((a, b) => String(b.worked).localeCompare(String(a.worked)));
+  });
 
   return {
     columns: [
       { key: "name", label: "Member", pinned: true, render: "avatar", width: 180 },
       { key: "team", label: "Team", width: 110 },
-      { key: "worked", label: "Worked Today", align: "right", width: 110 },
-      { key: "vsYesterday", label: "vs Yesterday", align: "right", width: 120 },
-      { key: "firstClockIn", label: "First Clock-in", align: "right", width: 110 },
-      { key: "status", label: "Status", render: "status", width: 110 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 100 },
+      { key: "productiveTime", label: "Productive Time", width: 120 },
+      { key: "effectiveTime", label: "Effective Time", width: 120 },
+      { key: "activityTime", label: "Activity Time", width: 110 },
+      { key: "idleTime", label: "Idle Time", width: 90 },
+      { key: "breakTime", label: "Break Time", width: 100 },
+      { key: "activity", label: "Activity %", render: "bar", width: 140 },
     ],
     rows,
   };
@@ -2425,31 +2462,33 @@ export function makeWorkedTodayTable(): DataTablePayload {
 export function makeTodaysActivityTable(): DataTablePayload {
   const rows: TableRow[] = expandPeople(3).map((p) => {
     const activity = Math.round(between(18, 92));
-    const idle = Math.round(between(0, 18));
-    const away = Math.max(0, 100 - activity - idle);
+    const idlePct = Math.round(between(0, 18));
+    const awayPct = Math.max(0, 100 - activity - idlePct);
+    const totalMins = Math.round(between(180, 420));
+    const activeMins = Math.round((activity / 100) * totalMins);
+    const idleMins = Math.round((idlePct / 100) * totalMins);
+    const breakMins = Math.round((awayPct / 100) * totalMins);
     return {
       name: p.name,
       team: p.team,
       role: p.role,
       activity,
-      idle,
-      away,
-      activeMins: formatHm(Math.round((activity / 100) * between(180, 420))),
+      idle: `${idlePct}%|${formatHm(idleMins)}`,
+      breakTime: formatHm(breakMins),
+      activeMins: formatHm(activeMins),
       delta: Math.round(between(-12, 14)),
-      health: healthFrom(activity, 60, 40),
     };
-  }).sort((a, b) => Number(b.activity) - Number(a.activity));
+  });
 
   return {
     columns: [
       { key: "name", label: "Member", pinned: true, render: "avatar", width: 190 },
       { key: "team", label: "Team", width: 120 },
-      { key: "activity", label: "Activity", align: "right", render: "bar", width: 140 },
-      { key: "idle", label: "Idle %", align: "right", width: 90 },
-      { key: "away", label: "Away %", align: "right", width: 90 },
+      { key: "activity", label: "Activity %", align: "right", render: "bar", width: 140 },
+      { key: "idle", label: "Idle %", align: "right", render: "hoverTooltip", width: 90 },
+      { key: "breakTime", label: "Break Time", align: "right", width: 100 },
       { key: "activeMins", label: "Active Time", align: "right", width: 110 },
       { key: "delta", label: "vs Yday", align: "right", render: "delta", width: 90 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
     ],
     rows,
   };
@@ -2460,7 +2499,6 @@ export function makeUtilizationTable(): DataTablePayload {
   const rows: TableRow[] = expandPeople(3).map((p) => {
     const utilization = Math.round(between(42, 98));
     const billable = Math.round(utilization * between(0.7, 0.95));
-    const nonBillable = Math.max(0, utilization - billable);
     const capacityHrs = 40;
     const workedHrs = round1((utilization / 100) * capacityHrs);
     return {
@@ -2469,12 +2507,11 @@ export function makeUtilizationTable(): DataTablePayload {
       role: p.role,
       utilization,
       billable,
-      nonBillable,
       workedHrs,
       capacityHrs,
-      health: healthFrom(utilization, 75, 60),
+      status: utilization < 60 ? "Under-utilized" : utilization < 80 ? "Optimal" : utilization <= 95 ? "Heavy" : "Over-allocated",
     };
-  }).sort((a, b) => Number(b.utilization) - Number(a.utilization));
+  });
 
   return {
     columns: [
@@ -2482,10 +2519,9 @@ export function makeUtilizationTable(): DataTablePayload {
       { key: "team", label: "Team", width: 120 },
       { key: "utilization", label: "Utilization", align: "right", render: "bar", width: 140 },
       { key: "billable", label: "Billable %", align: "right", width: 100 },
-      { key: "nonBillable", label: "Non-Billable %", align: "right", width: 120 },
       { key: "workedHrs", label: "Worked Hrs", align: "right", render: "hours", width: 110 },
       { key: "capacityHrs", label: "Capacity", align: "right", render: "hours", width: 100 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+      { key: "status", label: "Status", align: "right", render: "status", width: 120 },
     ],
     rows,
   };
@@ -2495,29 +2531,30 @@ export function makeUtilizationTable(): DataTablePayload {
 export function makeBenchTable(): DataTablePayload {
   const benchPeople = expandPeople(2).filter((_, i) => i % 2 === 0).slice(0, 18);
   const rows: TableRow[] = benchPeople.map((p) => {
-    const benchHrs = round1(between(8, 36));
-    const daysOnBench = Math.floor(between(1, 18));
-    const availability = pick(["Immediate", "This week", "Next sprint"]);
+    const availableHrs = round1(between(10, 40));
+    const capacityPct = Math.round(between(10, 90));
+    let band = "Under-utilized";
+    if (capacityPct > 100) band = "Over-allocated";
+    else if (capacityPct >= 70) band = "Healthy";
+
     return {
       name: p.name,
       team: p.team,
       role: p.role,
-      benchHrs,
-      daysOnBench,
-      availability,
-      health: daysOnBench > 10 ? "warn" : "good",
+      availableHrs,
+      capacityPct,
+      band,
     };
-  }).sort((a, b) => Number(b.benchHrs) - Number(a.benchHrs));
+  });
 
   return {
     columns: [
       { key: "name", label: "Member", pinned: true, render: "avatar", width: 190 },
       { key: "team", label: "Team", width: 120 },
       { key: "role", label: "Role", width: 180 },
-      { key: "benchHrs", label: "Bench Hours", align: "right", render: "hours", width: 120 },
-      { key: "daysOnBench", label: "Days on Bench", align: "right", width: 120 },
-      { key: "availability", label: "Availability", render: "status", width: 120 },
-      { key: "health", label: "Health", align: "center", render: "health", width: 90 },
+      { key: "availableHrs", label: "Available Hrs", width: 120 },
+      { key: "capacityPct", label: "Capacity %", render: "bandPct", width: 120 },
+      { key: "band", label: "Band", render: "status", width: 130 },
     ],
     rows,
   };

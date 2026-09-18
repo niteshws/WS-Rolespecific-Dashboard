@@ -30,6 +30,18 @@ export const PROJECT_STATUS_PILL: Record<string, { text: string; bg: string }> =
   Pending: { text: "#6B7280", bg: "#F3F4F6" },
   Approved: { text: "#059669", bg: "#ECFDF5" },
   Rejected: { text: "#DC2626", bg: "#FEE2E2" },
+  "On Time": { text: "#059669", bg: "#D1FAE5" },
+  Absent: { text: "#BE123C", bg: "#FFE4E6" },
+  "Not In Yet": { text: "#6B7280", bg: "#F3F4F6" },
+  Heavy: { text: "#D97706", bg: "#FEF3C7" },
+  "Under-utilized": { text: "#0284C7", bg: "#E0F2FE" },
+  "Over-allocated": { text: "#B91C1C", bg: "#FEE2E2" },
+  Healthy: { text: "#059669", bg: "#ECFDF5" },
+  Optimal: { text: "#059669", bg: "#ECFDF5" },
+  "Over-utilized": { text: "#DC2626", bg: "#FEE2E2" },
+  "High load": { text: "#DC2626", bg: "#FEE2E2" },
+  Balanced: { text: "#059669", bg: "#ECFDF5" },
+  "Light load": { text: "#0284C7", bg: "#E0F2FE" },
 };
 
 export function projectStatusColor(status: string): string | undefined {
@@ -37,10 +49,14 @@ export function projectStatusColor(status: string): string | undefined {
 }
 
 export function projectStatusPill(status: string): { text: string; bg: string } | undefined {
-  return PROJECT_STATUS_PILL[status] ?? PROJECT_STATUS_PILL[status.trim()];
+  const trimmed = status.trim();
+  if (trimmed.startsWith("Late")) {
+    return { text: "#DC2626", bg: "#FEE2E2" };
+  }
+  return PROJECT_STATUS_PILL[status] ?? PROJECT_STATUS_PILL[trimmed];
 }
 
-const GOOD = new Set(["paid", "on track", "good", "healthy", "productive", "in progress", "completed", "on budget", "under budget", "approved"]);
+const GOOD = new Set(["paid", "on track", "good", "healthy", "productive", "in progress", "completed", "on budget", "under budget", "approved", "on time"]);
 const WARN = new Set([
   "pending",
   "at risk",
@@ -69,6 +85,7 @@ const BAD = new Set([
   "over allocated",
   "over budget",
   "rejected",
+  "late",
 ]);
 
 /** Map an arbitrary status string to a Badge variant. */

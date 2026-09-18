@@ -17,6 +17,18 @@
     --border: 220 13% 91%;
     --input: 220 13% 88%;
     --ring: 258 100% 58%; /* #5d2bff */
+    --ink: 8 82% 4%;
+  }
+
+  .dark {
+    --background: 240 6% 6%; /* #0f0f10 - Deep dark background */
+    --foreground: 210 20% 98%; /* Off-white for crisp text */
+    --card: 240 5% 9%; /* #161617 - Slightly elevated for widgets */
+    --card-foreground: 210 20% 98%;
+    --border: 240 5% 16%; /* #27272a - Subtle borders */
+    --input: 240 5% 16%;
+    --ring: 258 100% 58%; /* Brand primary */
+    --ink: 8 82% 4%; /* Ensure side nav stays dark even if someone tries to use ink in dark mode */
   }
 
   * {
@@ -48,24 +60,30 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .thin-scrollbar::-webkit-scrollbar {
     height: 8px;
     width: 8px;
   }
+
   .thin-scrollbar::-webkit-scrollbar-thumb {
     background: #cbd0d8;
     border-radius: 4px;
   }
+
   .thin-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+
   .bg-stripes {
     background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(156, 163, 175, 0.3) 4px, rgba(156, 163, 175, 0.3) 8px);
   }

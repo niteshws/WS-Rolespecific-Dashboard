@@ -69,7 +69,15 @@ export function ReportDrawer({
           {report.stats.map((s) => (
             <div key={s.label} className="rounded border border-border bg-card p-3">
               <div className="flex items-center gap-1.5">
-                {s.health && <span className={cn("h-1.5 w-1.5 rounded-full", HEALTH_DOT[s.health])} />}
+                {(s.color || s.health) && (
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      !s.color && s.health ? HEALTH_DOT[s.health] : undefined
+                    )}
+                    style={s.color ? { backgroundColor: s.color } : undefined}
+                  />
+                )}
                 <span className="text-[11px] text-muted-foreground">{s.label}</span>
               </div>
               <div className="tabular mt-1 text-lg font-semibold text-ink">{s.value}</div>

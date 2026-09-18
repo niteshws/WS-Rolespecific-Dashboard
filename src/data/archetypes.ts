@@ -120,10 +120,10 @@ export const ARCHETYPES: _A[] = [
       { id: "w-tracked-least", type: "barList", size: "half-short", layer: 3, title: "Tracked Least Hours", actionLabel: "View all", reportKey: "tracked-least-hours", payload: { items: trackedLeastHours, unit: "%" } },
       { id: "w-time-log-approval", type: "barList", size: "half-short", layer: 3, title: "Time Log Approval Status", subtitle: "Sum: 53.68 hrs Log Hours", info: "Approval status of submitted time logs this period", actionLabel: "View report", reportKey: "time-log-approval", payload: timeLogApprovalStatus },
 
-      { id: "w-applications", type: "barList", size: "half-short", layer: 4, title: "Application Usage", info: "Time spent in each application", actionLabel: "View all", reportKey: "application-usage", payload: { items: applicationsUsage, unit: "%" } },
-      { id: "w-websites", type: "barList", size: "half-short", layer: 4, title: "Website Usage", info: "Time spent on each website", actionLabel: "View all", reportKey: "website-usage", payload: { items: websitesUsage, unit: "%" } },
+      { id: "w-applications", type: "barList", size: "half-short", layer: 3, title: "Application Usage", info: "Time spent in each application", actionLabel: "View all", reportKey: "application-usage", payload: { items: applicationsUsage, unit: "%" } },
+      { id: "w-websites", type: "barList", size: "half-short", layer: 3, title: "Website Usage", info: "Time spent on each website", actionLabel: "View all", reportKey: "website-usage", payload: { items: websitesUsage, unit: "%" } },
 
-      { id: "w-table", type: "dataTable", size: "full-tall", layer: 4, title: "Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
+      { id: "w-table", type: "dataTable", size: "full-tall", layer: 3, title: "Workforce Ledger", subtitle: "Itemized activity across every tracked member", reportKey: "working-hours", payload: activityTable },
     ],
   },
 

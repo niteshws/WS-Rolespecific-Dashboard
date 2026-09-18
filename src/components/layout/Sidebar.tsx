@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Clock,
@@ -14,6 +14,8 @@ import {
   FileBarChart,
   CalendarClock,
   Bell,
+  Sun,
+  Moon,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,21 @@ export function Sidebar({
   onCreate: () => void;
 }) {
   const [intelOpen, setIntelOpen] = useState(true);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  function toggleTheme() {
+    const next = !isDark;
+    setIsDark(next);
+    if (next) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }
 
   return (
     <aside
@@ -43,19 +60,22 @@ export function Sidebar({
       aria-label="Primary navigation"
     >
       <div className="flex h-16 items-center gap-2 border-b border-white/10 px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
-          <Clock className="h-4 w-4 text-white" strokeWidth={2.5} />
-        </div>
-        <div className="leading-tight">
-          <div className="text-sm font-semibold text-white">workstatus</div>
-          <div className="text-[10px] text-white/40">Work Intelligence</div>
+        <div className="flex items-center gap-1.5 font-bold tracking-tight text-[22px] text-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6">
+            <path d="M12 2A10 10 0 1 0 22 12" />
+            <path d="M12 12L8 8" />
+          </svg>
+          <div className="leading-none">
+            <span className="text-primary">work</span>
+            <span>status</span>
+          </div>
         </div>
       </div>
 
       <nav className="thin-scrollbar flex-1 space-y-1 overflow-y-auto p-3">
-        <TopItem 
-          icon={LayoutDashboard} 
-          label="My dashboard" 
+        <TopItem
+          icon={LayoutDashboard}
+          label="My dashboard"
           active={currentId === "my-dashboard"}
           onClick={() => onSelect("my-dashboard")}
         />
@@ -125,8 +145,29 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="border-t border-white/10 p-3">
-        <div className="flex items-center gap-2 rounded bg-white/[0.04] p-2">
+      <div className="border-t border-white/10 p-3 flex flex-col gap-2">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center justify-between w-full rounded bg-white/[0.04] px-3 py-2 text-sm text-white/80 hover:bg-white/[0.08] transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+          </div>
+          <div className={cn(
+            "flex h-4 w-7 items-center rounded-full px-0.5 transition-colors",
+            isDark ? "bg-primary" : "bg-white/20"
+          )}>
+            <div className={cn(
+              "h-3 w-3 rounded-full bg-white transition-transform",
+              isDark ? "translate-x-3" : "translate-x-0"
+            )} />
+          </div>
+        </button>
+
+        {/* User Profile */}
+        <div className="flex items-center gap-2 rounded bg-white/[0.04] p-2 mt-1">
           <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/20 text-xs font-semibold text-white">
             VN
           </div>
@@ -140,24 +181,24 @@ export function Sidebar({
   );
 }
 
-function TopItem({ 
-  icon: Icon, 
-  label, 
-  active, 
-  onClick 
-}: { 
-  icon: LucideIcon; 
-  label: string; 
-  active?: boolean; 
-  onClick?: () => void; 
+function TopItem({
+  icon: Icon,
+  label,
+  active,
+  onClick
+}: {
+  icon: LucideIcon;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={cn(
         "flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors border-l-2",
-        active 
-          ? "border-primary bg-white/[0.06] font-medium text-white" 
+        active
+          ? "border-primary bg-white/[0.06] font-medium text-white"
           : "border-transparent text-white/60 hover:bg-white/[0.05] hover:text-white"
       )}
     >

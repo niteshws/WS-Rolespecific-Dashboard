@@ -2,6 +2,7 @@ import type { ReportSpec } from "@/types";
 import {
   makeActivityTable,
   makeProjectTable,
+  makeBudgetBurnTable,
   makeInvoiceTable,
   makeTaskTable,
   makeAppUsageTable,
@@ -65,6 +66,7 @@ import {
 
 const activity = makeActivityTable();
 const projects = makeProjectTable();
+const budgetBurnTable = makeBudgetBurnTable();
 const invoices = makeInvoiceTable();
 const tasks = makeTaskTable();
 const appUsage = makeAppUsageTable();
@@ -128,9 +130,9 @@ const REPORTS: Record<string, ReportSpec> = {
     narrative:
       "Average activity is 41% today — up 6pts vs yesterday. Peak focus landed mid-morning and mid-afternoon; the lunch dip and meeting blocks are the main drag on the score.",
     stats: [
-      { label: "Activity", value: "41%", delta: "+6% vs yesterday", health: "warn" },
-      { label: "Idle", value: "9%", delta: "+1%", health: "warn" },
-      { label: "Away", value: "14%", delta: "−2%", health: "good" },
+      { label: "Activity", value: "41%", delta: "+6% vs yesterday", health: "warn", color: "#6366f1" },
+      { label: "Idle", value: "9%", delta: "+1%", health: "warn", color: "#f59e0b" },
+      { label: "Away", value: "14%", delta: "−2%", health: "good", color: "#94a3b8" },
       { label: "Active Time", value: "32h 10m", delta: "org total", health: "good" },
     ],
     chart: { type: "lineChart", title: "Activity vs idle by hour", payload: todaysActivityTrend },
@@ -181,9 +183,9 @@ const REPORTS: Record<string, ReportSpec> = {
       const idle = productivityTrend.series.find((s) => s.key === "Idle")?.data ?? [];
       const avg = (arr: number[]) => Math.round(arr.reduce((s, n) => s + n, 0) / Math.max(arr.length, 1));
       return [
-        { label: "Avg Productivity", value: `${avg(prod)}%`, health: "good" as const },
-        { label: "Avg Activity", value: `${avg(act)}%`, health: "good" as const },
-        { label: "Avg Idle", value: `${avg(idle)}%`, health: "warn" as const },
+        { label: "Avg Productivity", value: `${avg(prod)}%`, health: "good" as const, color: "#22c55e" },
+        { label: "Avg Activity", value: `${avg(act)}%`, health: "good" as const, color: "#6366f1" },
+        { label: "Avg Idle", value: `${avg(idle)}%`, health: "warn" as const, color: "#f59e0b" },
         { label: "Peak Day", value: "Fri", delta: `${Math.max(...prod)}%`, health: "good" as const },
       ];
     })(),
@@ -219,17 +221,20 @@ const REPORTS: Record<string, ReportSpec> = {
         value: String(projectsWorkedPayload.statuses.find((s) => s.key === "Not Started")?.value ?? 0),
         delta: `${Math.round(((projectsWorkedPayload.statuses.find((s) => s.key === "Not Started")?.value ?? 0) / projectsWorkedTotal) * 100)}%`,
         health: "warn",
+        color: "#64748b"
       },
       {
         label: "In Progress",
         value: String(projectsWorkedPayload.statuses.find((s) => s.key === "In Progress")?.value ?? 0),
         delta: `${Math.round(((projectsWorkedPayload.statuses.find((s) => s.key === "In Progress")?.value ?? 0) / projectsWorkedTotal) * 100)}%`,
         health: "good",
+        color: "#f59e0b"
       },
       {
         label: "Completed",
         value: String(projectsWorkedPayload.statuses.find((s) => s.key === "Completed")?.value ?? 0),
         health: "good",
+        color: "#10b981"
       },
     ],
     chart: { type: "barChart", title: "Projects by status", payload: projectsWorkedByStatus },
@@ -243,9 +248,9 @@ const REPORTS: Record<string, ReportSpec> = {
     narrative:
       "₹0 overdue this cycle, but ₹0 pending is sitting on total invoiced INR 0. Two clients account for the bulk of the pending balance and are past 30 days.",
     stats: [
-      { label: "Paid", value: "₹0", health: "good" },
-      { label: "Pending", value: "₹0", delta: "0 invoices", health: "warn" },
-      { label: "Overdue", value: "₹0", delta: "0 invoices", health: "good" },
+      { label: "Paid", value: "₹0", health: "good", color: "#10b981" },
+      { label: "Pending", value: "₹0", delta: "0 invoices", health: "warn", color: "#f59e0b" },
+      { label: "Overdue", value: "₹0", delta: "0 invoices", health: "good", color: "#ef4444" },
       { label: "Collection Rate", value: "94%", delta: "+2%", health: "good" },
     ],
     chart: { type: "lineChart", title: "Profit & loss by quarter", payload: profitLoss },
@@ -259,10 +264,10 @@ const REPORTS: Record<string, ReportSpec> = {
     narrative:
       "20,653 tasks tracked with 1,402 overdue — a 12% climb. Overdue work is concentrated in three projects; clearing the top 20 items would cut the overdue count by a third.",
     stats: [
-      { label: "Total Tasks", value: "20,653", health: "good" },
-      { label: "Overdue", value: "1,402", delta: "+12%", health: "bad" },
-      { label: "Due Tomorrow", value: "57", health: "warn" },
-      { label: "Yet to Start", value: "2,985", health: "warn" },
+      { label: "Total Tasks", value: "20,653", health: "good", color: "#3b82f6" },
+      { label: "Overdue", value: "1,402", delta: "+12%", health: "bad", color: "#ef4444" },
+      { label: "Due Tomorrow", value: "57", health: "warn", color: "#f59e0b" },
+      { label: "Yet to Start", value: "2,985", health: "warn", color: "#64748b" },
     ],
     table: tasks,
   },
@@ -284,12 +289,14 @@ const REPORTS: Record<string, ReportSpec> = {
         value: taskStatusMeta.open.toLocaleString(),
         delta: `${taskStatusMeta.inReview} in review`,
         health: "warn",
+        color: "#0ea5e9",
       },
       {
         label: "Overdue",
         value: taskStatusMeta.overdue.toLocaleString(),
         delta: `${Math.round((taskStatusMeta.overdue / Math.max(taskStatusMeta.open, 1)) * 100)}% of open`,
         health: "bad",
+        color: "#ef4444",
       },
       {
         label: "Top Overdue",
@@ -432,6 +439,7 @@ const REPORTS: Record<string, ReportSpec> = {
         value: String(milestonesMeta.total),
         delta: `${milestonesMeta.inProgress} in progress`,
         health: "good",
+        color: "#0ea5e9",
       },
       {
         label: "Due in 7 Days",
@@ -574,9 +582,9 @@ const REPORTS: Record<string, ReportSpec> = {
       "Utilization is at 72% — 4pts under the 76% target. Billable work holds most of capacity, but Design and Support are dragging the average with higher non-billable load this week.",
     stats: [
       { label: "Utilization", value: "72%", delta: "−4% vs target", health: "warn" },
-      { label: "Billable", value: "72%", delta: "of capacity", health: "good" },
-      { label: "Non-Billable", value: "14%", health: "warn" },
-      { label: "Under Target", value: "11", delta: "members", health: "bad" },
+      { label: "Billable", value: "72%", delta: "of capacity", health: "good", color: "#10b981" },
+      { label: "Non-Billable", value: "14%", health: "warn", color: "#f59e0b" },
+      { label: "Under Target", value: "11", delta: "members", health: "bad", color: "#ef4444" },
     ],
     chart: { type: "barChart", title: "Utilization mix by week", payload: utilizationTrend },
     table: utilizationRows,
@@ -590,7 +598,7 @@ const REPORTS: Record<string, ReportSpec> = {
       "14% of capacity is on bench — 112h available this week. Engineering holds the largest pool (42h). Two members have been benched over 10 days and should be considered for upcoming pipeline work.",
     stats: [
       { label: "Bench %", value: "14%", delta: "of capacity", health: "good" },
-      { label: "Bench Hours", value: "112h", delta: "this week", health: "good" },
+      { label: "Bench Hours", value: "112h", delta: "this week", health: "good", color: "#6366f1" },
       { label: "On Bench", value: "8", delta: "members", health: "warn" },
       { label: "Longest Idle", value: "16 days", delta: "1 member", health: "warn" },
     ],
@@ -785,7 +793,7 @@ const REPORTS: Record<string, ReportSpec> = {
       { label: "Forecast Var.", value: "±6%", health: "warn" },
     ],
     chart: { type: "barChart", title: "Budget vs. invoiced by quarter", payload: budgetTrend },
-    table: projects,
+    table: budgetBurnTable,
   },
   "budget-health": {
     key: "budget-health",
