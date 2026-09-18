@@ -34,14 +34,14 @@ export const PROJECT_STATUS_PILL: Record<string, { text: string; bg: string }> =
   Absent: { text: "#BE123C", bg: "#FFE4E6" },
   "Not In Yet": { text: "#6B7280", bg: "#F3F4F6" },
   Heavy: { text: "#D97706", bg: "#FEF3C7" },
-  "Under-utilized": { text: "#D97706", bg: "#FEF3C7" },
+  "Under-utilized": { text: "#DC2626", bg: "#FEE2E2" },
   "Over-allocated": { text: "#B91C1C", bg: "#FEE2E2" },
   Healthy: { text: "#059669", bg: "#ECFDF5" },
   Optimal: { text: "#059669", bg: "#ECFDF5" },
   "Over-utilized": { text: "#DC2626", bg: "#FEE2E2" },
   "High load": { text: "#DC2626", bg: "#FEE2E2" },
   Balanced: { text: "#059669", bg: "#ECFDF5" },
-  "Light load": { text: "#D97706", bg: "#FEF3C7" },
+  "Light load": { text: "#DC2626", bg: "#FEE2E2" },
 };
 
 export function projectStatusColor(status: string): string | undefined {
@@ -64,12 +64,9 @@ const WARN = new Set([
   "watch",
   "triage",
   "draft",
-  "under-utilized",
-  "under utilized",
   "in progress",
   "casual",
   "heavy",
-  "light load",
 ]);
 const BAD = new Set([
   "overdue",
@@ -86,6 +83,9 @@ const BAD = new Set([
   "late",
   "high load",
   "over-utilized",
+  "under-utilized",
+  "under utilized",
+  "light load",
 ]);
 
 /** Map an arbitrary status string to a Badge variant. */
