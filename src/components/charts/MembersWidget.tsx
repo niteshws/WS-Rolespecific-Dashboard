@@ -99,17 +99,12 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
   const C = 2 * Math.PI * R;
   let offset = 0;
 
-  const showSegmentTooltip = (
-    key: string,
-    pct: number,
-    value: number,
-    event: MouseEvent<SVGCircleElement>,
-  ): void => {
+  const showSegmentTooltip = (key: string, pct: number, value: number, x: number, y: number): void => {
     setHoveredStatus(key);
     setSegmentTooltip({
       label: `${pct}% · ${value} members`,
-      x: event.clientX,
-      y: event.clientY,
+      x,
+      y,
     });
   };
 
@@ -150,10 +145,21 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
                   pointerEvents="visibleStroke"
                   className="cursor-default transition-opacity"
                   style={{ opacity: isActive ? 1 : 0.35 }}
-                  onMouseEnter={(event) => showSegmentTooltip(s.key, pct, s.value, event)}
+                  onMouseEnter={(event) =>
+                    showSegmentTooltip(s.key, pct, s.value, event.clientX, event.clientY)
+                  }
                   onMouseMove={moveSegmentTooltip}
                   onMouseLeave={hideSegmentTooltip}
-                  onFocus={(event) => showSegmentTooltip(s.key, pct, s.value, event)}
+                  onFocus={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    showSegmentTooltip(
+                      s.key,
+                      pct,
+                      s.value,
+                      rect.left + rect.width / 2,
+                      rect.top,
+                    );
+                  }}
                   onBlur={hideSegmentTooltip}
                   tabIndex={0}
                   aria-label={`${s.key}: ${pct}%`}

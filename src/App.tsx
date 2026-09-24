@@ -87,7 +87,10 @@ export default function App() {
     setDashboards((prev) => prev.map((d) => (d.id === current.id ? fn(structuredClone(d)) : d)));
   }, [current.id]);
 
-  const handleUpdateWidgetVisibility = useCallback((visibility: Record<string, boolean>): void => {
+  const handleUpdateWidgetVisibility = useCallback((
+    visibility: Record<string, boolean>,
+    meta?: { scope: "personal" | "everyone"; viewName?: string },
+  ): void => {
     try {
       updateCurrent((dashboard) => {
         dashboard.widgets.forEach((widget) => {

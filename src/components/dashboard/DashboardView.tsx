@@ -5,7 +5,7 @@ import { MyDashboardBanner } from "./MyDashboardBanner";
 import { KpiCard } from "./KpiCard";
 import { BentoGrid, type GridOps } from "./BentoGrid";
 import { ReportDrawer } from "./ReportDrawer";
-import { CustomizeWidgetsDrawer } from "./CustomizeWidgetsDrawer";
+import { CustomizeWidgetsDrawer, type WidgetLayoutSaveResult } from "./CustomizeWidgetsDrawer";
 import { TourCalloutStrip } from "@/components/tour/TourCalloutStrip";
 import type { Dashboard } from "@/types";
 import type { DemoPlan } from "@/types/plan";
@@ -65,7 +65,10 @@ export function DashboardView({
   showTourCallout?: boolean;
   onStartTour?: () => void;
   onDismissTourCallout?: () => void;
-  onUpdateWidgetVisibility?: (visibility: Record<string, boolean>) => void;
+  onUpdateWidgetVisibility?: (
+    visibility: Record<string, boolean>,
+    meta?: Pick<WidgetLayoutSaveResult, "scope" | "viewName">,
+  ) => void;
   plan?: DemoPlan;
 }) {
   const [reportKey, setReportKey] = useState<string | null>(null);
@@ -77,9 +80,13 @@ export function DashboardView({
     setCustomizeOpen(false);
   }, [dashboard.id]);
 
-  const handleSaveWidgetVisibility = (visibility: Record<string, boolean>): void => {
+  const handleSaveWidgetVisibility = ({
+    visibility,
+    scope,
+    viewName,
+  }: WidgetLayoutSaveResult): void => {
     try {
-      onUpdateWidgetVisibility?.(visibility);
+      onUpdateWidgetVisibility?.(visibility, { scope, viewName });
     } catch (error) {
       console.error("Failed to save widget visibility:", error);
     }

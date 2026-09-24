@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,8 +32,8 @@ export function Dialog({
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+  return createPortal(
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={onClose} aria-hidden="true" />
       <div className={cn("relative w-full max-w-md rounded border border-border bg-card shadow-pop animate-scale-in", className)}>
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
@@ -47,6 +48,7 @@ export function Dialog({
         <div className={cn("px-5 py-4", contentClassName)}>{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-border px-5 py-3">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

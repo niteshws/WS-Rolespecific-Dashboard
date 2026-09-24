@@ -17,6 +17,7 @@ export function Sheet({
   contentClassName,
   headerClassName,
   footerClassName,
+  scrollBody = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -30,6 +31,8 @@ export function Sheet({
   contentClassName?: string;
   headerClassName?: string;
   footerClassName?: string;
+  /** When false, body does not scroll — use for drawers with an internal scroll region + fixed footer. */
+  scrollBody?: boolean;
 }) {
   React.useEffect(() => {
     if (!open) return;
@@ -53,7 +56,7 @@ export function Sheet({
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : "Panel"}>
+    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : "Panel"}>
       <div
         className="absolute inset-0 bg-ink/40 animate-fade-in"
         onClick={onClose}
@@ -63,7 +66,8 @@ export function Sheet({
       />
       <div
         className={cn(
-          "absolute right-0 top-0 flex h-full flex-col overscroll-contain bg-white shadow-[0_8px_40px_rgba(15,10,46,0.12)]",
+          "absolute inset-y-0 right-0 grid h-full max-h-full overflow-hidden overscroll-contain bg-white shadow-[0_8px_40px_rgba(15,10,46,0.12)]",
+          footer ? "grid-rows-[auto_minmax(0,1fr)_auto]" : "grid-rows-[auto_minmax(0,1fr)]",
           "translate-x-0 animate-[slide-in_0.25s_ease-out]",
           widthClass,
         )}
@@ -72,7 +76,7 @@ export function Sheet({
         <style>{`@keyframes slide-in{from{transform:translateX(24px);opacity:.6}to{transform:translateX(0);opacity:1}}`}</style>
         <div
           className={cn(
-            "flex shrink-0 items-center justify-between gap-4 border-b border-[#e5e7eb] px-5 py-4",
+            "flex min-h-0 items-center justify-between gap-4 border-b border-[#e5e7eb] px-5 py-4",
             headerClassName,
           )}
         >
@@ -100,14 +104,17 @@ export function Sheet({
         </div>
         <div
           className={cn(
-            "thin-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4",
+            "thin-scrollbar min-h-0 overscroll-contain px-5 py-4",
+            scrollBody ? "overflow-y-auto" : "overflow-hidden",
             contentClassName,
           )}
         >
           {children}
         </div>
         {footer ? (
-          <div className={cn("shrink-0 border-t border-[#e5e7eb] px-5 py-4", footerClassName)}>{footer}</div>
+          <div className={cn("min-h-0 border-t border-[#e5e7eb] bg-white px-5 py-4", footerClassName)}>
+            {footer}
+          </div>
         ) : null}
       </div>
     </div>,
