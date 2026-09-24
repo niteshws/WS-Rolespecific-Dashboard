@@ -1,4 +1,5 @@
 import { BarChart3, Lightbulb } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
 import type { ProjectsWorkedPayload } from "@/types";
 
 /** Layer 2 — project status bars with a side insight callout. */
@@ -18,19 +19,22 @@ export function ProjectsWorkedWidget({ payload }: { payload: ProjectsWorkedPaylo
           return (
             <li key={s.key} className="grid grid-cols-[7.5rem_minmax(0,1fr)_auto] items-center gap-3">
               <span className="truncate text-xs font-medium text-ink">{s.key}</span>
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted/10">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${Math.max(pct > 0 ? 4 : 0, Math.min(100, pct))}%`,
-                    background: s.color,
-                  }}
-                />
-              </div>
-              <span className="tabular shrink-0 text-xs font-semibold text-ink">
-                {s.value}{" "}
-                <span className="font-medium text-muted-foreground">({pct}%)</span>
-              </span>
+              <Tooltip
+                side="top"
+                wrapperClassName="block w-full min-w-0"
+                content={`${pct}% · ${s.value} projects`}
+              >
+                <div className="h-2.5 w-full cursor-default overflow-hidden rounded-full bg-muted/10">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.max(pct > 0 ? 4 : 0, Math.min(100, pct))}%`,
+                      background: s.color,
+                    }}
+                  />
+                </div>
+              </Tooltip>
+              <span className="tabular shrink-0 text-xs font-semibold text-ink">{s.value}</span>
             </li>
           );
         })}

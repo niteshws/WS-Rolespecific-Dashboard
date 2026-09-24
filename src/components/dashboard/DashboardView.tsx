@@ -123,15 +123,12 @@ export function DashboardView({
       ) : null}
 
       {!editing && showTourCallout && onStartTour && onDismissTourCallout ? (
-        <div
-          id="tour-callout-strip"
-          className={
-            highlightTourStrip
-              ? "animate-pulse rounded-[12px] ring-2 ring-primary/40 ring-offset-2"
-              : undefined
-          }
-        >
-          <TourCalloutStrip onStartTour={onStartTour} onDismiss={onDismissTourCallout} />
+        <div id="tour-callout-strip">
+          <TourCalloutStrip
+            highlighted={highlightTourStrip}
+            onStartTour={onStartTour}
+            onDismiss={onDismissTourCallout}
+          />
         </div>
       ) : null}
 

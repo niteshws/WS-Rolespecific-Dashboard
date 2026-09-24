@@ -215,6 +215,8 @@ export function WidgetRenderer({
     widget.id === "w-workload-capacity" ||
     widget.id === "w-top-profit" ||
     widget.id === "w-cost";
+  const barListPayload = widget.type === "barList" ? (widget.payload as BarListPayload) : null;
+  const hasBarListInsight = Boolean(barListPayload?.insight);
   const isProjectsWorked = widget.type === "projectsWorked";
   const isScatter = widget.type === "scatter";
   const isTaskTimeline = widget.type === "taskTimelineSummary";
@@ -274,9 +276,11 @@ export function WidgetRenderer({
               ? "px-5 py-4"
               : isTaskTimeline || isProjectBudgetHealth
                 ? "px-5 py-4"
-                : isCompactUsage
-                  ? "px-5 py-3"
-                  : undefined
+                : hasBarListInsight
+                  ? "flex flex-col p-0"
+                  : isCompactUsage
+                    ? "justify-start px-5 py-2"
+                    : undefined
       }
       hideHeader={isTable && !editing}
       locked={isLocked}

@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  Bell,
   Calendar,
   Check,
   ChevronDown,
@@ -8,13 +7,10 @@ import {
   Copy,
   LayoutGrid,
   MoreVertical,
-  Moon,
   Pencil,
   Plus,
-  RefreshCw,
   Search,
   Share2,
-  Sun,
   Trash2,
   Users,
 } from "lucide-react";
@@ -92,10 +88,6 @@ export const DashboardHeader = ({
   const [moreOpen, setMoreOpen] = useState<boolean>(false);
   const [filterTab, setFilterTab] = useState<FilterTab>("members");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isDark, setIsDark] = useState<boolean>(() =>
-    document.documentElement.classList.contains("dark"),
-  );
-
   const memberLabel: string = useMemo(() => {
     if (filterType === "all") return "All Members";
     return filterValue;
@@ -120,18 +112,6 @@ export const DashboardHeader = ({
     setFilterOpen(false);
     setDateOpen(false);
     setMoreOpen(false);
-  };
-
-  const toggleTheme = (): void => {
-    try {
-      const next: boolean = !isDark;
-      setIsDark(next);
-      document.documentElement.classList.toggle("dark", next);
-    } catch (error) {
-      console.error("Failed to toggle theme:", error);
-    } finally {
-      setMoreOpen(false);
-    }
   };
 
   const isMemberChecked = (name: string): boolean =>
@@ -438,23 +418,6 @@ export const DashboardHeader = ({
                           setMoreOpen(false);
                         }}
                       />
-                      <div className="my-1 h-px bg-border" />
-                      <MenuAction
-                        icon={RefreshCw}
-                        label="Auto Refresh: On"
-                        onClick={() => setMoreOpen(false)}
-                      />
-                      <MenuAction
-                        icon={isDark ? Sun : Moon}
-                        label={isDark ? "Light mode" : "Dark mode"}
-                        onClick={toggleTheme}
-                      />
-                      <MenuAction
-                        icon={Bell}
-                        label="Notifications"
-                        onClick={() => setMoreOpen(false)}
-                      />
-                      <MenuAction icon={Search} label="Search" onClick={() => setMoreOpen(false)} />
                     </>
                   )}
                 </div>

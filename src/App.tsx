@@ -194,9 +194,24 @@ export default function App() {
     setShowFirstInsight(true);
   }, []);
 
+  const handleLandOnDashboard = useCallback((): void => {
+    try {
+      setShowFirstInsight(false);
+      setHighlightWorkdayBanner(false);
+      setHighlightTourStrip(true);
+      window.setTimeout(() => {
+        document.getElementById("tour-callout-strip")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 200);
+    } catch (error) {
+      console.error("Failed to highlight tour callout on dashboard load:", error);
+    }
+  }, []);
+
   const handleShowFirstInsight = useCallback((): void => {
     try {
-      setHighlightTourStrip(false);
       setHighlightWorkdayBanner(true);
       window.setTimeout(() => {
         document.getElementById("my-dashboard-banner")?.scrollIntoView({
@@ -204,19 +219,7 @@ export default function App() {
           block: "center",
         });
       }, 150);
-
-      window.setTimeout(() => {
-        setHighlightWorkdayBanner(false);
-        setHighlightTourStrip(true);
-        window.setTimeout(() => {
-          document.getElementById("tour-callout-strip")?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }, 150);
-      }, 3400);
-
-      window.setTimeout(() => setHighlightTourStrip(false), 7000);
+      window.setTimeout(() => setHighlightWorkdayBanner(false), 3200);
     } catch (error) {
       console.error("Failed to highlight first insight:", error);
     }
@@ -241,6 +244,7 @@ export default function App() {
 
   const handleStartTour = useCallback((): void => {
     try {
+      setHighlightTourStrip(false);
       setShowTourStrip(false);
       setTourStepIndex(0);
       setTourActive(true);
@@ -253,6 +257,7 @@ export default function App() {
   const handleDismissTourStrip = useCallback((): void => {
     try {
       dismissTourCallout();
+      setHighlightTourStrip(false);
       setShowTourStrip(false);
     } catch (error) {
       console.error("Failed to dismiss tour strip:", error);
@@ -343,8 +348,7 @@ export default function App() {
 
       <FirstInsightReveal
         open={showFirstInsight && current.id === MY_DASHBOARD_ID}
-        dashboard={processedDashboard}
-        onClose={() => setShowFirstInsight(false)}
+        onClose={handleLandOnDashboard}
         onShowMe={handleShowFirstInsight}
       />
 

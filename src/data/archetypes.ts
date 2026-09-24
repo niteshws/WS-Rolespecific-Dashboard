@@ -108,7 +108,7 @@ export const ARCHETYPES: _A[] = [
       { id: "k-worked-today", label: "Worked Today", value: "1h 20m", delta: 12, deltaLabel: "+12m vs yesterday", deltaPolarity: "up-good", health: "good", sparkline: [8, 8, 8, 9, 8, 8, 9, 8, 8, 10, 8, 45, 92, 28], reportKey: "worked-today", icon: "Clock" },
     ],
     widgets: [
-      { id: "w-productivity-trend", type: "lineChart", size: "half", layer: 2, title: "Productivity Trend", subtitle: "This week", reportKey: "productivity-trend", payload: productivityTrend },
+      { id: "w-productivity-trend", type: "lineChart", size: "half", layer: 2, title: "Productivity Trend", reportKey: "productivity-trend", payload: productivityTrend },
       { id: "w-projects-worked", type: "projectsWorked", size: "half", layer: 2, title: "Project Status", info: "Total projects and their current status", actionLabel: "View report", reportKey: "projects-worked", icon: "FolderKanban", payload: projectsWorkedPayload },
 
       { id: "w-members", type: "members", size: "half-short", layer: 3, title: "Team Members", actionLabel: "View report", reportKey: "members", payload: membersData },
