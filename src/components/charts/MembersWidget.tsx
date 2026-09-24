@@ -1,24 +1,28 @@
+import { useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import type { MembersPayload } from "@/types";
-import { cn } from "@/lib/utils";
+
+type SegmentTooltip = {
+  label: string;
+  x: number;
+  y: number;
+};
 
 const STATUS = [
   {
     key: "Online",
     field: "online" as const,
     color: "#0ea5e9",
-    pill: "border-[#0ea5e9]/25 bg-[#0ea5e9]/10 text-[#0284c7]",
   },
   {
     key: "Offline",
     field: "offline" as const,
     color: "#e5e7eb",
-    pill: "border-[#d1d5db] bg-[#f3f4f6] text-[#6b7280]",
   },
   {
     key: "On Leave",
     field: "onLeave" as const,
     color: "#f59e0b",
-    pill: "border-health-warn/25 bg-health-warn/10 text-[#b45309]",
   },
 ] as const;
 
@@ -82,6 +86,9 @@ const PlatformIcon = ({ name }: { name: string }) => {
 
 /** Layer 2 — presence donut + members-by-platform grid. */
 export function MembersWidget({ payload }: { payload: MembersPayload }) {
+  const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
+  const [segmentTooltip, setSegmentTooltip] = useState<SegmentTooltip | null>(null);
+
   const statuses = STATUS.map((s) => ({
     ...s,
     value: payload[s.field],
@@ -92,6 +99,31 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
   const C = 2 * Math.PI * R;
   let offset = 0;
 
+  const showSegmentTooltip = (
+    key: string,
+    pct: number,
+    value: number,
+    event: MouseEvent<SVGCircleElement>,
+  ): void => {
+    setHoveredStatus(key);
+    setSegmentTooltip({
+      label: `${pct}% · ${value} members`,
+      x: event.clientX,
+      y: event.clientY,
+    });
+  };
+
+  const moveSegmentTooltip = (event: MouseEvent<SVGCircleElement>): void => {
+    setSegmentTooltip((current) =>
+      current ? { ...current, x: event.clientX, y: event.clientY } : null,
+    );
+  };
+
+  const hideSegmentTooltip = (): void => {
+    setHoveredStatus(null);
+    setSegmentTooltip(null);
+  };
+
   return (
     <div className="flex h-full min-h-0 items-stretch gap-3">
       <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -100,7 +132,9 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
             <circle cx="50" cy="50" r={R} fill="none" stroke="#37415115" strokeWidth="11" />
             {statuses.map((s) => {
               const frac = s.value / total;
+              const pct = Math.round(frac * 100);
               const dash = frac * C;
+              const isActive = hoveredStatus === null || hoveredStatus === s.key;
               const el = (
                 <circle
                   key={s.key}
@@ -113,15 +147,41 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
                   strokeDasharray={`${dash} ${C - dash}`}
                   strokeDashoffset={-offset}
                   strokeLinecap="butt"
-                >
-                  <title>{`${s.key}: ${Math.round(frac * 100)}%`}</title>
-                </circle>
+                  pointerEvents="visibleStroke"
+                  className="cursor-default transition-opacity"
+                  style={{ opacity: isActive ? 1 : 0.35 }}
+                  onMouseEnter={(event) => showSegmentTooltip(s.key, pct, s.value, event)}
+                  onMouseMove={moveSegmentTooltip}
+                  onMouseLeave={hideSegmentTooltip}
+                  onFocus={(event) => showSegmentTooltip(s.key, pct, s.value, event)}
+                  onBlur={hideSegmentTooltip}
+                  tabIndex={0}
+                  aria-label={`${s.key}: ${pct}%`}
+                />
               );
               offset += dash;
               return el;
             })}
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {segmentTooltip
+            ? createPortal(
+                <span
+                  role="tooltip"
+                  style={{
+                    position: "fixed",
+                    top: segmentTooltip.y - 8,
+                    left: segmentTooltip.x,
+                    transform: "translate(-50%, -100%)",
+                    zIndex: 50,
+                  }}
+                  className="pointer-events-none w-max whitespace-nowrap rounded-md bg-ink px-2.5 py-1.5 text-[11px] font-medium text-white shadow-pop animate-fade-in"
+                >
+                  {segmentTooltip.label}
+                </span>,
+                document.body,
+              )
+            : null}
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="tabular text-xl font-semibold leading-none text-ink">{payload.total}</span>
             <span className="mt-1 max-w-[72px] text-center text-[10px] leading-tight text-muted-foreground">
               Total Members
@@ -130,27 +190,16 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
         </div>
 
         <ul className="flex min-w-0 flex-col justify-center gap-0.5">
-          {statuses.map((s) => {
-            const pct = Math.round((s.value / total) * 100);
-            return (
-              <li
-                key={s.key}
-                className="flex items-center gap-1.5 rounded px-1.5 py-1 text-xs hover:bg-primary/[0.04]"
-              >
-                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: s.color }} />
-                <span className="w-[52px] shrink-0 truncate text-ink">{s.key}</span>
-                <span className="tabular w-4 shrink-0 font-medium text-muted">{s.value}</span>
-                <span
-                  className={cn(
-                    "inline-flex min-w-[2.25rem] items-center justify-center rounded border px-1.5 py-0.5 text-[10px] font-medium tabular leading-none",
-                    s.pill,
-                  )}
-                >
-                  {pct}%
-                </span>
-              </li>
-            );
-          })}
+          {statuses.map((s) => (
+            <li
+              key={s.key}
+              className="flex items-center gap-1.5 rounded px-1.5 py-1 text-xs hover:bg-primary/[0.04]"
+            >
+              <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: s.color }} />
+              <span className="w-[52px] shrink-0 truncate text-ink">{s.key}</span>
+              <span className="tabular shrink-0 font-medium text-muted">{s.value}</span>
+            </li>
+          ))}
         </ul>
       </div>
 

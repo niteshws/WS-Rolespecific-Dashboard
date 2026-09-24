@@ -34,7 +34,7 @@ export const TourCalloutStrip = ({ highlighted = false, onStartTour, onDismiss }
       <Sparkles className="h-4 w-4 shrink-0 text-[#5d2bff]" strokeWidth={1.75} aria-hidden="true" />
       <p className="min-w-0 flex-1 leading-snug">
         <span className="font-semibold text-[#4b4360]">New here?</span>{" "}
-        The 60-second tour walks the five screens that matter.
+        In about a minute, we&apos;ll walk you through setup, tracking, and the numbers that matter.
       </p>
       <div className="flex shrink-0 items-center gap-3">
         <button
