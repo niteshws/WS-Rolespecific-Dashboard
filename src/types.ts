@@ -113,6 +113,8 @@ export interface WidgetDescriptor {
   icon?: string;
   /** Runtime edit state (set while editing a dashboard). */
   hidden?: boolean;
+  /** Widget cannot be hidden in customize drawer. */
+  required?: boolean;
 }
 
 /** A saved dashboard the user can view, edit, and share. */

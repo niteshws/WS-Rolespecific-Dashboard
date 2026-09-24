@@ -1,15 +1,31 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { AppNavbar } from "@/components/layout/AppNavbar";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Topbar } from "@/components/layout/Topbar";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import { ShareDialog } from "@/components/dashboard/ShareDialog";
 import {
   CreateDashboardDialog,
   type NewDashboardInput,
 } from "@/components/dashboard/CreateDashboardDialog";
+import { FirstInsightReveal } from "@/components/dashboard/FirstInsightReveal";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { SIZE_ORDER, type GridOps } from "@/components/dashboard/BentoGrid";
 import { ARCHETYPES, ARCHETYPE_MAP } from "@/data/archetypes";
+import { isOnboardingComplete, resetOnboarding } from "@/lib/onboarding";
+import {
+  dismissTourCallout,
+  isTourCalloutDismissed,
+  isTourComplete,
+  markTourComplete,
+  clearTourState,
+  type TourStep,
+} from "@/lib/tour";
+import { GuidedTour } from "@/components/tour/GuidedTour";
+import { DemoBar } from "@/components/layout/DemoBar";
 import type { Dashboard, WidgetSize } from "@/types";
+import type { DemoPlan } from "@/types/plan";
+
+const MY_DASHBOARD_ID = "my-dashboard";
 
 /** Seed editable dashboard instances from the role templates. */
 function seedDashboards(): Dashboard[] {
@@ -27,7 +43,11 @@ const nextId = () => `d-${idc++}`;
 
 export default function App() {
   const [dashboards, setDashboards] = useState<Dashboard[]>(seedDashboards);
-  const [currentId, setCurrentId] = useState<string>(dashboards[0].id);
+  const [myDashboard, setMyDashboard] = useState<Dashboard>(() => structuredClone(MY_DASHBOARD));
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => !isOnboardingComplete());
+  const [currentId, setCurrentId] = useState<string>(
+    isOnboardingComplete() ? MY_DASHBOARD_ID : dashboards[0].id,
+  );
   const [editing, setEditing] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -38,20 +58,49 @@ export default function App() {
 
   const [filterType, setFilterType] = useState<"all" | "team" | "member">("all");
   const [filterValue, setFilterValue] = useState<string>("");
+  const [showFirstInsight, setShowFirstInsight] = useState<boolean>(false);
+  const [highlightWorkdayBanner, setHighlightWorkdayBanner] = useState<boolean>(false);
+  const [highlightTourStrip, setHighlightTourStrip] = useState<boolean>(false);
+  const [showTourStrip, setShowTourStrip] = useState<boolean>(
+    () => !isTourCalloutDismissed() && !isTourComplete(),
+  );
+  const [tourActive, setTourActive] = useState<boolean>(false);
+  const [tourStepIndex, setTourStepIndex] = useState<number>(0);
+  const [navbarCreateOpen, setNavbarCreateOpen] = useState<boolean>(false);
+  const [demoPlan, setDemoPlan] = useState<DemoPlan>("trial");
 
   const current = useMemo(() => {
-    if (currentId === "my-dashboard") return MY_DASHBOARD;
+    if (currentId === MY_DASHBOARD_ID) return myDashboard;
     return dashboards.find((d) => d.id === currentId) ?? dashboards[0];
-  }, [dashboards, currentId]);
+  }, [dashboards, currentId, myDashboard]);
 
   const processedDashboard = useMemo(() => {
     return getFilteredDashboard(current, dateRange, customStartDate, customEndDate, filterType, filterValue);
   }, [current, dateRange, customStartDate, customEndDate, filterType, filterValue]);
 
   /** Apply an update to the currently-selected dashboard. */
-  function updateCurrent(fn: (d: Dashboard) => Dashboard) {
+  const updateCurrent = useCallback((fn: (d: Dashboard) => Dashboard): void => {
+    if (current.id === MY_DASHBOARD_ID) {
+      setMyDashboard((prev) => fn(structuredClone(prev)));
+      return;
+    }
     setDashboards((prev) => prev.map((d) => (d.id === current.id ? fn(structuredClone(d)) : d)));
-  }
+  }, [current.id]);
+
+  const handleUpdateWidgetVisibility = useCallback((visibility: Record<string, boolean>): void => {
+    try {
+      updateCurrent((dashboard) => {
+        dashboard.widgets.forEach((widget) => {
+          if (widget.id in visibility) {
+            widget.hidden = !visibility[widget.id];
+          }
+        });
+        return dashboard;
+      });
+    } catch (error) {
+      console.error("Failed to update widget visibility:", error);
+    }
+  }, [updateCurrent]);
 
   const ops: GridOps = {
     onHide: (id) =>
@@ -138,6 +187,109 @@ export default function App() {
     setCurrentId(dashboards.find((d) => d.id !== current.id)!.id);
   }
 
+  const handleOnboardingComplete = useCallback((): void => {
+    setShowOnboarding(false);
+    setCurrentId(MY_DASHBOARD_ID);
+    setEditing(false);
+    setShowFirstInsight(true);
+  }, []);
+
+  const handleShowFirstInsight = useCallback((): void => {
+    try {
+      setHighlightTourStrip(false);
+      setHighlightWorkdayBanner(true);
+      window.setTimeout(() => {
+        document.getElementById("my-dashboard-banner")?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 150);
+
+      window.setTimeout(() => {
+        setHighlightWorkdayBanner(false);
+        setHighlightTourStrip(true);
+        window.setTimeout(() => {
+          document.getElementById("tour-callout-strip")?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 150);
+      }, 3400);
+
+      window.setTimeout(() => setHighlightTourStrip(false), 7000);
+    } catch (error) {
+      console.error("Failed to highlight first insight:", error);
+    }
+  }, []);
+
+  const handleReturnToOnboarding = useCallback((): void => {
+    try {
+      resetOnboarding();
+      clearTourState();
+      setShowOnboarding(true);
+      setEditing(false);
+      setShowTourStrip(true);
+      setTourActive(false);
+      setTourStepIndex(0);
+      setNavbarCreateOpen(false);
+      setHighlightWorkdayBanner(false);
+      setHighlightTourStrip(false);
+    } catch (error) {
+      console.error("Failed to return to onboarding:", error);
+    }
+  }, []);
+
+  const handleStartTour = useCallback((): void => {
+    try {
+      setShowTourStrip(false);
+      setTourStepIndex(0);
+      setTourActive(true);
+      setNavbarCreateOpen(true);
+    } catch (error) {
+      console.error("Failed to start guided tour:", error);
+    }
+  }, []);
+
+  const handleDismissTourStrip = useCallback((): void => {
+    try {
+      dismissTourCallout();
+      setShowTourStrip(false);
+    } catch (error) {
+      console.error("Failed to dismiss tour strip:", error);
+    }
+  }, []);
+
+  const handleTourStepEnter = useCallback((step: TourStep): void => {
+    try {
+      if (step.id === "invite-member") {
+        setNavbarCreateOpen(true);
+        return;
+      }
+      setNavbarCreateOpen(false);
+    } catch (error) {
+      console.error("Failed to prepare tour step:", error);
+    }
+  }, []);
+
+  const handleTourEnd = useCallback((completed: boolean): void => {
+    try {
+      markTourComplete();
+      setTourActive(false);
+      setTourStepIndex(0);
+      setNavbarCreateOpen(false);
+      if (completed) setShowTourStrip(false);
+    } catch (error) {
+      console.error("Failed to end guided tour:", error);
+    }
+  }, []);
+
+  const shouldShowTourStrip: boolean =
+    showTourStrip && !showFirstInsight && !tourActive && current.id === MY_DASHBOARD_ID;
+
+  if (showOnboarding) {
+    return <OnboardingFlow onComplete={handleOnboardingComplete} />;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar
@@ -148,37 +300,61 @@ export default function App() {
           setEditing(false);
         }}
         onCreate={() => setCreateOpen(true)}
+        onReturnToOnboarding={handleReturnToOnboarding}
       />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar 
-          dashboard={processedDashboard}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          customStartDate={customStartDate}
-          setCustomStartDate={setCustomStartDate}
-          customEndDate={customEndDate}
-          setCustomEndDate={setCustomEndDate}
+      <div className="flex min-w-0 flex-1 flex-col bg-[#f7f8fa]">
+        <AppNavbar
+          createOpen={navbarCreateOpen}
+          onCreateOpenChange={setNavbarCreateOpen}
+          highlightCreate={tourActive && tourStepIndex === 0}
         />
-        <main className="thin-scrollbar flex-1 overflow-y-auto" aria-live="polite">
+        <main className="thin-scrollbar flex-1 overflow-y-auto pb-14" aria-live="polite">
           <div key={current.id + String(editing)} className="animate-fade-in">
-            <DashboardView 
-              dashboard={processedDashboard} 
-              editing={editing} 
-              ops={ops} 
+            <DashboardView
+              dashboard={processedDashboard}
+              editing={editing}
+              ops={ops}
               dateRange={dateRange}
-              onCreate={() => setCreateOpen(true)}
-              onDuplicate={handleDuplicate}
-              onDelete={handleDelete}
-              onToggleEdit={() => setEditing((e) => !e)}
-              onShare={() => setShareOpen(true)}
+              setDateRange={setDateRange}
+              customStartDate={customStartDate}
+              setCustomStartDate={setCustomStartDate}
+              customEndDate={customEndDate}
+              setCustomEndDate={setCustomEndDate}
               filterType={filterType}
               setFilterType={setFilterType}
               filterValue={filterValue}
               setFilterValue={setFilterValue}
+              onToggleEdit={() => setEditing((value) => !value)}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              onShare={() => setShareOpen(true)}
+              onCreate={() => setCreateOpen(true)}
+              highlightWorkdayBanner={highlightWorkdayBanner}
+              highlightTourStrip={highlightTourStrip}
+              showTourCallout={shouldShowTourStrip}
+              onStartTour={handleStartTour}
+              onDismissTourCallout={handleDismissTourStrip}
+              onUpdateWidgetVisibility={handleUpdateWidgetVisibility}
+              plan={demoPlan}
             />
           </div>
         </main>
       </div>
+
+      <FirstInsightReveal
+        open={showFirstInsight && current.id === MY_DASHBOARD_ID}
+        dashboard={processedDashboard}
+        onClose={() => setShowFirstInsight(false)}
+        onShowMe={handleShowFirstInsight}
+      />
+
+      <GuidedTour
+        active={tourActive}
+        stepIndex={tourStepIndex}
+        onStepChange={setTourStepIndex}
+        onEnd={handleTourEnd}
+        onStepEnter={handleTourStepEnter}
+      />
 
       <ShareDialog
         dashboard={current}
@@ -187,6 +363,8 @@ export default function App() {
         onVisibilityChange={(v, roles) => updateCurrent((d) => ({ ...d, visibility: v, sharedRoles: roles }))}
       />
       <CreateDashboardDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreate={handleCreate} />
+
+      <DemoBar plan={demoPlan} onPlanChange={setDemoPlan} />
     </div>
   );
 }

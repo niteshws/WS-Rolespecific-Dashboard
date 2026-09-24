@@ -46,8 +46,7 @@ const KPI_HELP: Record<string, string> = {
 const WIDGET_HELP: Record<string, string> = {
   "w-productivity-trend":
     "Daily trend of productivity, activity, and idle time for the selected period.",
-  "w-projects-worked":
-    "How many projects sit in each status — not started, in progress, completed, and so on.",
+  "w-projects-worked": "Total projects and their current status",
   "w-members":
     "Team size plus who is online, offline, or away right now.",
   "w-upcoming-leaves":
@@ -79,10 +78,8 @@ const WIDGET_HELP: Record<string, string> = {
     "When people log in and work, by day and hour. Darker cells mean more activity.",
   "w-changes":
     "Categories whose usage moved the most compared with the previous period.",
-  "w-budget-health":
-    "Which projects are on budget, at risk of overspend, or already over budget.",
-  "w-task-timeline":
-    "Monthly count of tasks created versus completed — shows delivery pace.",
+  "w-budget-health": "Overview of project spending vs. allocated budget",
+  "w-task-timeline": "Trend of created vs completed tasks over time",
   "w-stacked": "Open tasks grouped by status: to do, in progress, in review, and done.",
   "w-milestones":
     "Upcoming delivery milestones with task progress and hours invested.",

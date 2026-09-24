@@ -41,6 +41,7 @@ import {
 import { ProjectBudgetHealthWidget } from "@/components/charts/ProjectBudgetHealthWidget";
 import { UpcomingLeavesWidget } from "@/components/charts/UpcomingLeavesWidget";
 import { getWidgetHelp } from "@/data/helpText";
+import type { DemoPlan } from "@/types/plan";
 import type {
   WidgetDescriptor,
   StatGroupPayload,
@@ -92,7 +93,7 @@ export function WidgetRenderer({
   edit?: EditControls;
   onOpenReport?: (reportKey?: string) => void;
   dateRange?: string;
-  plan?: string;
+  plan?: DemoPlan;
 }) {
   const hideActions = widget.title === "Workforce Ledger" || widget.title === "Project Delivery Ledger";
   const openReport = widget.reportKey && onOpenReport && !hideActions ? () => onOpenReport(widget.reportKey) : undefined;
@@ -228,7 +229,7 @@ export function WidgetRenderer({
     ? (widget.payload as TopContributorsPayload)
     : null;
   const headerReport = openReport;
-  const isLocked = plan === "lower" && (
+  const isLocked = plan === "proof" && (
     widget.type === "timeline" ||
     widget.type === "screenshots" ||
     widget.type === "heatmap" ||

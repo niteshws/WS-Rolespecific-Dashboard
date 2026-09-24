@@ -16,6 +16,7 @@ import {
   Bell,
   Sun,
   Moon,
+  RotateCcw,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,11 +32,13 @@ export function Sidebar({
   currentId,
   onSelect,
   onCreate,
+  onReturnToOnboarding,
 }: {
   dashboards: Dashboard[];
   currentId: string;
   onSelect: (id: string) => void;
   onCreate: () => void;
+  onReturnToOnboarding?: () => void;
 }) {
   const [intelOpen, setIntelOpen] = useState(true);
   const [isDark, setIsDark] = useState(false);
@@ -81,7 +84,7 @@ export function Sidebar({
         />
 
         {/* Intelligence parent */}
-        <div>
+        <div id="sidebar-intelligence">
           <button
             onClick={() => setIntelOpen((o) => !o)}
             aria-expanded={intelOpen}
@@ -146,6 +149,17 @@ export function Sidebar({
       </nav>
 
       <div className="border-t border-white/10 p-3 flex flex-col gap-2">
+        {onReturnToOnboarding ? (
+          <button
+            type="button"
+            onClick={onReturnToOnboarding}
+            className="flex w-full items-center gap-2 rounded bg-white/[0.04] px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/[0.08]"
+          >
+            <RotateCcw className="h-4 w-4 shrink-0" />
+            <span>Return to setup</span>
+          </button>
+        ) : null}
+
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}

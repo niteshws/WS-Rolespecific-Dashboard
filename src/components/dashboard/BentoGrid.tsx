@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { WidgetDescriptor, WidgetSize } from "@/types";
+import type { DemoPlan } from "@/types/plan";
 import { WidgetRenderer } from "./WidgetRenderer";
 import { HiddenWidgetCard } from "./WidgetShell";
 
@@ -88,7 +89,7 @@ export function BentoGrid({
   ops?: GridOps;
   onOpenReport?: (reportKey?: string) => void;
   dateRange?: string;
-  plan?: string;
+  plan?: DemoPlan;
 }) {
   const list = editing ? widgets : widgets.filter((w) => !w.hidden);
 

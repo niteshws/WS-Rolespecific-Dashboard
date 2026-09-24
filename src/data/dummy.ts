@@ -72,6 +72,16 @@ export const PEOPLE = [
 
 export const TEAMS = ["Engineering", "Design", "Product", "Sales", "Marketing", "Support"];
 
+export const DEPARTMENTS = [
+  "Engineering",
+  "Design",
+  "Product",
+  "Sales",
+  "Marketing",
+  "Support",
+  "Finance",
+];
+
 export const APPS = [
   { app: "app.workstatus.io", category: "Productive" as const, color: "#0ea5e9" },
   { app: "Figma", category: "Productive" as const, color: "#a259ff" },
