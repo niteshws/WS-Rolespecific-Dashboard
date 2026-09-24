@@ -90,11 +90,7 @@ export function WidgetShell({
         <div className="flex items-start justify-between gap-3 border-b border-border/60 px-5 py-3.5">
           <div className="flex min-w-0 items-center gap-2">
           {editing && <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/60" />}
-          {icon && (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Icon name={icon} className="h-4 w-4" />
-            </span>
-          )}
+
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
               <h3 className="truncate text-sm font-semibold tracking-tight text-ink">{title}</h3>

@@ -9,26 +9,32 @@
 
 @layer base {
   :root {
-    /* Neutral surfaces derived around the #374151 structural token */
-    --background: 220 20% 97%;
-    --foreground: 8 82% 4%; /* #110302 */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 8 82% 4%;
-    --border: 220 13% 91%;
-    --input: 220 13% 88%;
-    --ring: 258 100% 58%; /* #5d2bff */
+    --popover: 0 0% 100%;
+    --primary: 256 100% 58%;
+    --secondary: 210 40% 96.1%;
+    --muted: 210 40% 96.1%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 256 100% 58%;
+    --radius: 0.5rem;
     --ink: 8 82% 4%;
   }
 
   .dark {
-    --background: 240 6% 6%; /* #0f0f10 - Deep dark background */
-    --foreground: 210 20% 98%; /* Off-white for crisp text */
-    --card: 240 5% 9%; /* #161617 - Slightly elevated for widgets */
-    --card-foreground: 210 20% 98%;
-    --border: 240 5% 16%; /* #27272a - Subtle borders */
-    --input: 240 5% 16%;
-    --ring: 258 100% 58%; /* Brand primary */
-    --ink: 8 82% 4%; /* Ensure side nav stays dark even if someone tries to use ink in dark mode */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --popover: 222.2 84% 4.9%;
+    --primary: 256 100% 58%;
+    --secondary: 217.2 32.6% 17.5%;
+    --muted: 217.2 32.6% 17.5%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 256 100% 58%;
+    --ink: 8 82% 4%;
   }
 
   * {
@@ -42,7 +48,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans selection:bg-primary/20 selection:text-indigo-900;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -67,13 +73,25 @@
   }
 
   .thin-scrollbar::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
+    height: 6px;
+    width: 6px;
   }
 
   .thin-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd0d8;
-    border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .dark .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+  }
+
+  .dark .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
   }
 
   .thin-scrollbar::-webkit-scrollbar-track {

@@ -22,7 +22,7 @@ export function MemberActivityBarsWidget({ payload }: { payload: MemberActivityB
           <li key={row.name} className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,1.35fr)_2.75rem] items-center gap-3">
             <span className="flex min-w-0 items-center gap-2.5">
               <Avatar name={row.name} size={26} className="rounded-full" />
-              <span className="truncate text-[12px] font-medium text-ink" title={row.name}>
+              <span className="truncate text-[12px] font-medium text-zinc-700 dark:text-zinc-300" title={row.name}>
                 {row.name}
               </span>
             </span>
@@ -47,7 +47,7 @@ export function MemberActivityBarsWidget({ payload }: { payload: MemberActivityB
               </span>
             </Tooltip>
 
-            <span className="tabular text-right text-[12px] font-semibold text-ink">{row.activity}%</span>
+            <span className="tabular text-right text-[12px] font-semibold text-zinc-700 dark:text-zinc-300">{row.activity}%</span>
           </li>
         );
       })}

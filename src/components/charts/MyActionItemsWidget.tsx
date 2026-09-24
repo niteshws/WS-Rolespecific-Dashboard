@@ -29,7 +29,7 @@ export function MyActionItemsWidget() {
           <div key={idx} className="flex items-start gap-2.5 text-xs">
             <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${item.color}`} />
             <div className="flex-1 min-w-0 leading-tight">
-              <div className="font-semibold text-ink truncate">{item.title}</div>
+              <div className="font-semibold text-zinc-700 dark:text-zinc-300 truncate">{item.title}</div>
               <div className="text-[11px] text-muted-foreground truncate mt-0.5">{item.desc}</div>
             </div>
             <span className="shrink-0 text-[10px] text-muted-foreground bg-muted/5 px-1.5 py-0.5 rounded font-medium">

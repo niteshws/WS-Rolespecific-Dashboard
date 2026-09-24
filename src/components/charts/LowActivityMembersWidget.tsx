@@ -61,7 +61,7 @@ export function LowActivityMembersWidget({ payload }: { payload: LowActivityMemb
                   type="button"
                   onClick={() => toggleSort(col.key)}
                   className={cn(
-                    "inline-flex items-center gap-1 hover:text-ink",
+                    "inline-flex items-center gap-1 hover:text-zinc-700 dark:text-zinc-300",
                     col.align === "right" && "flex-row-reverse",
                   )}
                 >
@@ -83,7 +83,7 @@ export function LowActivityMembersWidget({ payload }: { payload: LowActivityMemb
         <tbody>
           {rows.map((row, ri) => (
             <tr key={row.name} className={cn("group hover:bg-primary/[0.03]", ri % 2 === 1 && "bg-muted/[0.03]")}>
-              <td className="border-b border-border/60 px-3 py-2 text-ink">
+              <td className="border-b border-border/60 px-3 py-2 text-zinc-700 dark:text-zinc-300">
                 <span className="flex min-w-0 items-center gap-2">
                   <Avatar name={row.name} size={22} />
                   <span className="min-w-0">
@@ -92,13 +92,13 @@ export function LowActivityMembersWidget({ payload }: { payload: LowActivityMemb
                   </span>
                 </span>
               </td>
-              <td className="border-b border-border/60 px-3 py-2 text-ink">
+              <td className="border-b border-border/60 px-3 py-2 text-zinc-700 dark:text-zinc-300">
                 <span className="truncate">{row.project}</span>
               </td>
               <td className="border-b border-border/60 px-3 py-2 text-right tabular text-health-bad">
                 {row.activity}%
               </td>
-              <td className="border-b border-border/60 px-3 py-2 text-right tabular text-ink">{row.idle}</td>
+              <td className="border-b border-border/60 px-3 py-2 text-right tabular text-zinc-700 dark:text-zinc-300">{row.idle}</td>
             </tr>
           ))}
         </tbody>

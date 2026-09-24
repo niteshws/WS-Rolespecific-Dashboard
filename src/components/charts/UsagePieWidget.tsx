@@ -24,7 +24,7 @@ export function ProductivityFilter({
         value={value}
         onChange={(e) => onChange(e.target.value as FilterOption)}
         aria-label="Classification filter"
-        className="h-8 appearance-none rounded-full border border-border bg-card py-1 pl-3 pr-8 text-xs text-ink focus-visible:border-primary focus-visible:outline-none"
+        className="h-8 appearance-none rounded-full border border-border bg-card py-1 pl-3 pr-8 text-xs text-zinc-700 dark:text-zinc-300 focus-visible:border-primary focus-visible:outline-none"
       >
         {FILTERS.map((f) => (
           <option key={f} value={f}>
@@ -116,7 +116,7 @@ export function UsagePieWidget({
             )}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="tabular text-base font-semibold leading-none text-ink">{totalUsage}</span>
+            <span className="tabular text-base font-semibold leading-none text-zinc-700 dark:text-zinc-300">{totalUsage}</span>
             <span className="mt-1 text-[10px] text-muted-foreground">Total Usage</span>
           </div>
         </div>
@@ -125,9 +125,9 @@ export function UsagePieWidget({
           {slices.map((s) => (
             <li key={s.key} className="flex items-center gap-2 text-xs">
               <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: s.color }} />
-              <span className="min-w-0 flex-1 truncate text-ink">{s.key}</span>
+              <span className="min-w-0 flex-1 truncate text-zinc-700 dark:text-zinc-300">{s.key}</span>
               <span className="tabular shrink-0 text-muted-foreground">{s.duration}</span>
-              <span className="tabular w-8 shrink-0 text-right font-medium text-ink">
+              <span className="tabular w-8 shrink-0 text-right font-medium text-zinc-700 dark:text-zinc-300">
                 {Math.round((s.value / total) * 100)}%
               </span>
             </li>

@@ -32,7 +32,7 @@ export function ProgressRing({ payload }: { payload: ProgressRingPayload }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="tabular text-2xl font-semibold text-ink">{pct}%</span>
+          <span className="tabular text-2xl font-semibold text-zinc-700 dark:text-zinc-300">{pct}%</span>
         </div>
       </div>
     </div>

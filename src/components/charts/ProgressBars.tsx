@@ -12,7 +12,7 @@ export function ProgressBars({ payload }: { payload: ProgressBarsPayload }) {
         return (
           <div key={r.label}>
             <div className="mb-1 flex items-baseline justify-between">
-              <span className="text-xs font-medium text-ink">{r.label}</span>
+              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{r.label}</span>
               <span className="tabular text-sm font-semibold text-primary">{r.value}</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted/10">

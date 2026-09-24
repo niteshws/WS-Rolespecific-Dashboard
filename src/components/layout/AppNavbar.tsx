@@ -10,6 +10,38 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnnouncementModal } from "@/components/ui/AnnouncementModal";
+
+const ANNOUNCEMENTS: Array<{
+  title: string;
+  description: React.ReactNode;
+  primaryActionLabel: string;
+}> = [
+  {
+    title: "You're loving Workstatus and that means a lot to us!",
+    description: (
+      <>
+        <p className="mb-2">Since you're having a great experience, would you mind sharing it on Google?</p>
+        <p>A quick review from you helps other HR teams discover Workstatus and it only takes 2 minutes.</p>
+        <div className="mt-5 inline-flex flex-col items-center justify-center rounded-lg bg-primary/10 px-5 py-3 text-primary">
+          <p className="font-semibold">Here's how:</p>
+          <p className="mt-0.5 text-[13px] font-medium opacity-90">Click "Leave a Review" and share your experience on Google</p>
+        </div>
+      </>
+    ),
+    primaryActionLabel: "Leave a Review",
+  },
+  {
+    title: "New Product Update",
+    description: "We've completely revamped the dashboard to load 10x faster. Try out the new widget editing features today!",
+    primaryActionLabel: "Check it out",
+  },
+  {
+    title: "Major Layout Change",
+    description: "The navigation has moved! We've listened to your feedback and made finding intelligence reports much easier.",
+    primaryActionLabel: "See what's new",
+  }
+];
 
 type AppNavbarProps = {
   trialDaysLeft?: number;
@@ -38,6 +70,8 @@ export const AppNavbar = ({
 }: AppNavbarProps) => {
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const [createOpenInternal, setCreateOpenInternal] = useState<boolean>(false);
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
   const createOpen: boolean = createOpenProp ?? createOpenInternal;
 
   const setCreateOpen = (open: boolean): void => {
@@ -62,6 +96,11 @@ export const AppNavbar = ({
     }
   };
 
+  const handleNotificationClick = () => {
+    setAnnouncementIndex((prev) => (prev + 1) % ANNOUNCEMENTS.length);
+    setShowAnnouncement(true);
+  };
+
   return (
     <header className="sticky top-0 z-50 flex h-12 shrink-0 items-center justify-end border-b border-[#e5e7eb] bg-white px-6">
       <div className="flex shrink-0 items-center gap-2.5">
@@ -79,7 +118,7 @@ export const AppNavbar = ({
         <span className="hidden h-5 w-px bg-[#e5e7eb] sm:block" aria-hidden="true" />
 
         <div className="flex items-center gap-0.5">
-          <NavbarIconButton label="Notifications">
+          <NavbarIconButton label="Notifications" onClick={handleNotificationClick}>
             <Bell className="h-4 w-4" strokeWidth={1.75} />
           </NavbarIconButton>
           <NavbarIconButton label="Help">
@@ -172,6 +211,14 @@ export const AppNavbar = ({
           ) : null}
         </div>
       </div>
+      <AnnouncementModal
+        open={showAnnouncement}
+        onOpenChange={setShowAnnouncement}
+        title={ANNOUNCEMENTS[announcementIndex].title}
+        description={ANNOUNCEMENTS[announcementIndex].description}
+        primaryActionLabel={ANNOUNCEMENTS[announcementIndex].primaryActionLabel}
+        onPrimaryAction={() => console.log("Action clicked")}
+      />
     </header>
   );
 };

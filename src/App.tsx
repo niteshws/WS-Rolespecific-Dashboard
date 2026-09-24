@@ -22,6 +22,7 @@ import {
 } from "@/lib/tour";
 import { GuidedTour } from "@/components/tour/GuidedTour";
 import { DemoBar } from "@/components/layout/DemoBar";
+import { ProductUpdateSpotlight } from "@/components/ProductUpdateSpotlight";
 import type { Dashboard, WidgetSize } from "@/types";
 import type { DemoPlan } from "@/types/plan";
 
@@ -299,7 +300,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-[#F8F9FC] dark:bg-zinc-950 transition-colors duration-300">
       <Sidebar
         dashboards={dashboards}
         currentId={current.id}
@@ -310,7 +311,7 @@ export default function App() {
         onCreate={() => setCreateOpen(true)}
         onReturnToOnboarding={handleReturnToOnboarding}
       />
-      <div className="flex min-w-0 flex-1 flex-col bg-[#f7f8fa]">
+      <div className="flex min-w-0 flex-1 flex-col bg-white dark:bg-zinc-950">
         <AppNavbar
           createOpen={navbarCreateOpen}
           onCreateOpenChange={setNavbarCreateOpen}
@@ -370,6 +371,8 @@ export default function App() {
         onVisibilityChange={(v, roles) => updateCurrent((d) => ({ ...d, visibility: v, sharedRoles: roles }))}
       />
       <CreateDashboardDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreate={handleCreate} />
+
+      <ProductUpdateSpotlight />
 
       <DemoBar plan={demoPlan} onPlanChange={setDemoPlan} />
     </div>

@@ -39,7 +39,7 @@ export function MiniTable({ payload }: { payload: DataTablePayload }) {
                   <td
                     key={c.key}
                     className={cn(
-                      "border-b border-border/50 text-ink",
+                      "border-b border-border/50 text-zinc-700 dark:text-zinc-300",
                       isMilestones ? "px-2 py-1" : "px-2 py-1.5",
                       c.align === "right" && "text-right tabular",
                       c.align === "center" && "text-center",
@@ -119,7 +119,7 @@ function MiniCell({
           <Tooltip content={text} side="bottom">
             <span
               className={cn(
-                "block max-w-full cursor-default truncate font-medium text-ink",
+                "block max-w-full cursor-default truncate font-medium text-zinc-700 dark:text-zinc-300",
                 compact && "text-[11px]",
               )}
               tabIndex={0}
@@ -130,7 +130,7 @@ function MiniCell({
         );
       }
       if (col.key === "progress") {
-        return <span className="whitespace-nowrap tabular text-ink">{text}</span>;
+        return <span className="whitespace-nowrap tabular text-zinc-700 dark:text-zinc-300">{text}</span>;
       }
       return <span className="truncate">{text}</span>;
     }

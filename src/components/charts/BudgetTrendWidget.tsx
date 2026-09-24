@@ -31,7 +31,7 @@ export function BudgetTrendPeriodBadge({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-ink transition-colors hover:bg-muted/10"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 transition-colors hover:bg-muted/10"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Select budget period"
@@ -57,7 +57,7 @@ export function BudgetTrendPeriodBadge({
                 }}
                 className={cn(
                   "flex w-full px-3 py-1.5 text-left text-xs transition-colors hover:bg-muted/10",
-                  p === period ? "font-semibold text-primary" : "text-ink",
+                  p === period ? "font-semibold text-primary" : "text-zinc-700 dark:text-zinc-300",
                 )}
               >
                 {p}

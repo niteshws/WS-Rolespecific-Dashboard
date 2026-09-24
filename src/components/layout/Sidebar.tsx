@@ -24,8 +24,7 @@ import { Icon } from "@/components/Icon";
 import type { Dashboard } from "@/types";
 
 /**
- * Primary side navigation. The top-level "Intelligence" parent nests every
- * saved dashboard plus reporting links, per the new information architecture.
+ * Primary side navigation matching the dark indigo theme.
  */
 export function Sidebar({
   dashboards,
@@ -41,156 +40,89 @@ export function Sidebar({
   onReturnToOnboarding?: () => void;
 }) {
   const [intelOpen, setIntelOpen] = useState(true);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  function toggleTheme() {
-    const next = !isDark;
-    setIsDark(next);
-    if (next) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }
 
   return (
     <aside
-      className="flex h-full w-64 shrink-0 flex-col border-r border-white/10 bg-ink text-white/80"
+      className="flex h-full w-64 shrink-0 flex-col border-r border-white/5 bg-[#0a0519] text-white transition-colors duration-300"
       aria-label="Primary navigation"
     >
-      <div className="flex h-16 items-center gap-2 border-b border-white/10 px-5">
-        <div className="flex items-center gap-1.5 font-bold tracking-tight text-[22px] text-white">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6">
-            <path d="M12 2A10 10 0 1 0 22 12" />
-            <path d="M12 12L8 8" />
-          </svg>
+      <div className="flex h-16 items-center gap-2 px-5 mt-2">
+        <div className="flex items-center gap-2 font-bold tracking-tight text-[22px] text-white">
+          <Clock className="w-6 h-6" />
           <div className="leading-none">
-            <span className="text-primary">work</span>
-            <span>status</span>
+            <span>workstatus</span>
           </div>
         </div>
       </div>
 
-      <nav className="thin-scrollbar flex-1 space-y-1 overflow-y-auto p-3">
+      <nav className="thin-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-4">
         <TopItem
           icon={LayoutDashboard}
-          label="My dashboard"
+          label="Dashboard"
           active={currentId === "my-dashboard"}
           onClick={() => onSelect("my-dashboard")}
         />
 
         {/* Intelligence parent */}
-        <div id="sidebar-intelligence">
-          <button
-            onClick={() => setIntelOpen((o) => !o)}
-            aria-expanded={intelOpen}
-            className="flex w-full items-center gap-2 rounded bg-primary/15 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/25"
-          >
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="flex-1 text-left">Intelligence</span>
-            <span className="rounded bg-primary/30 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-              New
+        <div id="sidebar-intelligence" className="pt-2">
+          <div className="flex items-center justify-between px-3 pb-2 pt-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7c8bba]">
+              INTELLIGENCE
             </span>
-            {intelOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-          </button>
+          </div>
 
-          {intelOpen && (
-            <div className="mt-1 space-y-0.5 pl-3">
-              <div className="flex items-center justify-between px-3 pb-1 pt-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/30">
-                  Dashboards
-                </span>
+          <div className="space-y-0.5">
+            {dashboards.map((d) => {
+              const active = currentId === d.id;
+              return (
                 <button
-                  onClick={onCreate}
-                  aria-label="Create new dashboard"
-                  className="rounded p-0.5 text-white/40 hover:bg-white/10 hover:text-white"
+                  key={d.id}
+                  onClick={() => onSelect(d.id)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-[13px] transition-colors group",
+                    active
+                      ? "bg-[#1f193c] font-medium text-white"
+                      : "text-[#b4accb] hover:bg-white/5 hover:text-white",
+                  )}
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Icon name={d.icon} className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 truncate text-left">{d.name ?? d.role}</span>
+                  {d.visibility === "public" ? (
+                    <ChevronRight className="h-4 w-4 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  ) : (
+                    <Lock className="h-3 w-3 shrink-0 opacity-50" />
+                  )}
                 </button>
-              </div>
-              {dashboards.map((d) => {
-                const active = currentId === d.id;
-                return (
-                  <button
-                    key={d.id}
-                    onClick={() => onSelect(d.id)}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded border-l-2 py-1.5 pl-3 pr-2 text-[13px] transition-colors",
-                      active
-                        ? "border-primary bg-white/[0.06] font-medium text-white"
-                        : "border-transparent text-white/60 hover:bg-white/[0.04] hover:text-white",
-                    )}
-                  >
-                    <Icon name={d.icon} className="h-3.5 w-3.5 shrink-0" />
-                    <span className="flex-1 truncate text-left">{d.name ?? d.role}</span>
-                    {d.visibility === "public" ? (
-                      <Globe className="h-3 w-3 shrink-0 text-white/40" />
-                    ) : (
-                      <Lock className="h-3 w-3 shrink-0 text-white/40" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
 
         <div className="pt-2">
-          <TopItem icon={Clock} label="Time Tracking" />
+          <div className="flex items-center justify-between px-3 pb-2 pt-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7c8bba]">
+              WORKSPACE
+            </span>
+          </div>
           <TopItem icon={FolderKanban} label="Projects" />
-          <TopItem icon={Users2} label="Team" />
-          <TopItem icon={Settings} label="Settings" />
+          <TopItem icon={Users2} label="People" hasArrow />
+          <TopItem icon={Settings} label="Settings" hasArrow />
         </div>
       </nav>
 
-      <div className="border-t border-white/10 p-3 flex flex-col gap-2">
-        {onReturnToOnboarding ? (
+      {onReturnToOnboarding ? (
+        <div className="border-t border-white/10 p-3 flex flex-col gap-2">
           <button
             type="button"
             onClick={onReturnToOnboarding}
-            className="flex w-full items-center gap-2 rounded bg-white/[0.04] px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/[0.08]"
+            className="flex w-full items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm text-[#b4accb] transition-colors hover:bg-white/10 hover:text-white"
           >
             <RotateCcw className="h-4 w-4 shrink-0" />
             <span>Return to setup</span>
           </button>
-        ) : null}
-
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="flex items-center justify-between w-full rounded bg-white/[0.04] px-3 py-2 text-sm text-white/80 hover:bg-white/[0.08] transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
-          </div>
-          <div className={cn(
-            "flex h-4 w-7 items-center rounded-full px-0.5 transition-colors",
-            isDark ? "bg-primary" : "bg-white/20"
-          )}>
-            <div className={cn(
-              "h-3 w-3 rounded-full bg-white transition-transform",
-              isDark ? "translate-x-3" : "translate-x-0"
-            )} />
-          </div>
-        </button>
-
-        {/* User Profile */}
-        <div className="flex items-center gap-2 rounded bg-white/[0.04] p-2 mt-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/20 text-xs font-semibold text-white">
-            VN
-          </div>
-          <div className="min-w-0 flex-1 leading-tight">
-            <div className="truncate text-xs font-medium text-white">Vinove Design</div>
-            <div className="truncate text-[10px] text-white/40">design@vinove.com</div>
-          </div>
         </div>
-      </div>
+      ) : null}
     </aside>
   );
 }
@@ -199,45 +131,28 @@ function TopItem({
   icon: Icon,
   label,
   active,
-  onClick
+  onClick,
+  hasArrow
 }: {
   icon: LucideIcon;
   label: string;
   active?: boolean;
   onClick?: () => void;
+  hasArrow?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors border-l-2",
+        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] transition-colors group",
         active
-          ? "border-primary bg-white/[0.06] font-medium text-white"
-          : "border-transparent text-white/60 hover:bg-white/[0.05] hover:text-white"
+          ? "bg-[#1f193c] font-medium text-white"
+          : "text-[#b4accb] hover:bg-white/5 hover:text-white"
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      {label}
-    </button>
-  );
-}
-
-function SubHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wider text-white/30">
-      {children}
-    </div>
-  );
-}
-
-function SubLink({ icon: Icon, label, badge }: { icon: LucideIcon; label: string; badge?: string }) {
-  return (
-    <button className="flex w-full items-center gap-2 rounded border-l-2 border-transparent py-1.5 pl-3 pr-2 text-[13px] text-white/60 transition-colors hover:bg-white/[0.04] hover:text-white">
-      <Icon className="h-3.5 w-3.5 shrink-0" />
-      <span className="flex-1 truncate text-left">{label}</span>
-      {badge && (
-        <span className="rounded bg-health-bad/80 px-1.5 py-0.5 text-[9px] font-semibold text-white">{badge}</span>
-      )}
+      <span className="flex-1 text-left">{label}</span>
+      {hasArrow && <ChevronRight className="h-4 w-4 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity" />}
     </button>
   );
 }

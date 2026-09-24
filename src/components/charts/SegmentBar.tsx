@@ -38,7 +38,7 @@ export function SegmentBar({ payload }: { payload: SegmentBarPayload }) {
           <li key={seg.key} className="flex items-center gap-1.5 text-[11px] text-muted">
             <span className="h-2 w-2 rounded-sm" style={{ background: seg.color }} />
             {seg.key}
-            <span className="tabular font-medium text-ink">{Math.round((seg.value / total) * 100)}%</span>
+            <span className="tabular font-medium text-zinc-700 dark:text-zinc-300">{Math.round((seg.value / total) * 100)}%</span>
           </li>
         ))}
       </ul>

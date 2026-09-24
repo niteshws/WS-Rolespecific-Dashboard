@@ -26,7 +26,7 @@ export function Leaderboard({
             <li key={r.id} className="flex items-start gap-2.5">
               <Avatar name={r.name} size={28} className="mt-0.5 rounded-full" />
               <div className="min-w-0 flex-1">
-                <span className="block truncate text-[11px] font-medium text-ink">{r.name}</span>
+                <span className="block truncate text-[11px] font-medium text-zinc-700 dark:text-zinc-300">{r.name}</span>
                 <div className="mt-0.5 flex gap-2">
                   <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted/10">
                     <div
@@ -37,7 +37,7 @@ export function Leaderboard({
                       }}
                     />
                   </div>
-                  <span className="tabular shrink-0 text-[11px] font-bold text-ink">{hoursText}</span>
+                  <span className="tabular shrink-0 text-[11px] font-bold text-zinc-700 dark:text-zinc-300">{hoursText}</span>
                   <span className="inline-flex min-w-[2.25rem] shrink-0 items-center justify-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold tabular text-slate-600">
                     {pct}%
                   </span>

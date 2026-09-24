@@ -23,7 +23,7 @@ export function AppBreakdown({ rows }: { rows: AppRow[] }) {
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="truncate text-sm font-medium text-ink">{r.app}</span>
+              <span className="truncate text-sm font-medium text-zinc-700 dark:text-zinc-300">{r.app}</span>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="tabular text-xs text-muted-foreground">{r.hours}h</span>
                 <Badge variant={CAT_VARIANT[r.category]} className="h-5 px-1.5 min-w-[20px] justify-center">

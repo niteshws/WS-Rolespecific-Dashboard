@@ -31,7 +31,7 @@ export function TimelineWidget({ dateRange = "This week" }: { dateRange?: string
     <div className="flex flex-col gap-3 h-full justify-center">
       {rows.map((row) => (
         <div key={row.name} className="flex items-center gap-3">
-          <span className="w-14 text-xs font-semibold text-ink">{row.name}</span>
+          <span className="w-14 text-xs font-semibold text-zinc-700 dark:text-zinc-300">{row.name}</span>
           <div className="flex-1 flex gap-0.5 h-3.5 bg-muted/5 rounded overflow-hidden">
             {Array.from({ length: 24 }).map((_, i) => {
               let color = "bg-muted/10";

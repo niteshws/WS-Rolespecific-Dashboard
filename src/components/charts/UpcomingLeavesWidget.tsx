@@ -20,7 +20,7 @@ export function UpcomingLeavesWidget({ payload }: { payload: UpcomingLeavesPaylo
             <li key={row.id} className="flex items-center gap-2.5">
               <Avatar name={row.name} size={28} className="shrink-0 rounded-full" />
               <div className="min-w-0 flex-1">
-                <span className="block truncate text-[11px] font-medium text-ink">{row.name}</span>
+                <span className="block truncate text-[11px] font-medium text-zinc-700 dark:text-zinc-300">{row.name}</span>
                 <span className="block truncate text-[10px] text-muted-foreground">
                   {row.department}
                 </span>

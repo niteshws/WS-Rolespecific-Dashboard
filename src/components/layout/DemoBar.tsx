@@ -22,7 +22,7 @@ export const DemoBar = ({ plan, onPlanChange }: DemoBarProps) => {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] flex flex-wrap items-center gap-4 border-t border-white/10 bg-[#11032e] px-[18px] py-2.5 shadow-[0_-8px_26px_rgba(15,10,46,0.3)]">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 rounded-full border border-white/10 bg-[#11032e] px-[18px] py-2 shadow-[0_8px_26px_rgba(15,10,46,0.3)]">
       <span className="text-[12px] font-semibold uppercase tracking-[0.04em] text-[#b9afd6]">
         Demo
       </span>

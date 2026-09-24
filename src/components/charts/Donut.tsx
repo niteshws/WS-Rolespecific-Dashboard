@@ -38,7 +38,7 @@ export function Donut({ payload }: { payload: DonutPayload }) {
         </svg>
         {centerValue && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="tabular text-xl font-semibold leading-none text-ink">{centerValue}</span>
+            <span className="tabular text-xl font-semibold leading-none text-zinc-700 dark:text-zinc-300">{centerValue}</span>
             {centerLabel && (
               <span className="mt-1 max-w-[80px] text-center text-[10px] leading-tight text-muted-foreground">
                 {centerLabel}
@@ -53,7 +53,7 @@ export function Donut({ payload }: { payload: DonutPayload }) {
             key={s.key}
             className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-xs hover:bg-primary/[0.04]"
           >
-            <span className="flex min-w-0 items-center gap-1.5 truncate text-ink">
+            <span className="flex min-w-0 items-center gap-1.5 truncate text-zinc-700 dark:text-zinc-300">
               <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: s.color }} />
               <span className="truncate">{s.key}</span>
             </span>

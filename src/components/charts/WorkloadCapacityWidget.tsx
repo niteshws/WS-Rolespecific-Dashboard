@@ -49,9 +49,9 @@ export function WorkloadCapacityWidget({ payload }: { payload: WorkloadCapacityP
             return (
               <tr key={row.name} className="hover:bg-primary/[0.03]">
                 <td className="border-b border-border/60 px-2 py-1.5">
-                  <span className="truncate font-medium text-ink">{row.name}</span>
+                  <span className="truncate font-medium text-zinc-700 dark:text-zinc-300">{row.name}</span>
                 </td>
-                <td className="border-b border-border/60 px-2 py-1.5 text-right tabular font-medium text-ink">
+                <td className="border-b border-border/60 px-2 py-1.5 text-right tabular font-medium text-zinc-700 dark:text-zinc-300">
                   {row.available}
                 </td>
                 <td className={cn("border-b border-border/60 px-2 py-1.5 text-right tabular font-medium", tone.pct)}>

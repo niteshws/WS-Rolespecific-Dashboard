@@ -31,7 +31,7 @@ export function RecentTasksWidget() {
             onClick={() => setActiveTab("upcoming")}
             className={cn(
               "pb-2 font-semibold transition-colors relative",
-              activeTab === "upcoming" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-ink"
+              activeTab === "upcoming" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-zinc-700 dark:text-zinc-300"
             )}
           >
             Upcoming (12)
@@ -40,7 +40,7 @@ export function RecentTasksWidget() {
             onClick={() => setActiveTab("overdue")}
             className={cn(
               "pb-2 font-semibold transition-colors relative",
-              activeTab === "overdue" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-ink"
+              activeTab === "overdue" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-zinc-700 dark:text-zinc-300"
             )}
           >
             Over Due (6)
@@ -49,7 +49,7 @@ export function RecentTasksWidget() {
             onClick={() => setActiveTab("completed")}
             className={cn(
               "pb-2 font-semibold transition-colors relative",
-              activeTab === "completed" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-ink"
+              activeTab === "completed" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-zinc-700 dark:text-zinc-300"
             )}
           >
             Completed (8)
@@ -66,7 +66,7 @@ export function RecentTasksWidget() {
         <div className="flex flex-col gap-2">
           {tasks[activeTab].map((task, idx) => (
             <div key={idx} className="flex justify-between items-center gap-3 text-xs">
-              <span className="truncate text-ink font-medium flex-1">{task.name}</span>
+              <span className="truncate text-zinc-700 dark:text-zinc-300 font-medium flex-1">{task.name}</span>
               <span className={cn("shrink-0 text-[11px]", task.color)}>{task.due}</span>
             </div>
           ))}

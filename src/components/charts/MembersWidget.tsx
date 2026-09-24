@@ -188,7 +188,7 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
               )
             : null}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="tabular text-xl font-semibold leading-none text-ink">{payload.total}</span>
+            <span className="tabular text-xl font-semibold leading-none text-zinc-700 dark:text-zinc-300">{payload.total}</span>
             <span className="mt-1 max-w-[72px] text-center text-[10px] leading-tight text-muted-foreground">
               Total Members
             </span>
@@ -202,7 +202,7 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
               className="flex items-center gap-1.5 rounded px-1.5 py-1 text-xs hover:bg-primary/[0.04]"
             >
               <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: s.color }} />
-              <span className="w-[52px] shrink-0 truncate text-ink">{s.key}</span>
+              <span className="w-[52px] shrink-0 truncate text-zinc-700 dark:text-zinc-300">{s.key}</span>
               <span className="tabular shrink-0 font-medium text-muted">{s.value}</span>
             </li>
           ))}
@@ -223,7 +223,7 @@ export function MembersWidget({ payload }: { payload: MembersPayload }) {
                 <PlatformIcon name={d.name} />
                 <span className="truncate text-[10px] text-muted-foreground">{d.name}</span>
               </span>
-              <span className="tabular shrink-0 text-xs font-semibold text-ink">{d.count}</span>
+              <span className="tabular shrink-0 text-xs font-semibold text-zinc-700 dark:text-zinc-300">{d.count}</span>
             </div>
           ))}
         </div>

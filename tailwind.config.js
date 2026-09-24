@@ -45,12 +45,12 @@ export default {
         },
       },
       borderRadius: {
-        // Strict 4px geometry
-        DEFAULT: "4px",
-        sm: "2px",
-        md: "4px",
-        lg: "4px",
-        xl: "4px",
+        DEFAULT: "0.5rem",
+        sm: "0.25rem",
+        md: "0.5rem",
+        lg: "0.75rem",
+        xl: "1rem",
+        "2xl": "1.5rem",
       },
       spacing: {
         // 8px base grid helpers

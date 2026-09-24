@@ -80,7 +80,7 @@ export function Gauge({ payload }: { payload: GaugePayload }) {
       <div className="text-center">
         <div
           className={cn(
-            "tabular font-semibold leading-none text-ink",
+            "tabular font-semibold leading-none text-zinc-700 dark:text-zinc-300",
             isHeadline ? "text-xl" : "text-2xl",
           )}
         >
@@ -98,7 +98,7 @@ export function Gauge({ payload }: { payload: GaugePayload }) {
       <div className="flex h-full items-center justify-between gap-4 px-1 py-1">
         <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch py-1">
           <div>
-            <div className="tabular text-2xl font-semibold leading-none text-ink">
+            <div className="tabular text-2xl font-semibold leading-none text-zinc-700 dark:text-zinc-300">
               {headlineValue}
             </div>
             {headlineLabel && (
@@ -131,7 +131,7 @@ export function Gauge({ payload }: { payload: GaugePayload }) {
       {(caption || target) && (
         <div className="min-w-0 space-y-2">
           {caption && (
-            <div className="inline-flex items-center gap-1.5 rounded bg-muted/5 px-2 py-1 text-xs font-medium text-ink">
+            <div className="inline-flex items-center gap-1.5 rounded bg-muted/5 px-2 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
               {caption}
             </div>
           )}

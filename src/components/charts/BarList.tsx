@@ -80,7 +80,7 @@ export function BarList({ payload }: { payload: BarListPayload }) {
             : "grid-cols-[minmax(0,6.5rem)_1fr_auto]",
         )}
       >
-        <span className="truncate text-[11px] font-medium text-ink" title={it.label}>
+        <span className="truncate text-[11px] font-medium text-zinc-700 dark:text-zinc-300" title={it.label}>
           {it.label}
         </span>
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -121,7 +121,7 @@ export function BarList({ payload }: { payload: BarListPayload }) {
           )}
         </div>
         {!bubbles && (
-          <span className="tabular shrink-0 whitespace-nowrap text-right text-[11px] font-semibold text-ink">
+          <span className="tabular shrink-0 whitespace-nowrap text-right text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
             {valueLabel}
           </span>
         )}

@@ -32,7 +32,7 @@ export function StatGroup({ payload }: { payload: StatGroupPayload }) {
             </span>
           </div>
           <div
-            className="tabular mt-1 text-xl font-semibold leading-none text-ink"
+            className="tabular mt-1 text-xl font-semibold leading-none text-zinc-700 dark:text-zinc-300"
             style={s.accent ? { color: s.accent } : undefined}
           >
             {s.value}

@@ -20,7 +20,7 @@ export function RangeBar({ payload }: { payload: RangeBarPayload }) {
         const width = ((r.end - r.start) / span) * 100;
         return (
           <div key={r.label} className="grid grid-cols-[70px_1fr] items-center gap-3">
-            <span className="truncate text-xs font-medium text-ink">{r.label}</span>
+            <span className="truncate text-xs font-medium text-zinc-700 dark:text-zinc-300">{r.label}</span>
             <div className="relative h-6">
               {ticks.map((t, i) => (
                 <span

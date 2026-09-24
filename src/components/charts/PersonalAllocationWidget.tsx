@@ -15,7 +15,7 @@ export function PersonalAllocationWidget({ type = "apps" }: { type?: "apps" | "w
       {data.map((item, i) => (
         <div key={i} className="space-y-1">
           <div className="flex justify-between text-xs font-semibold">
-            <span className="text-ink">{item.label}</span>
+            <span className="text-zinc-700 dark:text-zinc-300">{item.label}</span>
             <span className="text-muted-foreground">{item.percent}%</span>
           </div>
           <div className="h-1.5 w-full bg-muted/10 rounded-full overflow-hidden">

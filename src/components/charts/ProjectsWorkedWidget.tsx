@@ -18,7 +18,7 @@ export function ProjectsWorkedWidget({ payload }: { payload: ProjectsWorkedPaylo
           const pct = Math.round((s.value / total) * 100);
           return (
             <li key={s.key} className="grid grid-cols-[7.5rem_minmax(0,1fr)_auto] items-center gap-3">
-              <span className="truncate text-xs font-medium text-ink">{s.key}</span>
+              <span className="truncate text-xs font-medium text-zinc-700 dark:text-zinc-300">{s.key}</span>
               <Tooltip
                 side="top"
                 wrapperClassName="block w-full min-w-0"
@@ -34,7 +34,7 @@ export function ProjectsWorkedWidget({ payload }: { payload: ProjectsWorkedPaylo
                   />
                 </div>
               </Tooltip>
-              <span className="tabular shrink-0 text-xs font-semibold text-ink">{s.value}</span>
+              <span className="tabular shrink-0 text-xs font-semibold text-zinc-700 dark:text-zinc-300">{s.value}</span>
             </li>
           );
         })}
@@ -45,7 +45,7 @@ export function ProjectsWorkedWidget({ payload }: { payload: ProjectsWorkedPaylo
           <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <BarChart3 className="h-3.5 w-3.5" />
           </span>
-          <p className="text-xs leading-snug text-ink">
+          <p className="text-xs leading-snug text-zinc-700 dark:text-zinc-300">
             <span className="text-base font-bold tabular">{topPct}%</span>
             {" "}of projects are in <span className="font-semibold">{top.key}</span> stage.
           </p>

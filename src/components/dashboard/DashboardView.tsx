@@ -100,6 +100,15 @@ export function DashboardView({
   return (
     <div>
       <div className="bg-white px-6">
+        {!editing && showTourCallout && onStartTour && onDismissTourCallout ? (
+          <div id="tour-callout-strip" className="mx-auto max-w-[1600px] pt-4 pb-2">
+            <TourCalloutStrip
+              highlighted={highlightTourStrip}
+              onStartTour={onStartTour}
+              onDismiss={onDismissTourCallout}
+            />
+          </div>
+        ) : null}
         <DashboardHeader
           dashboard={dashboard}
           dateRange={dateRange}
@@ -129,15 +138,6 @@ export function DashboardView({
         </div>
       ) : null}
 
-      {!editing && showTourCallout && onStartTour && onDismissTourCallout ? (
-        <div id="tour-callout-strip">
-          <TourCalloutStrip
-            highlighted={highlightTourStrip}
-            onStartTour={onStartTour}
-            onDismiss={onDismissTourCallout}
-          />
-        </div>
-      ) : null}
 
       {/* Data storytelling */}
       {!editing && (

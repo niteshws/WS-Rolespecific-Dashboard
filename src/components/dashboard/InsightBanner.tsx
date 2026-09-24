@@ -70,7 +70,7 @@ export function InsightBanner({
             >
               <IconCmp className={cn("mt-0.5 h-4 w-4 shrink-0", c.iconColor)} />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-ink">{ins.title}</p>
+                <p className="truncate text-sm font-semibold tracking-tight text-ink">{ins.title}</p>
                 <p className="mt-0.5 text-xs leading-relaxed text-muted">{ins.body}</p>
                 {ins.action && (
                   <button

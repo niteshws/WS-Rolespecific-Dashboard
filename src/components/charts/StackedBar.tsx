@@ -24,7 +24,7 @@ export function StackedBar({
           return (
             <div key={row.label} className="group" style={{ opacity: dim ? 0.4 : 1 }}>
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-ink">{row.label}</span>
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{row.label}</span>
                 <span className="tabular text-[11px] text-muted-foreground">{total}h</span>
               </div>
               <div className="flex h-5 w-full overflow-hidden rounded bg-muted/5">

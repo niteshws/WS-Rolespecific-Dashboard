@@ -55,7 +55,7 @@ export function ProjectBudgetHealthWidget({
             })}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center px-2 text-center">
-            <span className="tabular text-2xl font-bold leading-none text-ink">{healthPercent}%</span>
+            <span className="tabular text-2xl font-bold leading-none text-zinc-700 dark:text-zinc-300">{healthPercent}%</span>
             <span className="mt-1 text-[10px] leading-tight text-muted-foreground">{healthLabel}</span>
             <span className="mt-1.5 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
               {healthStatus}
@@ -67,7 +67,7 @@ export function ProjectBudgetHealthWidget({
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-medium text-muted-foreground">Budget Utilization</p>
           <div className="mt-1 flex items-end justify-between gap-2">
-            <p className="tabular text-xl font-bold leading-none text-ink sm:text-2xl">
+            <p className="tabular text-xl font-bold leading-none text-zinc-700 dark:text-zinc-300 sm:text-2xl">
               {utilization.spentShort}
               <span className="text-muted-foreground"> / {utilization.budgetShort}</span>
             </p>
@@ -93,7 +93,7 @@ export function ProjectBudgetHealthWidget({
                 {b.percentLabel}
               </span>
             </div>
-            <p className="mt-1 truncate text-[11px] font-semibold text-ink">{b.key}</p>
+            <p className="mt-1 truncate text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">{b.key}</p>
             <p className="text-[10px] text-muted-foreground">{b.projects} projects</p>
           </div>
         ))}
@@ -103,7 +103,7 @@ export function ProjectBudgetHealthWidget({
       <div className="flex shrink-0 items-start gap-2 rounded-xl bg-[#F5F3FF] px-3 py-2.5">
         <BarChart3 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold leading-snug text-ink">{insight.title}</p>
+          <p className="text-[11px] font-semibold leading-snug text-zinc-700 dark:text-zinc-300">{insight.title}</p>
           <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">{insight.body}</p>
         </div>
         {onViewAffected && (

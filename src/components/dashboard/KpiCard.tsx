@@ -73,7 +73,7 @@ export function KpiCard({
         )}
 
         <span
-          className="absolute inset-y-0 left-0 w-0.5 bg-primary opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute inset-y-0 left-0 w-1 rounded-l-lg bg-primary opacity-0 transition-opacity group-hover:opacity-100"
           aria-hidden="true"
         />
         <div className="flex items-start justify-between gap-2" aria-hidden={isComingSoon}>
@@ -81,7 +81,7 @@ export function KpiCard({
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-primary/10 text-primary">
               <Icon name={spec.icon} className="h-3.5 w-3.5" />
             </span>
-            <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted">
+            <span className="truncate text-sm font-semibold tracking-tight text-ink">
               {spec.label}
             </span>
             {info && <InfoTip content={info} side="top" />}
@@ -94,13 +94,13 @@ export function KpiCard({
 
         <div className="mt-3.5 flex items-end justify-between gap-3" aria-hidden={isComingSoon}>
           <div className="min-w-0">
-            <div className="tabular text-[1.75rem] font-semibold leading-none tracking-tight text-ink">
+            <div className="tabular text-[1.75rem] font-semibold leading-none tracking-tight text-zinc-700 dark:text-zinc-300">
               {spec.value}
             </div>
 
             {hasSecondary ? (
               <div className="mt-2.5 flex items-baseline gap-1.5">
-                <span className="tabular text-sm font-semibold leading-none text-ink">
+                <span className="tabular text-sm font-semibold leading-none text-zinc-700 dark:text-zinc-300">
                   {spec.secondaryValue}
                 </span>
                 <span className="text-[11px] font-medium leading-none text-muted">

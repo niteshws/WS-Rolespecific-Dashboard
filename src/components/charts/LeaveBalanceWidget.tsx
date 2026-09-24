@@ -39,7 +39,7 @@ export function LeaveBalanceWidget() {
                   strokeLinecap="round"
                 />
               </svg>
-              <div className="absolute flex flex-col leading-none text-ink items-center">
+              <div className="absolute flex flex-col leading-none text-zinc-700 dark:text-zinc-300 items-center">
                 <span className="text-[11px] font-bold tabular">{cat.used}/{cat.total}</span>
               </div>
             </div>

@@ -13,7 +13,7 @@ export function MyAllocationWidget() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          <span className="text-xs font-semibold text-ink">My allocation</span>
+          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">My allocation</span>
         </div>
         <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
           Today
