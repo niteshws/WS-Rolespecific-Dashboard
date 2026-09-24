@@ -274,13 +274,15 @@ export function WidgetRenderer({
             ? "px-3 py-2"
             : isProjectsWorked || isTopContributors || isUpcomingLeaves
               ? "px-5 py-4"
+              : hasBarListInsight
+                ? "px-5 py-3"
               : isTaskTimeline || isProjectBudgetHealth
                 ? "px-5 py-4"
-                : hasBarListInsight
-                  ? "flex flex-col p-0"
-                  : isCompactUsage
-                    ? "justify-start px-5 py-2"
-                    : undefined
+                : isCompactUsage
+                  ? widget.id === "w-tracked-least"
+                    ? "justify-start px-5 py-3"
+                    : "justify-start px-5 py-2"
+                  : undefined
       }
       hideHeader={isTable && !editing}
       locked={isLocked}

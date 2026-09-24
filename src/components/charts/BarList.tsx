@@ -12,9 +12,9 @@ const formatBarValue = (value: number, unit?: string): string => {
   return `${value} ${unit}`;
 };
 
-const InsightFooter = ({ insight }: { insight: string }) => (
-  <div className="mt-auto flex shrink-0 items-center gap-2 border-t border-sky-100 bg-sky-50/90 px-5 py-2">
-    <TrendingUp className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden="true" />
+const InsightStrip = ({ insight }: { insight: string }) => (
+  <div className="flex shrink-0 items-start gap-2 rounded-xl bg-sky-50/90 px-3 py-2.5">
+    <TrendingUp className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden="true" />
     <p className="min-w-0 flex-1 text-[11px] leading-snug text-slate-600">{insight}</p>
   </div>
 );
@@ -142,9 +142,16 @@ export function BarList({ payload }: { payload: BarListPayload }) {
 
   if (insight) {
     return (
-      <div className="flex h-full min-h-0 flex-col">
-        <div className={cn("px-5 pt-2", compact ? "pb-1.5" : "pb-2")}>{list}</div>
-        <InsightFooter insight={insight} />
+      <div className="flex h-full min-h-0 flex-col gap-2.5">
+        <ul
+          className={cn(
+            "flex shrink-0 flex-col",
+            compact ? "gap-1.5" : "thin-scrollbar gap-2 overflow-y-auto",
+          )}
+        >
+          {rows}
+        </ul>
+        <InsightStrip insight={insight} />
       </div>
     );
   }

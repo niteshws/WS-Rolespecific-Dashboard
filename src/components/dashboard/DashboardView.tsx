@@ -92,7 +92,7 @@ export function DashboardView({
 
   return (
     <div>
-      <div className="border-b border-[#e5e7eb] bg-[#f7f8fa] px-6">
+      <div className="bg-white px-6">
         <DashboardHeader
           dashboard={dashboard}
           dateRange={dateRange}
@@ -115,7 +115,7 @@ export function DashboardView({
         />
       </div>
 
-      <div className="mx-auto max-w-[1600px] space-y-6 bg-white p-6">
+      <div className="mx-auto max-w-[1600px] space-y-6 bg-white px-6 pb-6 pt-2">
       {editing ? (
         <div className="-mt-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-primary">
           Editing layout — use widget controls to resize, hide, or reorder. Finish from the menu (⋮).

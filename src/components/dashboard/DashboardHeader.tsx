@@ -119,7 +119,7 @@ export const DashboardHeader = ({
 
   return (
     <div className="mx-auto max-w-[1600px]">
-      <div className="flex min-h-[72px] flex-wrap items-center justify-between gap-4 py-4">
+      <div className="flex min-h-[72px] flex-wrap items-center justify-between gap-4 pb-2 pt-4">
         {/* Left — title block */}
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f3efff] text-primary">
